@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 
+""" Setup.py for Kafka To Hbase """
+
 from setuptools import setup, find_packages
+
+with open("requirements.txt") as f:
+    requirements = [l.strip() for l in f]
+
+with open("requirements-dev.txt") as f:
+    requirements_dev = [l.strip() for l in f]
 
 setup(
     name='kafka-to-hbase',
@@ -11,15 +19,8 @@ setup(
     url='https://github.com/dwp/kafka-to-python',
     packages=find_packages(),
     scripts=['scripts/kafka-to-hbase'],
-    install_requires=[
-        'happybase==1.2.0',
-        'kafka-python==1.4.6',
-    ],
+    install_requires=requirements,
     extras_require={
-        'dev': [
-            'docker-compose==1.24.0',
-            'invoke==1.2.0',
-            'pytest==4.6.3',
-        ]
+        'dev': requirements_dev,
     }
 )

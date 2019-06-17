@@ -1,37 +1,40 @@
 # pylint: disable=C
 
-import pytest
+from assertpy import assert_that
 
 from . import env
 
 
-@pytest.mark.parametrize("fn,default,value,expected", [
-    (env.delimited, "dflt", "one,two,three", ["one", "two", "three"]),
-    (env.delimited, "dflt", "", ["dflt"]),
-    (env.delimited, "dflt", None, ["dflt"]),
-    (env.delimited, "", None, []),
-    (env.string, "dflt", "testing", "testing"),
-    (env.string, "dflt", "", "dflt"),
-    (env.string, "dflt", None, "dflt"),
-    (env.integer, 987, "1234", 1234),
-    (env.integer, 987, "", 987),
-    (env.integer, 987, None, 987),
-    (env.boolean, False, "True", True),
-    (env.boolean, False, "true", True),
-    (env.boolean, False, "blah", False),
-    (env.boolean, False, "", False),
-    (env.boolean, False, None, False),
-])
-def test_config_conversion(fn, default, value, expected):
-    assert fn(default)(value) == expected
+def test_config_conversion():
+    def _test_config_conversion(fn, default, value, expected):
+        assert_that(fn(default)(value)).is_equal_to(expected)
+
+    for fn, default, value, expected in [
+        (env.delimited, "dflt", "one,two,three", ["one", "two", "three"]),
+        (env.delimited, "dflt", "", ["dflt"]),
+        (env.delimited, "dflt", None, ["dflt"]),
+        (env.delimited, "", None, []),
+        (env.string, "dflt", "testing", "testing"),
+        (env.string, "dflt", "", "dflt"),
+        (env.string, "dflt", None, "dflt"),
+        (env.integer, 987, "1234", 1234),
+        (env.integer, 987, "", 987),
+        (env.integer, 987, None, 987),
+        (env.boolean, False, "True", True),
+        (env.boolean, False, "true", True),
+        (env.boolean, False, "blah", False),
+        (env.boolean, False, "", False),
+        (env.boolean, False, None, False),
+    ]:
+        yield _test_config_conversion, fn, default, value, expected
 
 
 def test_env_var_for_config_key_uppercases_and_prefixes():
-    assert env.env_var_for_config_key("kafka", "ssl_ciphers") == "K2HB_KAFKA_SSL_CIPHERS"
+    assert_that(env.env_var_for_config_key("kafka", "ssl_ciphers")).is_equal_to("K2HB_KAFKA_SSL_CIPHERS")
 
 
 def test_load_config_uses_defaults():
-    assert env.load_config({}) == env.Config(
+    assert_that(env.load_config({})).is_equal_to(env.Config(
         kafka=env.KafkaConfig(
             bootstrap_servers=["localhost:9092"],
             client_id="kafka-to-hbase",
@@ -75,7 +78,7 @@ def test_load_config_uses_defaults():
             table_prefix="",
             column="",
         ),
-    )
+    ))
 
 
 custom_environment = {
@@ -122,7 +125,7 @@ custom_environment = {
 
 
 def test_load_config_uses_overrides():
-    assert env.load_config(custom_environment) == env.Config(
+    assert_that(env.load_config(custom_environment)).is_equal_to(env.Config(
         kafka=env.KafkaConfig(
             bootstrap_servers=["localhost:9092", "remotehost:9092"],
             client_id="my-kafka-consumer",
@@ -166,11 +169,11 @@ def test_load_config_uses_overrides():
             table_prefix="tbl_",
             column="cf:data",
         ),
-    )
+    ))
 
 
 def test_env_vars_lists_all():
-    assert env.all_env_vars({}) == {
+    assert_that(env.all_env_vars({})).is_equal_to({
         "K2HB_KAFKA_BOOTSTRAP_SERVERS": "localhost:9092",
         "K2HB_KAFKA_CLIENT_ID": "kafka-to-hbase",
         "K2HB_KAFKA_GROUP_ID": "kafka-to-hbase",
@@ -210,11 +213,11 @@ def test_env_vars_lists_all():
         "K2HB_HBASE_NAMESPACE": "",
         "K2HB_HBASE_TABLE_PREFIX": "",
         "K2HB_HBASE_COLUMN": ""
-    }
+    })
 
 
 def test_env_vars_lists_all_with_overrides():
-    assert env.all_env_vars(custom_environment) == {
+    assert_that(env.all_env_vars(custom_environment)).is_equal_to({
         "K2HB_KAFKA_BOOTSTRAP_SERVERS": "localhost:9092,remotehost:9092",
         "K2HB_KAFKA_CLIENT_ID": "my-kafka-consumer",
         "K2HB_KAFKA_GROUP_ID": "group-id-123",
@@ -254,4 +257,4 @@ def test_env_vars_lists_all_with_overrides():
         "K2HB_HBASE_NAMESPACE": "ns1",
         "K2HB_HBASE_TABLE_PREFIX": "tbl_",
         "K2HB_HBASE_COLUMN": "cf:data",
-    }
+    })
