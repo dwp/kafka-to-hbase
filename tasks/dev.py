@@ -47,7 +47,7 @@ def cleanup(ctx):
 @task(
     help={
         "topic": "a topic to listen to",
-        "group_id": "the ID of the consumer group to join (default kafka-to-hbase)",
+        "group-id": "the ID of the consumer group to join (default kafka-to-hbase)",
         "column": "the column name to store data in (defaults to cf:data)",
     },
     iterable=["topic"],
@@ -67,7 +67,12 @@ def run(ctx, topic, group_id="kafka-to-hbase", column="cf:data"):
     )
 
 
-@task()
+@task(
+    help={
+        "build-images": "build the docker images before running the container (default true)",
+        "remove": "remove the container after it exits (default true)"
+    }
+)
 def run_docker(ctx, build_images=True, remove=True):
     """ Run the kafka-to-hbase command inside a properly configured docker container """
     if build_images:
