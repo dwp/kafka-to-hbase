@@ -4,5 +4,5 @@
 from collections import namedtuple
 
 
-class Message(namedtuple("Message", ["topic", "key", "value", "timestamp"])):
+class Message(namedtuple("Message", ["topic", "partition", "offset", "key", "value", "timestamp"])):
     """ A simplified version of the Kafka message containing only required fields """

@@ -37,7 +37,8 @@ def shovel(stream, store, get_destination):
         valid = True
         for attr in ["topic", "key", "value", "timestamp"]:
             if not has_truthy_attr(message, attr):
-                _log.warning("Message %s missing %s", message, attr)
+                _log.warning("Message %s:%d:%d missing %s",
+                             message.topic, message.partition, message.offset, attr)
                 valid = False
                 break
 

@@ -35,16 +35,19 @@ def kafka_stream(consumer, timeout=10):
         _log.info("Exceeded %ds waiting for messages", timeout)
 
     # Generate a sequence of all messages from all topics
-    _log.debug("Received topic messages for %d topics", len(topic_messages))
     _log.info("Received %s", {x.topic: len(topic_messages[x]) for x in topic_messages})
-    for messages in topic_messages.values():
-        for message in messages:
-            yield Message(
-                message.topic,
-                message.key,
-                message.value,
-                int(timestamp() * 1000)
-            )
+    yield from (
+        Message(
+            message.topic,
+            message.partition,
+            message.offset,
+            message.key,
+            message.value,
+            int(timestamp() * 1000)  # TODO Use timestamp from message
+        )
+        for messages in topic_messages.values()
+        for message in messages
+    )
 
     _log.debug("Committing offsets")
     consumer.commit()
