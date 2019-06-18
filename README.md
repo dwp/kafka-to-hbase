@@ -76,6 +76,18 @@ pip install invoke
 Once done, all other development tasks can be achieved using the `invoke`
 command.
 
+Get a list of available Invoke tasks using `--list`:
+
+```
+invoke --list
+```
+
+Get help on a particular task using `--help`:
+
+```
+invoke --help <task>
+```
+
 ### Installing Dependencies
 
 All dependencies for development an execution can be installed together by
@@ -116,20 +128,46 @@ $ export K2HB_KAFKA_TOPICS=some_topic
 $ kafka-to-hbase
 ```
 
+### Running Kafka To Hbase Locally
+
+Running the Kafka To Hbase utility locally with a custom configuration can be
+achieved using `dev.run`.
+
+```
+$ invoke dev.run --topic my-topic
+```
+
 ### Running Kafka To Hbase In Docker
 
 Running the Kafka To Hbase utility in Docker using the configuration in Docker
 Compose is the easiest way to ensure the package builds, installs and runs. This
-can be achieved using `dev.run`.
+can be achieved using `dev.run-docker`.
 
 ```
-$ invoke dev.run
+$ invoke dev.run-docker
 ```
 
 This will builds the Kafka To Hbase Docker image and run the process using the
 environment defined in the Docker Compose YAML file.
 
-### Changing the Docker Compose Configuration
+### Generating test data locally
+
+A utility script to produce random messages exists in utilities called `producer.py`.
+This can be run using the invoke task `test.produce`:
+
+```
+$ invoke test.produce --topic my-topic --count 10
+```
+
+### Running tests
+
+All tests can be run via invoke using the various tasks under `test.`.
+
+```
+$ invoke test.unit
+```
+
+## Changing the Docker Compose Configuration
 
 The Docker Compose file defines the logical architecture of the 3 service system
 required to run Kafka To Hbase. To change the Docker Compose configuration of
