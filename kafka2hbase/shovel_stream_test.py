@@ -11,8 +11,8 @@ from .shovel_stream import shovel
 def test_stores_valid_messages():
     store = mock.MagicMock()
     messages = [
-        Message("test-topic", "test-key", "test-value", 1645275945),
-        Message("another-topic", "another-key", "another-value", 185735485),
+        Message("test-topic", 0, 0, "test-key", "test-value", 1645275945),
+        Message("another-topic", 0, 0, "another-key", "another-value", 185735485),
     ]
 
     count = shovel(messages, store, lambda x: x)
@@ -26,7 +26,7 @@ def test_stores_valid_messages():
 def test_uses_destination_function():
     store = mock.MagicMock()
     messages = [
-        Message("test-topic", "test-key", "test-value", 1645275945)
+        Message("test-topic", 0, 0, "test-key", "test-value", 1645275945)
     ]
 
     count = shovel(messages, store, lambda x: x + "-transformed")
@@ -45,10 +45,10 @@ def test_ignores_invalid_message():
         store.assert_not_called()
 
     messages = [
-        Message("", "test-key", "test-value", 1645275945),
-        Message("test-topic", "", "test-value", 1645275945),
-        Message("test-topic", "test-key", "", 1645275945),
-        Message("test-topic", "test-key", "test-value", 0),
+        Message("", 0, 0, "test-key", "test-value", 1645275945),
+        Message("test-topic", 0, 0, "", "test-value", 1645275945),
+        Message("test-topic", 0, 0, "test-key", "", 1645275945),
+        Message("test-topic", 0, 0, "test-key", "test-value", 0),
     ]
 
     for message in messages:
