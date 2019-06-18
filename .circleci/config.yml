@@ -6,9 +6,9 @@ jobs:
     steps:
       - checkout
       - run: sudo apt-get install -y build-essential python3-dev
-      - run: python setup.py bdist_wheel
-      - run: pip install --user dist/kafka_to_hbase-1.0-py3-none-any.whl[dev]
-      - run: nosetests
+      - run: python3 setup.py bdist_wheel
+      - run: pip3 install --user dist/kafka_to_hbase-1.0-py3-none-any.whl[dev]
+      - run: python3 -m nose
 workflows:
   version: 2
   build_and_test:
