@@ -3,9 +3,16 @@
 """ Kafka To Hbase transfer utility """
 
 import argparse
+import logging
 import os
+import sys
 
 import kafka2hbase
+
+logging.root.setLevel(logging.INFO)
+logging.root.addHandler(logging.StreamHandler(sys.stdout))
+
+_log = logging.getLogger(__name__)
 
 
 def dump_config(c):
@@ -24,6 +31,84 @@ def dump_config(c):
     return "\n".join(output)
 
 
+def connect_kafka(kafka_config):
+    """ Connect a consumer to the Kafka broker """
+    from kafka import KafkaConsumer
+
+    configs = {
+        x: getattr(kafka_config, x)
+        for x in [
+            "bootstrap_servers",
+            "client_id",
+            "group_id",
+            "fetch_min_bytes",
+            "fetch_max_wait_ms",
+            "fetch_max_bytes",
+            "max_partition_fetch_bytes",
+            "request_timeout_ms",
+            "retry_backoff_ms",
+            "reconnect_backoff_ms",
+            "reconnect_backoff_max_ms",
+            "max_in_flight_requests_per_connection",
+            "check_crcs",
+            "metadata_max_age_ms",
+            "session_timeout_ms",
+            "heartbeat_interval_ms",
+            "receive_buffer_bytes",
+            "send_buffer_bytes",
+            "consumer_timeout_ms",
+            "connections_max_idle_ms",
+            "ssl_check_hostname",
+            "ssl_cafile",
+            "ssl_certfile",
+            "ssl_keyfile",
+            "ssl_password",
+            "ssl_crlfile",
+            "ssl_ciphers",
+            "sasl_plain_username",
+            "sasl_plain_password",
+            "sasl_kerberos_service_name",
+            "sasl_kerberos_domain_name",
+        ]
+    }
+
+    if kafka_config.ssl:
+        configs["security_protocol"] = "SSL"
+
+    if kafka_config.sasl_kerberos:
+        configs["sasl_mechanism"] = "GSSAPI"
+
+    _log.info(
+        "Connecting to Kafka on %s and listening to %s as part of consumer group %s",
+        kafka_config.bootstrap_servers,
+        kafka_config.topics,
+        kafka_config.group_id)
+
+    return KafkaConsumer(
+        *kafka_config.topics,
+        **configs,
+        auto_offset_reset='earliest',
+        enable_auto_commit=False,
+    )
+
+
+def connect_hbase(hbase_config):
+    """ Connect a client to Hbase """
+    import happybase
+
+    configs = {
+        x: getattr(hbase_config, x)
+        for x in [
+            "host",
+            "port",
+            "timeout",
+        ]
+    }
+
+    _log.info("Connecting to Hbase on %s:%d", hbase_config.host, hbase_config.port)
+    return happybase.Connection(**configs)
+
+
 config = kafka2hbase.load_config(os.environ)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
@@ -31,3 +116,28 @@ parser.prog = "kafka-to-hbase"
 parser.description = "Simple Kafka to Hbase shovel utility"
 parser.epilog = dump_config(kafka2hbase.all_env_vars(os.environ))
 parser.parse_args()
+
+
+consumer = connect_kafka(config.kafka)
+hbase = connect_hbase(config.hbase)
+
+stream = kafka2hbase.kafka_stream(consumer)
+
+
+def get_destination(name):
+    """ Get the destination table from the supplied name and config """
+    return kafka2hbase.qualified_table_name(
+        config.hbase.namespace,
+        config.hbase.table_prefix,
+        name)
+
+
+def store(table, key, value, timestamp):
+    """ Store a value in the configured Hbase with the correct column name """
+    kafka2hbase.hbase_put(hbase, table, key, {config.hbase.column: value}, timestamp)
+
+
+kafka2hbase.shovel(
+    stream,
+    store,
+    get_destination)

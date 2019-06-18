@@ -3,7 +3,7 @@ import os as _os
 
 from invoke import Collection
 
-from . import dev
+from . import dev, test
 
 # Set working director to the root of the repo
 _os.chdir(
@@ -15,3 +15,4 @@ _os.chdir(
 
 namespace = Collection()
 namespace.add_collection(Collection.from_module(dev))
+namespace.add_collection(Collection.from_module(test))

@@ -40,14 +40,14 @@ def down(ctx):
 
 
 @task
-def cleanup(ctx):
-    """ Remove old containers and clean up """
+def purge(ctx):
+    """ Remove old containers and purge all data """
     ctx.run("docker-compose rm -fv")
     ctx.run("docker volume prune -f")
     ctx.run("docker network prune -f")
 
 
 @task
-def purge(ctx):
+def cleanup(ctx):
     """ Reset all changes and delete all untracked files in the repository """
     ctx.run("git clean -fdx")
