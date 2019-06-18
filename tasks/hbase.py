@@ -1,7 +1,6 @@
 """ Hbase management utilities """
 
 import happybase
-import subprocess
 
 from invoke import task
 from invoke.exceptions import Exit
