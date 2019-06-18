@@ -113,15 +113,20 @@ $ invoke dev.up
 By default this builds the Docker image containing Kafka To Hbase and starts up
 both the services.
 
-### Running Kafka To Hbase Locally
+### Running Kafka To Hbase Directly
 
-The Kafka To Hbase utility can be run locally on the development machine. The
-configured defaults are sufficient to get started, with the exception of
-`K2HB_KAFKA_TOPICS` which needs setting to at least a single topic. In addition
-the tables need to be created in Hbase using the namespace, prefix and topic as
-input.
+The Kafka To Hbase utility can be run directly on the development machine using
+a native Python interpreter. The configured defaults are sufficient to get
+started, with the exception of:
 
-Once this is done, and `dev.install` has been run, executing Kafka To Hbase is a case of running the CLI.
+* `K2HB_KAFKA_TOPICS` which needs setting to at least a single topic
+* `K2HB_HBASE_COLUMN` which needs setting to a valid column family for the tables
+
+In addition the tables need to be created in Hbase using the namespace, prefix
+and topic as input.
+
+Once this is done, and `dev.install` has been run, executing Kafka To Hbase is a
+case of running the CLI.
 
 ```
 $ export K2HB_KAFKA_TOPICS=some_topic
@@ -130,11 +135,12 @@ $ kafka-to-hbase
 
 ### Running Kafka To Hbase Locally
 
-Running the Kafka To Hbase utility locally with a custom configuration can be
-achieved using `dev.run`.
+An alternative to running the Kafka To Hbase utility directly with Python is to use
+the configured Invoke task. The configuration of topics and columns is done via
+command line parameters rather than environment variables.
 
 ```
-$ invoke dev.run --topic my-topic
+$ invoke dev.run --topic my-topic --column cf:data
 ```
 
 ### Running Kafka To Hbase In Docker
