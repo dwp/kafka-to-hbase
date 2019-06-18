@@ -109,35 +109,43 @@ def connect_hbase(hbase_config):
     return happybase.Connection(**configs)
 
 
+# Load config from environment variables
 config = kafka2hbase.load_config(os.environ)
 
+# Check for help requests
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.prog = "kafka-to-hbase"
 parser.description = "Simple Kafka to Hbase shovel utility"
 parser.epilog = dump_config(kafka2hbase.all_env_vars(os.environ))
 parser.parse_args()
 
-
+# Connect to everything we need
 consumer = connect_kafka(config.kafka)
 hbase = connect_hbase(config.hbase)
 
-stream = kafka2hbase.kafka_stream(consumer)
+# Shovel all messages from Kafka to Hbase
+total_processed = 0
+while True:
+    messages_processed = kafka2hbase.shovel(
+        stream=kafka2hbase.kafka_stream(consumer),
+        store=lambda table, key, value, timestamp: kafka2hbase.hbase_put(
+            hbase,
+            table,
+            key,
+            {config.hbase.column: value},
+            timestamp,
+        ),
+        get_destination=lambda topic: kafka2hbase.qualified_table_name(
+            config.hbase.namespace,
+            config.hbase.table_prefix,
+            topic,
+        )
+    )
 
+    _log.info("Processed %d messages", messages_processed)
+    total_processed += messages_processed
 
-def get_destination(name):
-    """ Get the destination table from the supplied name and config """
-    return kafka2hbase.qualified_table_name(
-        config.hbase.namespace,
-        config.hbase.table_prefix,
-        name)
+    if messages_processed == 0:
+        break
 
-
-def store(table, key, value, timestamp):
-    """ Store a value in the configured Hbase with the correct column name """
-    kafka2hbase.hbase_put(hbase, table, key, {config.hbase.column: value}, timestamp)
-
-
-kafka2hbase.shovel(
-    stream,
-    store,
-    get_destination)
+_log.info("Processed %d messages in total", total_processed)
