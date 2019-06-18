@@ -21,7 +21,7 @@ def kafka_stream(consumer, timeout=10):
     # Loop continuously until we get no messages during a timeout window
     start = timestamp()
     topic_messages = {}
-    while not topic_messages and timestamp() - start < timeout:
+    while timestamp() - start < timeout:
         # Try and get some messages, retrying if required
         _log.debug("Waiting for messages from %s", consumer)
         topic_messages = consumer.poll()
@@ -36,16 +36,15 @@ def kafka_stream(consumer, timeout=10):
 
     # Generate a sequence of all messages from all topics
     _log.debug("Received topic messages for %d topics", len(topic_messages))
-    messages = (message for messages in topic_messages.values() for message in messages)
-
-    for message in messages:
-        wrapped = Message(
-            message.topic,
-            message.key,
-            message.value,
-            int(timestamp() * 1000))
-        _log.debug("Yielding message %s", wrapped)
-        yield wrapped
+    _log.info("Received %s", {x.topic: len(topic_messages[x]) for x in topic_messages})
+    for messages in topic_messages.values():
+        for message in messages:
+            yield Message(
+                message.topic,
+                message.key,
+                message.value,
+                int(timestamp() * 1000)
+            )
 
     _log.debug("Committing offsets")
     consumer.commit()
