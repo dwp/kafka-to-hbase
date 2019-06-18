@@ -5,7 +5,6 @@ services:
   app:
     build: ./
     image: kafka-to-hbase:latest
-    command: "true"
     depends_on:
       - kafka
       - hbase
@@ -15,7 +14,8 @@ services:
       K2HB_HBASE_HOST: "hbase"
 
   kafka:
-    image: harisekhon/kafka
+    image: kafka
+    build: images/kafka
     ports:
       - "2181:2181"
       - "9092:9092"
