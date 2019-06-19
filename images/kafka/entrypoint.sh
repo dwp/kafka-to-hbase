@@ -29,4 +29,9 @@ then
     kafka-topics.sh --zookeeper localhost:2181 --create --topic integration-test --partitions 10 --replication-factor 1
 fi
 
+if [[ ! " ${array[TOPICS]} " =~ " docker " ]]
+then
+    kafka-topics.sh --zookeeper localhost:2181 --create --topic docker --partitions 10 --replication-factor 1
+fi
+
 wait

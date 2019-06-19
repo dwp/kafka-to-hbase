@@ -5,6 +5,7 @@ services:
   app:
     build: ./
     image: kafka-to-hbase:latest
+    restart: on-failure
     depends_on:
       - kafka
       - hbase
@@ -14,14 +15,17 @@ services:
       K2HB_HBASE_HOST: "hbase"
 
   kafka:
-    image: kafka
     build: images/kafka
+    image: kafka
+    restart: on-failure
     ports:
       - "2181:2181"
       - "9092:9092"
 
   hbase:
-    image: harisekhon/hbase
+    build: images/hbase
+    image: hbase
+    restart: on-failure
     ports:
       - "9090:9090"
       - "9095:9095"

@@ -33,7 +33,7 @@ def down(ctx):
 @task
 def purge(ctx):
     """ Remove old containers and purge all data """
-    ctx.run("docker-compose rm -fv")
+    ctx.run("docker-compose rm -sfv")
     ctx.run("docker volume prune -f")
     ctx.run("docker network prune -f")
 
