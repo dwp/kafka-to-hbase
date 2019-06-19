@@ -20,7 +20,7 @@ def kafka_stream(consumer):
     """ Stream all ready data from kafka """
     topic_messages = consumer.poll()
     if not topic_messages:
-        return 0
+        return
 
     _log.info("Received %s", {x.topic: len(topic_messages[x]) for x in topic_messages})
     yield from (
