@@ -23,6 +23,11 @@ def up(ctx, build_images=True):
 
     ctx.run("docker-compose up -d")
 
+    from .hbase import create_namespace, create_table
+    create_namespace(ctx, "k2hb")
+    create_table(ctx, ["k2hb:docker"])
+    create_table(ctx, ["k2hb:integration-test"])
+
 
 @task
 def down(ctx):
@@ -54,29 +59,30 @@ def cleanup(ctx):
 )
 def run(ctx, topic, group_id="kafka-to-hbase", column="cf:data"):
     """ Run the kafka-to-hbase command locally with specified options """
+    from shlex import quote
+
     if not topic:
         raise Exit("No topics specified", 1)
 
+    topics = ",".join(topic)
     ctx.run(
-        "python3 scripts/kafka-to-hbase",
-        env={
-            "K2HB_KAFKA_TOPICS": ",".join(topic),
-            "K2HB_KAFKA_GROUP_ID": group_id,
-            "K2HB_HBASE_COLUMN": column,
-        }
+        f"docker-compose run --rm -e K2HB_KAFKA_TOPICS={quote(topics)} -e K2HB_KAFKA_GROUP_ID={quote(group_id)} -e K2HB_HBASE_COLUMN={quote(column)} python scripts/kafka-to-hbase",
     )
 
 
 @task(
     help={
-        "build-images": "build the docker images before running the container (default true)",
-        "remove": "remove the container after it exits (default true)"
-    }
+        "topic": "a topic to produce messages to",
+        "count": "the number of messages to produce (default 1)",
+    },
+    iterable=["topic"],
 )
-def run_docker(ctx, build_images=True, remove=True):
-    """ Run the kafka-to-hbase command inside a properly configured docker container """
-    if build_images:
-        build(ctx)
+def producer(ctx, topic, count=1):
+    """ Produce test messages on specified topics """
+    if not topic:
+        raise Exit("No topics specified", 1)
 
-    rm = '--rm' if remove else ''
-    ctx.run(f"docker-compose run {rm} app kafka-to-hbase")
+    topics = " ".join(topic)
+    ctx.run(
+        f"docker-compose run --rm python utilities/producer.py {topics} --count {count}"
+    )

@@ -5,6 +5,7 @@ FROM python:3 as build
 
 WORKDIR /app
 
+COPY pip.conf /etc
 RUN pip3 install --upgrade pip setuptools wheel
 
 # Copy and install the package
@@ -24,6 +25,7 @@ RUN buildDeps='build-essential python3-dev' && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy and install requirements first so changes in code don't cause a full rebuild
+COPY pip.conf /etc
 COPY requirements.txt .
 COPY requirements-dev.txt .
 RUN pip3 install -r requirements.txt -r requirements-dev.txt

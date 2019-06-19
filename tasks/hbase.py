@@ -13,6 +13,23 @@ def connect():
 
 @task(
     help={
+        "name": "namespace name",
+    },
+)
+def create_namespace(ctx, name):
+    """ Create a namespace """
+    from shlex import quote
+
+    hbase_command = f'create_namespace "{name}" unless describe_namespace "{name}"'
+    print(hbase_command)
+    bash_command = f'echo {quote(hbase_command)} | hbase shell'
+    print(bash_command)
+
+    ctx.run(f'docker-compose exec -T hbase bash -c {quote(bash_command)}')
+
+
+@task(
+    help={
         "name": "fully qualified table name",
         "family": "the name of the column family (default cf)",
         "versions": "the maximum number of versions to support (default 10)"
@@ -26,6 +43,10 @@ def create_table(ctx, name, family="cf", versions=10):  # pylint: disable=unused
 
     hbase = connect()
     for table in name:
+        if table in hbase.tables():
+            print(f"table {table} already exists")
+            continue
+
         hbase.create_table(
             table,
             {

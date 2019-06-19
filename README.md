@@ -30,7 +30,8 @@ Current environment:
     K2HB_KAFKA_MAX_PARTITION_FETCH_BYTES                1048576
     K2HB_KAFKA_REQUEST_TIMEOUT_MS                       305000
     K2HB_KAFKA_RETRY_BACKOFF_MS                         100
-    K2HB_KAFKA_RECONNECT_BACKOFF_MS                     1000
+    K2HB_KAFKA_RECONNECT_BACKOFF_MS                     50
+    K2HB_KAFKA_RECONNECT_BACKOFF_MAX_MS                 1000
     K2HB_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION    5
     K2HB_KAFKA_CHECK_CRCS                               true
     K2HB_KAFKA_METADATA_MAX_AGE                         300000
@@ -119,8 +120,8 @@ The Kafka To Hbase utility can be run directly on the development machine using
 a native Python interpreter. The configured defaults are sufficient to get
 started, with the exception of:
 
-* `K2HB_KAFKA_TOPICS` which needs setting to at least a single topic
-* `K2HB_HBASE_COLUMN` which needs setting to a valid column family for the tables
+- `K2HB_KAFKA_TOPICS` which needs setting to at least a single topic
+- `K2HB_HBASE_COLUMN` which needs setting to a valid column family for the tables
 
 In addition the tables need to be created in Hbase using the namespace, prefix
 and topic as input.

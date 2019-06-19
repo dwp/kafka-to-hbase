@@ -6,3 +6,4 @@
 !/scripts
 !/kafka2hbase
 !/requirements*.txt
+!/pip.conf

@@ -90,6 +90,7 @@ def connect_kafka(kafka_config):
         **configs,
         auto_offset_reset='earliest',
         enable_auto_commit=False,
+        api_version=(0, 9),
     )
 
 
@@ -106,7 +107,8 @@ def connect_hbase(hbase_config):
         ]
     }
 
-    _log.info("Connecting to Hbase on %s:%d", hbase_config.host, hbase_config.port)
+    _log.info("Connecting to Hbase on %s:%d",
+              hbase_config.host, hbase_config.port)
     return happybase.Connection(**configs)
 
 
@@ -142,6 +144,7 @@ while True:
         )
     )
 
-    _log.info("Processed %d messages", messages_processed)
     if messages_processed == 0:
         time.sleep(1)
+    else:
+        _log.info("Processed %d messages", messages_processed)
