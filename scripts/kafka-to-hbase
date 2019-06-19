@@ -6,6 +6,7 @@ import argparse
 import logging
 import os
 import sys
+import time
 
 import kafka2hbase
 
@@ -142,3 +143,5 @@ while True:
     )
 
     _log.info("Processed %d messages", messages_processed)
+    if messages_processed == 0:
+        time.sleep(1)
