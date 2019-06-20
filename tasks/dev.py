@@ -51,6 +51,17 @@ def cleanup(ctx):
 
 @task(
     help={
+        "follow": "continuously watch the logs for updates (default false)",
+    },
+)
+def logs(ctx, follow=False):
+    """ Show the logs for the kafka-to-hbase service """
+    follow_flag = "-f" if follow else ""
+    ctx.run(f"docker-compose logs {follow_flag} app")
+
+
+@task(
+    help={
         "topic": "a topic to listen to",
         "group-id": "the ID of the consumer group to join (default kafka-to-hbase)",
         "column": "the column name to store data in (defaults to cf:data)",

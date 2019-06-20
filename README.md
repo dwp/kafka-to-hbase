@@ -114,6 +114,11 @@ $ invoke dev.up
 By default this builds the Docker image containing Kafka To Hbase and starts up
 both the services.
 
+It also starts a persistent instance of kafka-to-hbase that listens on the
+`docker` topic. Use the `dev.producer` task to create traffic on the `docker`
+topic and the `dev.logs` task to view the output. It joins the `kafka-to-hbase-docker`
+consumer group.
+
 ### Running Kafka To Hbase Directly
 
 The Kafka To Hbase utility can be run directly on the development machine using
@@ -163,7 +168,17 @@ A utility script to produce random messages exists in utilities called `producer
 This can be run using the invoke task `test.produce`:
 
 ```
-$ invoke test.produce --topic my-topic --count 10
+$ invoke dev.producer --topic my-topic --count 10
+```
+
+### Viewing logs of the kafka-to-hbase service
+
+To view the logs of the persistent kafka-to-hbase instance that listen on the `docker`
+topic use the `dev.logs` task. Optionally use the `--follow` or `-f` flags to
+constantly stream the log as it updates.
+
+```
+$ invoke dev.logs -f
 ```
 
 ### Running tests
