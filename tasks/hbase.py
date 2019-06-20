@@ -43,7 +43,11 @@ def create_table(ctx, name, family="cf", versions=10):  # pylint: disable=unused
 
     hbase = connect()
     for table in name:
-        if table in hbase.tables():
+        table = table.encode('utf8')
+        print(f"Creating table {table}")
+
+        tables = hbase.tables()
+        if table in tables:
             print(f"table {table} already exists")
             continue
 
