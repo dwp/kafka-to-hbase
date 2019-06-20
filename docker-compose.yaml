@@ -13,7 +13,7 @@ services:
       K2HB_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       K2HB_KAFKA_SSL: "false"
       K2HB_KAFKA_GROUP_ID: "kafka-to-hbase-docker"
-      K2HB_KAFKA_TOPICS: "docker"
+      K2HB_KAFKA_TOPICS: "docker,integration-test"
       K2HB_HBASE_HOST: "hbase"
       K2HB_HBASE_NAMESPACE: "k2hb"
       K2HB_HBASE_COLUMN: "cf:data"
@@ -37,7 +37,7 @@ services:
   python:
     image: kafka-to-hbase:latest
     entrypoint: "/usr/local/bin/python3"
-    command: "--help"
+    command: "--version"
     volumes:
       - ".:/app"
     working_dir: "/app"
@@ -45,3 +45,13 @@ services:
       K2HB_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       K2HB_KAFKA_SSL: "false"
       K2HB_HBASE_HOST: "hbase"
+
+  integration-tests:
+    image: integration-tests:latest
+    build: ./integration_tests
+    command: "--version"
+    volumes:
+      - "./integration_tests:/tests"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+      HBASE_HOST: "hbase"

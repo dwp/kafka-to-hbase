@@ -6,19 +6,6 @@ import logging
 _log = logging.getLogger(__name__)
 
 
-def qualified_table_name(namespace, prefix, topic):
-    """ Calculate the fully qualified table name for a topic including namespace and prefix """
-    fqtn = ""
-
-    if namespace:
-        fqtn += namespace + ":"
-
-    if prefix:
-        fqtn += prefix + "_"
-
-    return fqtn + topic
-
-
 def has_truthy_attr(obj, attr):
     """ Check if an object attribute exists and has a truthy value """
     if not getattr(obj, attr, None):

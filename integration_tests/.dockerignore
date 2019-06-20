@@ -2,10 +2,8 @@
 **
 
 # Allow just enough to install the package
-!/setup.py
-!/scripts
-!/kafka2hbase/**.py
-!/requirements*.txt
+!/requirements.txt
+!/features
 !/pip.conf
 
 .mypy_cache

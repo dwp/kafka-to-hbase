@@ -1,0 +1,4 @@
+behave==1.2.6
+assertpy==0.14
+happybase==1.2.0
+kafka-python==1.4.6
