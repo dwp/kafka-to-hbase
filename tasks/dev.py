@@ -54,10 +54,11 @@ def cleanup(ctx):
         "topic": "a topic to listen to",
         "group-id": "the ID of the consumer group to join (default kafka-to-hbase)",
         "column": "the column name to store data in (defaults to cf:data)",
+        "namespace": "the namespace of the tables (defaults to k2hb)",
     },
     iterable=["topic"],
 )
-def run(ctx, topic, group_id="kafka-to-hbase", column="cf:data"):
+def run(ctx, topic, group_id="kafka-to-hbase", column="cf:data", namespace="k2hb"):
     """ Run the kafka-to-hbase command locally with specified options """
     from shlex import quote
 
@@ -66,7 +67,12 @@ def run(ctx, topic, group_id="kafka-to-hbase", column="cf:data"):
 
     topics = ",".join(topic)
     ctx.run(
-        f"docker-compose run --rm -e K2HB_KAFKA_TOPICS={quote(topics)} -e K2HB_KAFKA_GROUP_ID={quote(group_id)} -e K2HB_HBASE_COLUMN={quote(column)} python scripts/kafka-to-hbase",
+        f"docker-compose run --rm "
+        f"-e K2HB_KAFKA_TOPICS={quote(topics)} "
+        f"-e K2HB_KAFKA_GROUP_ID={quote(group_id)} "
+        f"-e K2HB_HBASE_COLUMN={quote(column)} "
+        f"-e K2HB_HBASE_NAMESPACE={quote(namespace)} "
+        f"python scripts/kafka-to-hbase",
     )
 
 
