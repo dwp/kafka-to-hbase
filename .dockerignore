@@ -4,7 +4,7 @@
 # Allow just enough to install the package
 !/setup.py
 !/scripts
-!/kafka2hbase/**.py
+!/kafka2hbase/**/*.py
 !/requirements*.txt
 !/pip.conf
 
