@@ -137,7 +137,7 @@ while True:
             {config.hbase.column: value},
             timestamp,
         ),
-        get_destination=lambda topic: kafka2hbase.qualified_table_name(
+        get_table_name_from_topic=lambda topic: kafka2hbase.qualified_table_name(
             config.hbase.namespace,
             config.hbase.table_prefix,
             topic,

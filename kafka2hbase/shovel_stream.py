@@ -6,7 +6,7 @@ import logging
 _log = logging.getLogger(__name__)
 
 
-def qualified_table_name(namespace, prefix, name):
+def qualified_table_name(namespace, prefix, topic):
     """ Calculate the fully qualified table name for a topic including namespace and prefix """
     fqtn = ""
 
@@ -16,7 +16,7 @@ def qualified_table_name(namespace, prefix, name):
     if prefix:
         fqtn += prefix + "_"
 
-    return fqtn + name
+    return fqtn + topic
 
 
 def has_truthy_attr(obj, attr):
@@ -26,7 +26,7 @@ def has_truthy_attr(obj, attr):
     return True
 
 
-def shovel(stream, store, get_destination):
+def shovel(stream, store, get_table_name_from_topic):
     """ Shovel data from a stream into a data store until there are none left """
     messages_processed = 0
 
@@ -47,7 +47,7 @@ def shovel(stream, store, get_destination):
             continue
 
         # Get the table name and store the message
-        table_name = get_destination(message.topic)
+        table_name = get_table_name_from_topic(message.topic)
         store(table_name, message.key, message.value, message.timestamp)
 
     return messages_processed

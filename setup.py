@@ -16,7 +16,7 @@ setup(
     description='Simple Kafka to Hbase importer',
     author='Craig Andrews',
     author_email='craig.andrews@infinityworks.com',
-    url='https://github.com/dwp/kafka-to-python',
+    url='https://github.com/dwp/kafka-to-hbase',
     packages=find_packages(),
     scripts=['scripts/kafka-to-hbase'],
     install_requires=requirements,

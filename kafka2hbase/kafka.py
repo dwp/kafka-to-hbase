@@ -2,7 +2,6 @@
 
 import logging
 
-from time import sleep
 from datetime import datetime
 
 from .message import Message
