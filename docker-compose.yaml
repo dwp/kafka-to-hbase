@@ -49,7 +49,7 @@ services:
   integration-tests:
     image: integration-tests:latest
     build: ./integration_tests
-    command: "--version"
+    command: "true"
     volumes:
       - "./integration_tests:/tests"
     environment:
