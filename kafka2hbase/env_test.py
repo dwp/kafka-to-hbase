@@ -5,32 +5,64 @@ from assertpy import assert_that
 from . import env
 
 
-def test_config_conversion():
-    def _test_config_conversion(fn, default, value, expected):
-        assert_that(fn(default)(value)).is_equal_to(expected)
+def test_delimited_value_conversion():
+    def _assert(default, value, expected):
+        converter = env.delimited(default)
+        assert_that(converter(value)).is_equal_to(expected)
 
-    for fn, default, value, expected in [
-        (env.delimited, "dflt", "one,two,three", ["one", "two", "three"]),
-        (env.delimited, "dflt", "", ["dflt"]),
-        (env.delimited, "dflt", None, ["dflt"]),
-        (env.delimited, "", None, []),
-        (env.string, "dflt", "testing", "testing"),
-        (env.string, "dflt", "", "dflt"),
-        (env.string, "dflt", None, "dflt"),
-        (env.integer, 987, "1234", 1234),
-        (env.integer, 987, "", 987),
-        (env.integer, 987, None, 987),
-        (env.boolean, False, "True", True),
-        (env.boolean, False, "true", True),
-        (env.boolean, False, "blah", False),
-        (env.boolean, False, "", False),
-        (env.boolean, False, None, False),
+    for default, value, expected in [
+        ("dflt", "one,two,three", ["one", "two", "three"]),
+        ("dflt", "", ["dflt"]),
+        ("dflt", None, ["dflt"]),
+        ("", None, []),
     ]:
-        yield _test_config_conversion, fn, default, value, expected
+        yield _assert, default, value, expected
+
+
+def test_string_value_conversion():
+    def _assert(default, value, expected):
+        converter = env.string(default)
+        assert_that(converter(value)).is_equal_to(expected)
+
+    for default, value, expected in [
+        ("dflt", "testing", "testing"),
+        ("dflt", "", "dflt"),
+        ("dflt", None, "dflt"),
+    ]:
+        yield _assert, default, value, expected
+
+
+def test_integer_value_conversion():
+    def _assert(default, value, expected):
+        converter = env.integer(default)
+        assert_that(converter(value)).is_equal_to(expected)
+
+    for default, value, expected in [
+        (987, "1234", 1234),
+        (987, "", 987),
+        (987, None, 987),
+    ]:
+        yield _assert, default, value, expected
+
+
+def test_boolean_value_conversion():
+    def _assert(default, value, expected):
+        converter = env.boolean(default)
+        assert_that(converter(value)).is_equal_to(expected)
+
+    for default, value, expected in [
+        (False, "True", True),
+        (False, "true", True),
+        (False, "blah", False),
+        (False, "", False),
+        (False, None, False),
+    ]:
+        yield _assert, default, value, expected
 
 
 def test_env_var_for_config_key_uppercases_and_prefixes():
-    assert_that(env.env_var_for_config_key("kafka", "ssl_ciphers")).is_equal_to("K2HB_KAFKA_SSL_CIPHERS")
+    assert_that(env.env_var_for_config_key("kafka", "ssl_ciphers")
+                ).is_equal_to("K2HB_KAFKA_SSL_CIPHERS")
 
 
 def test_load_config_uses_defaults():
