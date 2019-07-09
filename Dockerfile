@@ -30,7 +30,9 @@ ARG DIST_FILE=$DIST.tar
 ENV acm_pca_cert_generator_version 0.4.0
 RUN echo "===> Installing Dependencies ..." \
     && apt-get -qq update \
-    && apt-get install -y gosu gcc python3-pip \
+    && apt-get install -y gosu uuid \
+    && echo "===> Installing acm_pca_cert_generator ..." \
+    && apt-get install -y gcc python3-pip \
     && pip3 install https://github.com/dwp/acm-pca-cert-generator/releases/download/${acm_pca_cert_generator_version}/acm_pca_cert_generator-${acm_pca_cert_generator_version}.tar.gz \
     && echo "===> Cleaning up ..."  \
     && apt-get remove -y gcc \
