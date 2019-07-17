@@ -11,7 +11,7 @@ sed -e "s/{{ZOOKEEPER_PORT}}/${ZOOKEEPER_PORT}/" \
     -e "s/{{ZOOKEEPER_QUORUM}}/${ZOOKEEPER_QUORUM}/" \
     /hbase/conf/hbase-site.template.xml > /hbase/conf/hbase-site.xml
 
-if [[ -t 0 ]]
+if [[ -t 0 || $1 == "shell" ]]
 then
     # Running interactively so assume we are trying to run an Hbase command
     exec /hbase/bin/hbase "${@}"

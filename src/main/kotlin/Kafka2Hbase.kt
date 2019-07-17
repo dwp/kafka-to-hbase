@@ -28,14 +28,6 @@ suspend fun main() {
         "data".toByteArray()
     )
 
-    // Create the topic tables
-    hbase.createTopicTable(
-        "test-topic".toByteArray(),
-        maxVersions = 10,
-        minVersions = 1,
-        timeToLive = Duration.ofDays(10)
-    )
-
     // Create a Kafka consumer
     val kafka = KafkaConsumer<ByteArray, ByteArray>(Properties().apply {
         put("bootstrap.servers", "kafka:9092")
