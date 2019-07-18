@@ -1,5 +1,6 @@
 import org.apache.hadoop.conf.Configuration
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
+import org.apache.kafka.common.serialization.ByteArraySerializer
 import java.time.Duration
 import java.util.*
 
@@ -21,8 +22,9 @@ object Config {
 
         val dataTable = getEnv("K2HB_HBASE_DATA_TABLE") ?: "k2hb:ingest"
         val dataFamily = getEnv("K2HB_HBASE_DATA_FAMILY_NAME") ?: "topic"
-        val topicTable = getEnv("K2HB_HBASE_TOPIC_TABLE") ?: "k2hb:ingest-topics"
-        val topicFamily = getEnv("K2HB_HBASE_TOPIC_FAMILY_NAME") ?: "topic"
+        val topicTable = getEnv("K2HB_HBASE_TOPIC_TABLE") ?: "k2hb:ingest-topic"
+        val topicFamily = getEnv("K2HB_HBASE_TOPIC_FAMILY_NAME") ?: "c"
+        val topicQualifier = getEnv("K2HB_HBASE_TOPIC_QUALIFIER") ?: "msg"
     }
 
     object Kafka {
@@ -42,6 +44,10 @@ object Config {
 
             put("key.deserializer", ByteArrayDeserializer::class.java)
             put("value.deserializer", ByteArrayDeserializer::class.java)
+
+            put("key.serializer", ByteArraySerializer::class.java)
+            put("value.serializer", ByteArraySerializer::class.java)
+
             put("auto.offset.reset", "earliest")
         }
 
