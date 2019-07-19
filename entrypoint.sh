@@ -48,9 +48,9 @@ then
             --truststore-path "${K2HB_TRUSTSTORE_PATH}" \
             --truststore-password "${K2HB_TRUSTSTORE_PASSWORD}"
 
-        echo "Cert generation result for ${HOSTNAME} is: $?"
+        echo "Cert generation result is $? for ${HOSTNAME}"
 
-    elif [[ ${K2HB_KAFKA_CERT_MODE} == "RETRIEVER" ]]; then
+    elif [[ ${K2HB_KAFKA_CERT_MODE} == "RETRIEVE" ]]; then
 
         echo "Retrieving cert from ${RETRIEVER_ACM_CERT_ARN}"
 
@@ -63,10 +63,10 @@ then
             --truststore-path "${K2HB_TRUSTSTORE_PATH}" \
             --truststore-password "${K2HB_TRUSTSTORE_PASSWORD}"
 
-        echo "Cert Retrieve result for cert ${RETRIEVER_ACM_CERT_ARN} is: $?"
+        echo "Cert retrieve result is $? for ${RETRIEVER_ACM_CERT_ARN}"
 
     else
-        echo "K2HB_KAFKA_CERT_MODE must be one of 'CERTGEN,RETRIEVER' but was ${K2HB_KAFKA_CERT_MODE}"
+        echo "K2HB_KAFKA_CERT_MODE must be one of 'CERTGEN,RETRIEVE' but was ${K2HB_KAFKA_CERT_MODE}"
         exit 1
     fi
 else
