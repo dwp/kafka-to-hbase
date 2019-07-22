@@ -23,7 +23,7 @@ Otherwise if a tarball is required use the distTar command.
 
 A full local stack can be run using the provided Dockerfile and Docker
 Compose configuration. The Dockerfile uses a multi-stage build so no
-pre-compilation isrequired.
+pre-compilation is required.
 
     docker-compose up --build -d
 
