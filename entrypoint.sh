@@ -24,7 +24,7 @@ fi
 
 # Generate a cert for Kafka mutual auth
 
-if [[ ${K2HB_KAFKA_INSECURE} != "true" ]]
+if [[ "${K2HB_KAFKA_INSECURE}" != "true" ]]
 then
 
     SSL_DIR="$(mktemp -d)"
@@ -36,7 +36,7 @@ then
     export K2HB_TRUSTSTORE_PATH="${SSL_DIR}/k2hb.truststore"
     export K2HB_TRUSTSTORE_PASSWORD="$(uuid -v4)"
 
-    if [[ ${K2HB_KAFKA_CERT_MODE} == "CERTGEN" ]]; then
+    if [[ "${K2HB_KAFKA_CERT_MODE}" == "CERTGEN" ]]; then
 
         echo "Generating cert for host ${HOSTNAME}"
 
@@ -50,7 +50,7 @@ then
 
         echo "Cert generation result is $? for ${HOSTNAME}"
 
-    elif [[ ${K2HB_KAFKA_CERT_MODE} == "RETRIEVE" ]]; then
+    elif [[ "${K2HB_KAFKA_CERT_MODE}" == "RETRIEVE" ]]; then
 
         echo "Retrieving cert from ${RETRIEVER_ACM_CERT_ARN}"
 
