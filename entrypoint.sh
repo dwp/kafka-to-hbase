@@ -57,6 +57,7 @@ then
         export RETRIEVER_ACM_KEY_PASSPHRASE="$(uuid -v4)"
 
         acm-cert-retriever \
+            --acm-key-passphrase "${RETRIEVER_ACM_KEY_PASSPHRASE}" \
             --keystore-path "${K2HB_KEYSTORE_PATH}" \
             --keystore-password "${K2HB_KEYSTORE_PASSWORD}" \
             --private-key-password "${K2HB_PRIVATE_KEY_PASSWORD}" \
