@@ -120,7 +120,7 @@ and create tables in the `k2hb` namespace. The data will be stored in `cf:data`
 with at least `1` version and at most `10` versions and a TTL of 10 days.
 
 * **K2HB_HBASE_ZOOKEEPER_PARENT**
-    The hbase parant uri, defaults to `/hbase` but should be set to ``/hbase-unsecure`` for AWS HBase
+    The hbase parent uri, defaults to `/hbase` but should be set to ``/hbase-unsecure`` for AWS HBase
 * **K2HB_HBASE_ZOOKEEPER_QUORUM**
     Comma separated list of Zookeeper servers
 * **K2HB_HBASE_ZOOKEEPER_PORT**
