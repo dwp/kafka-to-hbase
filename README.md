@@ -190,6 +190,8 @@ defaulted in the `entrypoint.sh` script.
     (`SHA256WITHECDSA`, `SHA384WITHECDSA`, `SHA512WITHECDSA`, `SHA256WITHRSA`, `SHA384WITHRSA`, `SHA512WITHRSA`)
 * **CERTGEN_VALIDITY_PERIOD**
     The certificate validity period in Go style duration (e.g. `1y2m6d`)
+* **CERTGEN_PRIVATE_KEY_ALIAS**
+    Alias for the private key
 * **CERTGEN_TRUSTSTORE_CERTS**
     Comma delimited list of S3 URIs pointing to certificates to be included in the trust store
 * **CERTGEN_TRUSTSTORE_ALIASES**
