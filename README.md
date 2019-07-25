@@ -115,10 +115,12 @@ are for configuring the built-in ACM PCA client to perform mutual auth.
 
 #### Hbase
 
-By default Kafka2Hbase will connect to Zookeeper at `zookeeper:2181` and
-create tables in the `k2hb` namespace. The data will be stored in `cf:data`
+By default Kafka2Hbase will connect to Zookeeper at `zookeeper:2181` use the parent uri `hbase` 
+and create tables in the `k2hb` namespace. The data will be stored in `cf:data`
 with at least `1` version and at most `10` versions and a TTL of 10 days.
 
+* **K2HB_HBASE_ZOOKEEPER_PARENT**
+    The hbase parant uri, defaults to `/hbase` but should be set to ``/hbase-unsecure`` for AWS HBase
 * **K2HB_HBASE_ZOOKEEPER_QUORUM**
     Comma separated list of Zookeeper servers
 * **K2HB_HBASE_ZOOKEEPER_PORT**
@@ -163,6 +165,8 @@ and `K2HB_KAFKA_CERT_MODE=CERTGEN`.
 For an authoritative full list of arguments see the tool help; Arguments not listed here are 
 defaulted in the `entrypoint.sh` script.
 
+* **CERTGEN_CA_ARN**
+    The AWS CA ARN to use to generate the cert
 * **CERTGEN_KEY_TYPE**
     The type of private key (`RSA` or `DSA`)
 * **CERTGEN_KEY_LENGTH**
