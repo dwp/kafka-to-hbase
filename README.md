@@ -146,8 +146,8 @@ consumer group. It will poll the `test-topic` topic with a poll timeout of
     Comma separated list of Kafka servers and ports
 * **K2HB_KAFKA_CONSUMER_GROUP**
     The name of the consumer group to join
-* **K2HB_KAFKA_TOPICS**
-    The list of topics to listen to
+* **K2HB_KAFKA_TOPIC_REGEX**
+    A regex that will fetch a list of topics to listen to, e.g. `^db\..*`
 * **K2HB_KAFKA_POLL_TIMEOUT**
     The maximum time to wait for messages in ISO-8601 duration format (e.g. `PT10S`)
 * **K2HB_KAFKA_INSECURE**

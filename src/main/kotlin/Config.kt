@@ -3,6 +3,7 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import java.time.Duration
 import java.util.*
+import java.util.regex.Pattern
 
 fun getEnv(envVar: String): String? {
     val value = System.getenv(envVar)
@@ -54,6 +55,6 @@ object Config {
         }
 
         val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofDays(10)
-        val topics = getEnv("K2HB_KAFKA_TOPICS")?.split(',') ?: listOf("test-topic")
+        val topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "test-topic")
     }
 }
