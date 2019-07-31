@@ -15,6 +15,9 @@ fun String.toDuration(): Duration {
 }
 
 object Config {
+
+    val metaDataRefreshKey = "metadata.max.age.ms"
+
     object Hbase {
         val config = Configuration().apply {
             // See also https://hbase.apache.org/book.html#hbase_default_configurations
@@ -52,10 +55,15 @@ object Config {
             put("value.serializer", ByteArraySerializer::class.java)
 
             put("auto.offset.reset", "earliest")
-            put("metadata.max.age.ms", getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
+            put(metaDataRefreshKey, getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
         }
 
-        val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofDays(10)
+        val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofMinutes(10)
         val topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "test-topic")
+
+        fun reportTopicSubscriptionDetails(): String {
+            return "Subscribing to topics '%s' with poll timeout '%s' and matadata refresh every '%s ms'"
+                .format(topicRegex.pattern(), pollTimeout.toString(), props.getProperty(metaDataRefreshKey))
+        }
     }
 }

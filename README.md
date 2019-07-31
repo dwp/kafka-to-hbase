@@ -140,7 +140,7 @@ with at least `1` version and at most `10` versions and a TTL of 10 days.
 
 By default Kafka2Hbase will connect to Kafka at `kafka:9092` in the `k2hb`
 consumer group. It will poll the `test-topic` topic with a poll timeout of
-`10` seconds, and refresh the topics list every second.
+`10` days, and refresh the topics list every 10 seconds (`10000` ms).
 
 * **K2HB_KAFKA_BOOTSTRAP_SERVERS**
     Comma separated list of Kafka servers and ports
@@ -150,10 +150,12 @@ consumer group. It will poll the `test-topic` topic with a poll timeout of
     A regex that will fetch a list of topics to listen to, e.g. `db.*`
 * **K2HB_KAFKA_META_REFRESH_MS** (Optional)
     The frequency that the consumer will ask the broker for metadata updates, which also checks for new topics. 
-    Defaults to 10000 ms.
+    Defaults to 10000 ms (10 seconds).
+    Typically, should be an order of magnitude less than `K2HB_KAFKA_POLL_TIMEOUT`, else new topics will not be discovered within each polling interval.
 * **K2HB_KAFKA_POLL_TIMEOUT**
     The maximum time to wait for messages in ISO-8601 duration format (e.g. `PT10S`). 
-    Defaults to 10 Days.
+    Defaults to 10 Minutes.
+    Should be greater than `K2HB_KAFKA_META_REFRESH_MS`, else new topics will not be discovered within each polling interval.
 * **K2HB_KAFKA_INSECURE**
     Disable SSL entirely (useful for dev / test) with `K2HB_KAFKA_INSECURE=true`
 * **K2HB_KAFKA_CERT_MODE**

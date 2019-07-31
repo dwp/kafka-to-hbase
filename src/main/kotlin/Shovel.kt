@@ -8,6 +8,9 @@ import java.util.logging.Logger
 fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, pollTimeout: Duration) =
     GlobalScope.async {
         val log = Logger.getLogger("shovelAsync")
+
+        log.info(Config.Kafka.reportTopicSubscriptionDetails())
+
         while (isActive) {
             kafka.subscribe(Config.Kafka.topicRegex)
             val records = kafka.poll(pollTimeout)
