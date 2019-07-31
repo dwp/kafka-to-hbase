@@ -52,6 +52,7 @@ object Config {
             put("value.serializer", ByteArraySerializer::class.java)
 
             put("auto.offset.reset", "earliest")
+            put("metadata.max.age.ms", "1000")
         }
 
         val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofDays(10)
