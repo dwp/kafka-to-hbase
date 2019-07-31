@@ -17,7 +17,7 @@ fi
 
 if [ "${INTERNET_PROXY}" ]; then
   export http_proxy="http://${INTERNET_PROXY}:3128"
-  export https_proxy="https://${INTERNET_PROXY}:3128"
+  export https_proxy="http://${INTERNET_PROXY}:3128"
   export no_proxy=169.254.169.254
   echo "Using proxy ${INTERNET_PROXY}"
 fi
@@ -70,6 +70,7 @@ then
         echo "K2HB_KAFKA_CERT_MODE must be one of 'CERTGEN,RETRIEVE' but was ${K2HB_KAFKA_CERT_MODE}"
         exit 1
     fi
+    chown -R ${SUID}:${SGID} $SSL_DIR
 else
     echo "Skipping cert generation for host ${HOSTNAME}"
 fi
