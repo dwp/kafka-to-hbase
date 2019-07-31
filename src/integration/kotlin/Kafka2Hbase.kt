@@ -2,16 +2,16 @@ import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import lib.*
 import org.apache.kafka.clients.producer.KafkaProducer
+import java.time.Instant
 
 class Kafka2Hbase : StringSpec({
     configureLogging()
-    
-    val topic = "test-topic".toByteArray()
 
     val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.props)
     val hbase = HbaseClient.connect()
 
     "messages with new identifiers are written to hbase" {
+        val topic = "test-topic-%s".format(Instant.now().toEpochMilli()).toByteArray()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
         val body = uniqueBytes()
@@ -27,6 +27,7 @@ class Kafka2Hbase : StringSpec({
     }
 
     "messages with previously received identifiers are written as new versions" {
+        val topic = "test-topic-%s".format(Instant.now().toEpochMilli()).toByteArray()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
         val body = uniqueBytes()
