@@ -33,6 +33,8 @@ services:
     environment:
       K2HB_KAFKA_INSECURE: "true"
       K2HB_KAFKA_TOPIC_REGEX: "test.*"
+      K2HB_KAFKA_META_REFRESH_MS: "1000"
+      K2HB_KAFKA_POLL_TIMEOUT: "PT10"
 
   integration-test:
     image: kafka2hbase-integration:latest
