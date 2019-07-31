@@ -58,8 +58,8 @@ object Config {
             put(metaDataRefreshKey, getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
         }
 
-        val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofMinutes(10)
-        val topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "test-topic")
+        val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofHours(1)
+        val topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "test-topic.*")
 
         fun reportTopicSubscriptionDetails(): String {
             return "Subscribing to topics '%s' with poll timeout '%s' and matadata refresh every '%s ms'"

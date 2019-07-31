@@ -147,14 +147,14 @@ consumer group. It will poll the `test-topic` topic with a poll timeout of
 * **K2HB_KAFKA_CONSUMER_GROUP**
     The name of the consumer group to join
 * **K2HB_KAFKA_TOPIC_REGEX**
-    A regex that will fetch a list of topics to listen to, e.g. `db.*`
+    A regex that will fetch a list of topics to listen to, e.g. `db.*`. Defaults to `test-topic.*`
 * **K2HB_KAFKA_META_REFRESH_MS** (Optional)
     The frequency that the consumer will ask the broker for metadata updates, which also checks for new topics. 
-    Defaults to 10000 ms (10 seconds).
+    Defaults to `10000` ms (10 seconds).
     Typically, should be an order of magnitude less than `K2HB_KAFKA_POLL_TIMEOUT`, else new topics will not be discovered within each polling interval.
 * **K2HB_KAFKA_POLL_TIMEOUT**
     The maximum time to wait for messages in ISO-8601 duration format (e.g. `PT10S`). 
-    Defaults to 10 Minutes.
+    Defaults to 1 Hour.
     Should be greater than `K2HB_KAFKA_META_REFRESH_MS`, else new topics will not be discovered within each polling interval.
 * **K2HB_KAFKA_INSECURE**
     Disable SSL entirely (useful for dev / test) with `K2HB_KAFKA_INSECURE=true`

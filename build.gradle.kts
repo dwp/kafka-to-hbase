@@ -46,7 +46,6 @@ sourceSets {
 tasks.register<Test>("integration") {
     description = "Runs the integration tests"
     group = "verification"
-    outputs.upToDateWhen { false }
     testClassesDirs = sourceSets["integration"].output.classesDirs
     classpath = sourceSets["integration"].runtimeClasspath
 
