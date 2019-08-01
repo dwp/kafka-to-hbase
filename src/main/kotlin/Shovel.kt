@@ -19,8 +19,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 val newKey: ByteArray = record.key() ?: ByteArray(0)
                 if (newKey.isEmpty()) {
                     log.warning(
-                        "Empty key '%s' was skipped for %s:%d:%d".format(
-                            newKey,
+                        "Empty key was skipped for %s:%d:%d".format(
                             record.topic() ?: "null",
                             record.partition(),
                             record.offset()
