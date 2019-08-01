@@ -54,7 +54,7 @@ class Kafka2Hbase : StringSpec({
 
         val body = uniqueBytes()
         val timestamp = timestamp()
-        producer.sendRecord(topic, "", body, timestamp)
+        producer.sendRecord(topic, ByteArray(0), body, timestamp)
 
         val counter = waitFor { hbase.getCount(topic) }
         counter shouldBe startingCounter
