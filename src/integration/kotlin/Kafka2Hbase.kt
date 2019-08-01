@@ -48,14 +48,13 @@ class Kafka2Hbase : StringSpec({
         counter shouldBe startingCounter + 2
     }
 
-    "messages with null key are skipped" {
+    "messages with empty key are skipped" {
         val topic = uniqueTopicName()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
         val body = uniqueBytes()
         val timestamp = timestamp()
-        val key: String? = null
-        producer.sendRecord(topic, key, body, timestamp)
+        producer.sendRecord(topic, "", body, timestamp)
 
         val counter = waitFor { hbase.getCount(topic) }
         counter shouldBe startingCounter
