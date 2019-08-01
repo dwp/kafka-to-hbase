@@ -27,7 +27,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                             record.topic(),
                             record.partition(),
                             record.offset(),
-                            String(record.key())
+                            String(record.key() ?: "")
                         )
                     )
                 } catch (e: Exception) {
@@ -36,7 +36,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                             record.topic(),
                             record.partition(),
                             record.offset(),
-                            String(record.key()),
+                            String(record.key() ?: ""),
                             e.toString()
                         )
                     )
