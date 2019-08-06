@@ -41,7 +41,7 @@ ENV HTTPS_PROXY=${https_proxy_value}
 
 # Copy proxy set script and execute it
 COPY set-proxy.sh .
-RUN chmod +x set-proxy.sh && ./set-proxy.sh
+RUN ./set-proxy.sh
 
 ARG VERSION=1.0-SNAPSHOT
 ARG DIST=kafka2hbase-$VERSION
