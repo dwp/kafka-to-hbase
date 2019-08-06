@@ -1,9 +1,9 @@
+ARG http_proxy_value=""
+ARG https_proxy_value=""
+
 FROM zenika/kotlin:1.3-jdk8-slim as build
 
 WORKDIR /kafka2hbase
-
-ARG http_proxy_value=""
-ARG https_proxy_value=""
 
 # Upper and local case is needed because different tools respect either ones
 ENV http_proxy=${http_proxy_value}
@@ -27,12 +27,15 @@ RUN $GRADLE build
 # Copy the source
 COPY src/ ./src
 
+# Copy proxy set script and execute it
+COPY set-proxy.sh .
+
 RUN $GRADLE distTar
 
 FROM openjdk:8-slim
 
 # Copy proxy set script and execute it
-COPY set-proxy.sh .
+COPY --from=build /kafka2hbase/set-proxy.sh .
 RUN ./set-proxy.sh
 
 ARG VERSION=1.0-SNAPSHOT
