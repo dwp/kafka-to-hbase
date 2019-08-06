@@ -27,15 +27,12 @@ RUN $GRADLE build
 # Copy the source
 COPY src/ ./src
 
-# Copy proxy set script and execute it
-COPY set-proxy.sh .
-
 RUN $GRADLE distTar
 
 FROM openjdk:8-slim
 
 # Copy proxy set script and execute it
-COPY --from=build /kafka2hbase/set-proxy.sh .
+COPY ./set-proxy.sh .
 RUN ./set-proxy.sh
 
 ARG VERSION=1.0-SNAPSHOT
