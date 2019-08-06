@@ -31,6 +31,12 @@ RUN $GRADLE distTar
 
 FROM openjdk:8-slim
 
+# Vars needed again for setting build
+ENV http_proxy=${http_proxy_value}
+ENV https_proxy=${https_proxy_value}
+ENV HTTP_PROXY=${http_proxy_value}
+ENV HTTPS_PROXY=${https_proxy_value}
+
 # Copy proxy set script and execute it
 COPY ./set-proxy.sh .
 RUN ./set-proxy.sh
