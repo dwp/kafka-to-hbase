@@ -28,9 +28,6 @@ RUN $GRADLE build
 # Copy the source
 COPY src/ ./src
 
-# Copy proxy set script
-COPY set-proxy.sh .
-
 RUN $GRADLE distTar
 
 # Second build stage starts here
@@ -43,7 +40,7 @@ ENV HTTP_PROXY=${http_proxy_value}
 ENV HTTPS_PROXY=${https_proxy_value}
 
 # Copy proxy set script and execute it
-COPY --from=build /kafka2hbase/set-proxy.sh .
+COPY set-proxy.sh .
 RUN ./set-proxy.sh
 
 ARG VERSION=1.0-SNAPSHOT
