@@ -31,6 +31,9 @@ RUN $GRADLE distTar
 
 FROM openjdk:8-slim
 
+# Copy proxy set script and execute it
+COPY set-proxy.sh .
+RUN ./set-proxy.sh
 
 ARG VERSION=1.0-SNAPSHOT
 ARG DIST=kafka2hbase-$VERSION
