@@ -5,6 +5,7 @@ WORKDIR /kafka2hbase
 ARG http_proxy_value=""
 ARG https_proxy_value=""
 
+# Upper and local case is needed because different tools respect either ones
 ENV http_proxy=${http_proxy_value}
 ENV https_proxy=${https_proxy_value}
 ENV HTTP_PROXY=${http_proxy_value}
