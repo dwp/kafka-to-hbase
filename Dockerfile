@@ -7,13 +7,12 @@ FROM zenika/kotlin:1.3-jdk8-slim as build
 
 WORKDIR /kafka2hbase
 
-# Set environment variables to pass to proxy script
-ENV http_proxy=${http_proxy_full}
-ENV https_proxy=${http_proxy_full}
-ENV HTTP_PROXY=${http_proxy_full}
-ENV HTTPS_PROXY=${http_proxy_full}
+# Set gradle proxy
 ENV GRADLE_OPTS="${GRADLE_OPTS} -Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port"
 ENV GRADLE_OPTS="${GRADLE_OPTS} -Dhttps.proxyHost=$http_proxy_host -Dhttps.proxyPort=$http_proxy_port"
+
+RUN echo "Env variable contents (gradle):" \
+    && echo "ENV http: ${GRADLE_OPTS}" \
 
 ENV GRADLE "/kafka2hbase/gradlew --no-daemon"
 
@@ -36,25 +35,21 @@ RUN $GRADLE distTar
 # Second build stage starts here
 FROM openjdk:8-slim
 
-# Set environment variables to pass to proxy script
-ENV http_proxy=${http_proxy_host}:${http_proxy_port}
-ENV https_proxy=${https_proxy_host}:${https_proxy_port}
-ENV HTTP_PROXY=${http_proxy_host}:${http_proxy_port}
-ENV HTTPS_PROXY=${https_proxy_host}:${https_proxy_port}
-ENV GRADLE_OPTS="$GRADLE_OPTS -Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPort=$http_proxy_port"
-ENV GRADLE_OPTS="$GRADLE_OPTS -Dhttps.proxyHost=$https_proxy_host -Dhttps.proxyPort=$https_proxy_port"
+# Set environment variables for apt-get
+ENV http_proxy=${http_proxy_full}
+ENV https_proxy=${http_proxy_full}
+ENV HTTP_PROXY=${http_proxy_full}
+ENV HTTPS_PROXY=${http_proxy_full}
 
 ARG VERSION=1.0-SNAPSHOT
 ARG DIST=kafka2hbase-$VERSION
 ARG DIST_FILE=$DIST.tar
 
-RUN echo "Apt.conf contents:" \
-    && echo $(cat /etc/apt/apt.conf) \
-    && echo "ENV http: $http_proxy" \
-    && echo "ENV https: $https_proxy" \
-    && echo "ENV HTTP: $HTTP_PROXY" \
-    && echo "ENV HTTPS: $HTTPS_PROXY" \
-    && echo "ENV GRADLE: $GRADLE_OPTS"
+RUN echo "Env variable contents (proxy):" \
+    && echo "ENV http: ${http_proxy}" \
+    && echo "ENV https: ${https_proxy}" \
+    && echo "ENV HTTP: ${HTTP_PROXY}" \
+    && echo "ENV HTTPS: ${HTTPS_PROXY}"
 
 ENV acm_cert_helper_version 0.8.0
 RUN echo "===> Installing Dependencies ..." \
