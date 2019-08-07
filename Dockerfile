@@ -12,7 +12,7 @@ ENV GRADLE_OPTS="${GRADLE_OPTS} -Dhttp.proxyHost=$http_proxy_host -Dhttp.proxyPo
 ENV GRADLE_OPTS="${GRADLE_OPTS} -Dhttps.proxyHost=$http_proxy_host -Dhttps.proxyPort=$http_proxy_port"
 
 RUN echo "Env variable contents (gradle):" \
-    && echo "ENV http: ${GRADLE_OPTS}" \
+    && echo "ENV http: ${GRADLE_OPTS}"
 
 ENV GRADLE "/kafka2hbase/gradlew --no-daemon"
 
