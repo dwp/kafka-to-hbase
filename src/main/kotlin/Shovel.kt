@@ -16,7 +16,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
             val records = kafka.poll(pollTimeout)
             for (record in records) {
 
-                val newKeyString: String = record.key() ?: "unknown"
+                val newKeyString: String = String(record.key()) ?: "unknown"
                 val newKey: ByteArray = record.key() ?: ByteArray(0)
                 if (newKey.isEmpty()) {
                     log.warning(
