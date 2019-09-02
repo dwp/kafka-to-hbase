@@ -16,6 +16,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
             val records = kafka.poll(pollTimeout)
             for (record in records) {
 
+                val newKeyString: ByteArray = record.key() ?: "unknown"
                 val newKey: ByteArray = record.key() ?: ByteArray(0)
                 if (newKey.isEmpty()) {
                     log.warning(
@@ -36,7 +37,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                     )
                     log.info(
                         "Wrote key %s data %s:%d:%d".format(
-                            newKey,
+                            newKeyString,
                             record.topic() ?: "null",
                             record.partition(),
                             record.offset()
@@ -45,7 +46,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 } catch (e: Exception) {
                     log.severe(
                         "Error while writing key %s data %s:%d:%: %s".format(
-                            newKey,
+                            newKeyString,
                             record.topic() ?: "null",
                             record.partition(),
                             record.offset(),
