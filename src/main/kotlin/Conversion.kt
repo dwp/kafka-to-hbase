@@ -1,14 +1,18 @@
 import org.bson.BsonDocument
-import kotlin.js.json
 import java.util.logging.Logger
 import java.security.MessageDigest
 import javax.xml.bind.DatatypeConverter
+import com.beust.klaxon.Parser
+import com.beust.klaxon.JsonObject
 
-fun convertToJson(body: ByteArray) {
+fun convertToJson(body: ByteArray): JsonObject {
     val log = Logger.getLogger("generateKey")
 
     try {
-        return JSON.parse<Json>(String(body))
+        val parser: Parser = Parser.default()
+        val stringBuilder: StringBuilder = StringBuilder(String(body))
+        val json: JsonObject = parser.parse(stringBuilder) as JsonObject
+        return json
     } catch (e: Exception) {
         log.severe(
             "Error while parsing message body of '%s' in to json: %s".format(
@@ -20,9 +24,8 @@ fun convertToJson(body: ByteArray) {
     }
 }
 
-fun convertToBson(input: Json) {
-    val input_string = JSON.stringify(input)
-    return BsonDocument.parse(input_string)
+fun convertToBson(input: JsonObject): BsonDocument {
+    return BsonDocument.parse(input.toJsonString())
 }
 
 fun generateHash(type: String, input: String): String {

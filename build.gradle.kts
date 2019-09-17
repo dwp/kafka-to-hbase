@@ -12,6 +12,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -20,6 +21,7 @@ dependencies {
     implementation("org.apache.hbase", "hbase-client", "1.4.9")
     implementation("org.apache.kafka", "kafka-clients", "2.3.0")
     implementation("org.mongodb", "bson", "3.11.0")
+    implementation("com.beust", "klaxon", "4.0.2")
     testImplementation("io.kotlintest", "kotlintest-runner-junit5", "3.3.2")
 }
 
@@ -42,6 +44,11 @@ sourceSets {
         compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
         runtimeClasspath += output + compileClasspath
     }
+    create("unit") {
+        java.srcDir(file("src/unit/kotlin"))
+        compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 tasks.register<Test>("integration") {
@@ -49,6 +56,19 @@ tasks.register<Test>("integration") {
     group = "verification"
     testClassesDirs = sourceSets["integration"].output.classesDirs
     classpath = sourceSets["integration"].runtimeClasspath
+
+    useJUnitPlatform { }
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
+    }
+}
+
+tasks.register<Test>("unit") {
+    description = "Runs the unit tests"
+    group = "verification"
+    testClassesDirs = sourceSets["unit"].output.classesDirs
+    classpath = sourceSets["unit"].runtimeClasspath
 
     useJUnitPlatform { }
     testLogging {

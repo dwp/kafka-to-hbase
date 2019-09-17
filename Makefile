@@ -35,3 +35,7 @@ integration: ## Run the integration tests in a Docker container
 hbase-shell: ## Open an Hbase shell onto the running Hbase container
 	docker-compose run --rm hbase shell
 
+.PHONY: test
+integration: ## Run the unit tests
+	./gradlew --rerun-tasks unit
+
