@@ -1,11 +1,12 @@
-import org.bson.BsonDocument
 import java.util.logging.Logger
 import java.util.Base64
-import java.security.MessageDigest
-import javax.xml.bind.DatatypeConverter
+import java.util.zip.CRC32
+import java.nio.ByteBuffer
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.KlaxonException
+import com.beust.klaxon.lookup
+import java.text.SimpleDateFormat
 
 fun convertToJson(body: ByteArray): JsonObject {
     val log = Logger.getLogger("convertToJson")
@@ -26,16 +27,19 @@ fun convertToJson(body: ByteArray): JsonObject {
     }
 }
 
-fun convertToBson(input: JsonObject): BsonDocument {
-    return BsonDocument.parse(input.toJsonString())
+fun sortJsonByKey(unsortedJson: JsonObject): String {
+    val sortedEntries = unsortedJson.toSortedMap(compareBy<String> { it.toLowerCase() })
+    val sortedEntriesString = sortedEntries.entries.joinToString(",").replace("[", "").replace("]", "")
+    return sortedEntriesString
 }
 
-fun generateHash(type: String, input: String): String {
-    val bytes = MessageDigest
-            .getInstance(type)
-            .digest(input.toByteArray())
+fun generateFourByteChecksum(input: String): ByteArray {
+    val bytes = input.toByteArray()
+    val checksum = CRC32()
 
-    return DatatypeConverter.printHexBinary(bytes).toUpperCase()
+	checksum.update(bytes, 0, bytes.size)
+
+    return ByteBuffer.allocate(4).putInt(checksum.getValue().toInt()).array();
 }
 
 fun encodeToBase64(input: String): String {
@@ -45,4 +49,13 @@ fun encodeToBase64(input: String): String {
 fun decodeFromBase64(input: String): String {
     val decodedBytes: ByteArray = Base64.getDecoder().decode(input);
     return String(decodedBytes);
+}
+
+fun getTimestampAsLong(timeStampAsStr: String?, timeStampPattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ"): Long {
+    val df = SimpleDateFormat(timeStampPattern);
+    return df.parse(timeStampAsStr).time
+}
+
+fun getLastModifiedTimestamp(json: JsonObject): String? {
+    return json.lookup<String?>("message._lastModifiedDateTime").get(0)
 }

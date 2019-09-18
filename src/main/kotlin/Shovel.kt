@@ -1,12 +1,10 @@
-import com.fasterxml.jackson.module.kotlin.readValue
-import parser.JacksonObjectMapper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
-import model.Record
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
 import java.util.logging.Logger
+import com.beust.klaxon.JsonObject
 
 fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, pollTimeout: Duration) =
     GlobalScope.async {
@@ -17,9 +15,21 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
         while (isActive) {
             kafka.subscribe(Config.Kafka.topicRegex)
             val records = kafka.poll(pollTimeout)
+            var json: JsonObject
             for (record in records) {
-                val newKey: ByteArray = record.key() ?: ByteArray(0)
-                if (newKey.isEmpty()) {
+                try {
+                    json = convertToJson(record.value())
+                } catch (e: IllegalArgumentException) {
+                    log.warning("Could not parse message body, record will be skipped")
+                    continue
+                }
+
+                val id: ByteArray = getId(json)
+                val keyNew = generateKey(json)
+
+                val key = record.key()
+
+                if (key.isEmpty()) {
                     log.warning(
                         "Empty key was skipped for %s:%d:%d".format(
                             record.topic() ?: "null",
@@ -30,16 +40,16 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 }
 
                 try {
-                    val parsedRecord: Record = JacksonObjectMapper.instance.readValue(record.value())
+                    val lastModifiedTimestamp = getTimestampAsLong(getLastModifiedTimestamp(json))
                     hbase.putVersion(
                         topic = record.topic().toByteArray(),
                         key = record.key(),
                         body = record.value(),
-                        version = parsedRecord.message.lastModifiedDateTime //record.timestamp()
+                        version = lastModifiedTimestamp //record.timestamp()
                     )
                     log.info(
                         "Wrote key %s data %s:%d:%d".format(
-                            String(newKey),
+                            String(key),
                             record.topic() ?: "null",
                             record.partition(),
                             record.offset()
@@ -48,7 +58,7 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 } catch (e: Exception) {
                     log.severe(
                         "Error while writing key %s data %s:%d:%: %s".format(
-                            String(newKey),
+                            String(key),
                             record.topic() ?: "null",
                             record.partition(),
                             record.offset(),
@@ -60,3 +70,17 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
             }
         }
     }
+
+fun generateKey(json: JsonObject): ByteArray {
+    val log = Logger.getLogger("generateKey")
+    val jsonOrdered = sortJsonByKey(json)
+    val base64EncodedString: String = encodeToBase64(jsonOrdered)
+    val checksumBytes: ByteArray = generateFourByteChecksum(jsonOrdered)
+
+    return checksumBytes.plus(base64EncodedString.toByteArray())
+}
+
+fun getId(json: JsonObject): ByteArray {
+    val log = Logger.getLogger("generateKey")
+    return ByteArray(0)
+}
