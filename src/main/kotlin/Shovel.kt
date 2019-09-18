@@ -71,7 +71,7 @@ fun generateKey(body: ByteArray): ByteArray {
         val key_string: String = "%s%s".format(hash, bson.toString())
         return encodeToBase64(key_string).toByteArray()
     } catch (e: IllegalArgumentException) {
-        log.warning("Could not parse message body, so will skip record")
+        log.warning("Could not parse message body, record will be skipped")
         return ByteArray(0)
     }
 }
