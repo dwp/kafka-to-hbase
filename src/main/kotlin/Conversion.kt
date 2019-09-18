@@ -4,6 +4,7 @@ import java.security.MessageDigest
 import javax.xml.bind.DatatypeConverter
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.KlaxonException
 
 fun convertToJson(body: ByteArray): JsonObject {
     val log = Logger.getLogger("generateKey")
@@ -13,14 +14,14 @@ fun convertToJson(body: ByteArray): JsonObject {
         val stringBuilder: StringBuilder = StringBuilder(String(body))
         val json: JsonObject = parser.parse(stringBuilder) as JsonObject
         return json
-    } catch (e: Exception) {
+    } catch (e: KlaxonException) {
         log.severe(
             "Error while parsing message body of '%s' in to json: %s".format(
                 String(body),
                 e.toString()
             )
         )
-        throw e
+        throw IllegalArgumentException("Cannot parse invalid JSON")
     }
 }
 
