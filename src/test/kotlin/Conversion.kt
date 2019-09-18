@@ -6,6 +6,7 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
+import io.kotlintest.properties.assertAll
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.specs.StringSpec
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -48,7 +49,7 @@ class Conversion : StringSpec({
         val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
         val json: JsonObject = convertToJson(json_string.toByteArray())
 
-        val bson: BsonDocument = convertToBson(json)
+        val bson: BsonDocument = convertToBson(json.toJsonString())
 
         bson should beInstanceOf<BsonDocument>()
         bson.get("testOne") should beInstanceOf<BsonString>()
@@ -70,32 +71,6 @@ class Conversion : StringSpec({
         intTwo?.intValue() shouldBe 2
     }
 
-    "hash generation is consistent per type" {
-        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val hashOne = generateHash("md5", json_string)
-        val hashTwo = generateHash("md5", json_string)
-
-        hashOne shouldBe hashTwo
-    }
-
-    "hash generation is different with different types" {
-        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val hashOne = generateHash("md5", json_string)
-        val hashTwo = generateHash("sha-1", json_string)
-
-        hashOne shouldNotBe hashTwo
-    }
-
-    "can generate consistent hash from bson" {
-        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val json: JsonObject = convertToJson(json_string.toByteArray())
-        val bson: BsonDocument = convertToBson(json)
-        val hashOne = generateHash("sha-1", bson.toJson())
-        val hashTwo = generateHash("sha-1", bson.toJson())
-
-        hashOne shouldBe hashTwo
-    }
-
     "can generate consistent base64 encoded string" {
         val json_string_with_fake_hash = "82&%\$dsdsd{\"testOne\":\"test1\", \"testTwo\":2}"
         
@@ -112,5 +87,48 @@ class Conversion : StringSpec({
         val decodedString = decodeFromBase64(encodedString)
 
         decodedString shouldBe json_string_with_fake_hash
+    }
+
+    "sorts json by key name" {
+        val jsonStringUnsorted = "{\"testA\":\"test1\", \"testC\":2, \"testb\":true}"
+        val jsonObjectUnsorted: JsonObject = convertToJson(jsonStringUnsorted.toByteArray())
+        val jsonStringSorted = "testA=test1,testb=true,testC=2"
+
+        val sortedJson = sortJsonByKey(jsonObjectUnsorted)
+
+        sortedJson shouldBe jsonStringSorted
+    }
+
+    "hash generation is consistent per type" {
+        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
+        val hashOne = "1"
+        val hashTwo = "1"
+
+        hashOne shouldBe hashTwo
+    }
+
+    "hash generation is different with different types" {
+        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
+        val hashOne = "1"
+        val hashTwo = "2"
+
+        hashOne shouldNotBe hashTwo
+    }
+
+    "can generate consistent hash from bson" {
+        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
+        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val bson: BsonDocument = convertToBson(json.toJsonString())
+        val hashOne = "1"
+        val hashTwo = "1"
+
+        hashOne shouldBe hashTwo
+    }
+
+    "generated checksums are a single byte integer" {
+        assertAll({ input: String ->
+            val checksum = generateTwoByteChecksum(input)
+            checksum.size shouldBe 4
+        })
     }
 })

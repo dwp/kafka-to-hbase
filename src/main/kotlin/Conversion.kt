@@ -1,7 +1,9 @@
 import org.bson.BsonDocument
 import java.util.logging.Logger
 import java.util.Base64
-import java.security.MessageDigest
+import java.util.zip.CRC32
+import java.util.zip.Checksum
+import java.nio.ByteBuffer
 import javax.xml.bind.DatatypeConverter
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
@@ -26,16 +28,23 @@ fun convertToJson(body: ByteArray): JsonObject {
     }
 }
 
-fun convertToBson(input: JsonObject): BsonDocument {
-    return BsonDocument.parse(input.toJsonString())
+fun sortJsonByKey(unsortedJson: JsonObject): String {
+    val sortedEntries = unsortedJson.toSortedMap(compareBy<String> { it.toLowerCase() })
+    val sortedEntriesString = sortedEntries.entries.joinToString(",").replace("[", "").replace("]", "")
+    return sortedEntriesString
 }
 
-fun generateHash(type: String, input: String): String {
-    val bytes = MessageDigest
-            .getInstance(type)
-            .digest(input.toByteArray())
+fun convertToBson(text: String): BsonDocument {
+    return BsonDocument.parse(text)
+}
 
-    return DatatypeConverter.printHexBinary(bytes).toUpperCase()
+fun generateTwoByteChecksum(input: String): ByteArray {
+    val bytes = input.toByteArray()
+    val checksum = CRC32()
+
+	checksum.update(bytes, 0, bytes.size)
+
+    return ByteBuffer.allocate(4).putInt(checksum.getValue().toInt()).array();
 }
 
 fun encodeToBase64(input: String): String {
