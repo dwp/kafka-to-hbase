@@ -1,5 +1,6 @@
 import org.bson.BsonDocument
 import java.util.logging.Logger
+import java.util.Base64
 import java.security.MessageDigest
 import javax.xml.bind.DatatypeConverter
 import com.beust.klaxon.Parser
@@ -15,7 +16,7 @@ fun convertToJson(body: ByteArray): JsonObject {
         val json: JsonObject = parser.parse(stringBuilder) as JsonObject
         return json
     } catch (e: KlaxonException) {
-        log.severe(
+        log.warning(
             "Error while parsing message body of '%s' in to json: %s".format(
                 String(body),
                 e.toString()
@@ -33,5 +34,15 @@ fun generateHash(type: String, input: String): String {
     val bytes = MessageDigest
             .getInstance(type)
             .digest(input.toByteArray())
+
     return DatatypeConverter.printHexBinary(bytes).toUpperCase()
+}
+
+fun encodeToBase64(input: String): String {
+    return Base64.getEncoder().encodeToString(input.toByteArray());
+}
+
+fun decodeFromBase64(input: String): String {
+    val decodedBytes: ByteArray = Base64.getDecoder().decode(input);
+    return String(decodedBytes);
 }
