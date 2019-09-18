@@ -25,7 +25,9 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 }
 
                 val id: ByteArray = getId(json)
-                val key = generateKey(json)
+                val keyNew = generateKey(json)
+                
+                val key = record.key()
 
                 if (key.isEmpty()) {
                     log.warning(
