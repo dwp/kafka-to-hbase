@@ -7,7 +7,7 @@ import com.beust.klaxon.JsonObject
 import com.beust.klaxon.KlaxonException
 
 fun convertToJson(body: ByteArray): JsonObject {
-    val log = Logger.getLogger("generateKey")
+    val log = Logger.getLogger("convertToJson")
 
     try {
         val parser: Parser = Parser.default()
