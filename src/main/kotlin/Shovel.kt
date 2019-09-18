@@ -15,9 +15,17 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
         while (isActive) {
             kafka.subscribe(Config.Kafka.topicRegex)
             val records = kafka.poll(pollTimeout)
+            var json: JsonObject
             for (record in records) {
-                
-                val key = generateKey(record.value())
+                try {
+                    json = convertToJson(record.value())
+                } catch (e: IllegalArgumentException) {
+                    log.warning("Could not parse message body, record will be skipped") 
+                    continue
+                }
+
+                val id: ByteArray = getId(json)
+                val key = generateKey(json)
 
                 if (key.isEmpty()) {
                     log.warning(
@@ -60,23 +68,16 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
         }
     }
 
-fun generateKey(body: ByteArray): ByteArray {
+fun generateKey(json: JsonObject): ByteArray {
     val log = Logger.getLogger("generateKey")
-
-    try {
-        val json: JsonObject = convertToJson(body)
-        val jsonOrdered = sortJsonByKey(json)
-        val base64EncodedString: String = encodeToBase64(jsonOrdered)
-        val checksumBytes: ByteArray = generateFourByteChecksum(jsonOrdered)
-        
-        return checksumBytes.plus(base64EncodedString.toByteArray())
-    } catch (e: IllegalArgumentException) {
-        log.warning("Could not parse message body, record will be skipped") 
-        return ByteArray(0)
-    }
+    val jsonOrdered = sortJsonByKey(json)
+    val base64EncodedString: String = encodeToBase64(jsonOrdered)
+    val checksumBytes: ByteArray = generateFourByteChecksum(jsonOrdered)
+    
+    return checksumBytes.plus(base64EncodedString.toByteArray())
 }
 
-fun getIdFromBody(body: ByteArray) {
+fun getId(json: JsonObject): ByteArray {
     val log = Logger.getLogger("generateKey")
-    
+    return ByteArray(0)
 }
