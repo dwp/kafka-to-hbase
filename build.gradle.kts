@@ -45,7 +45,7 @@ sourceSets {
         runtimeClasspath += output + compileClasspath
     }
     create("unit") {
-        java.srcDir(file("src/unit/kotlin"))
+        java.srcDir(file("src/test/kotlin"))
         compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
         runtimeClasspath += output + compileClasspath
     }
