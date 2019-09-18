@@ -1,4 +1,3 @@
-import org.bson.BsonDocument
 import java.util.logging.Logger
 import java.util.Base64
 import java.util.zip.CRC32
@@ -32,10 +31,6 @@ fun sortJsonByKey(unsortedJson: JsonObject): String {
     val sortedEntries = unsortedJson.toSortedMap(compareBy<String> { it.toLowerCase() })
     val sortedEntriesString = sortedEntries.entries.joinToString(",").replace("[", "").replace("]", "")
     return sortedEntriesString
-}
-
-fun convertToBson(text: String): BsonDocument {
-    return BsonDocument.parse(text)
 }
 
 fun generateFourByteChecksum(input: String): ByteArray {

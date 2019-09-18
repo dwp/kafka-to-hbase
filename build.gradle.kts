@@ -20,7 +20,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.2")
     implementation("org.apache.hbase", "hbase-client", "1.4.9")
     implementation("org.apache.kafka", "kafka-clients", "2.3.0")
-    implementation("org.mongodb", "bson", "3.11.0")
     implementation("com.beust", "klaxon", "4.0.2")
     testImplementation("io.kotlintest", "kotlintest-runner-junit5", "3.3.2")
 }

@@ -1,7 +1,3 @@
-import org.bson.BsonDocument
-import org.bson.BsonValue
-import org.bson.BsonString
-import org.bson.BsonInt32
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
@@ -9,7 +5,6 @@ import io.kotlintest.shouldThrow
 import io.kotlintest.properties.assertAll
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.specs.StringSpec
-import org.apache.kafka.clients.producer.KafkaProducer
 import com.beust.klaxon.JsonObject
 
 class Conversion : StringSpec({
@@ -43,32 +38,6 @@ class Conversion : StringSpec({
         }
         
         exception.message shouldBe "Cannot parse invalid JSON"
-    }
-
-    "valid nested json converts to bson" {
-        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val json: JsonObject = convertToJson(json_string.toByteArray())
-
-        val bson: BsonDocument = convertToBson(json.toJsonString())
-
-        bson should beInstanceOf<BsonDocument>()
-        bson.get("testOne") should beInstanceOf<BsonString>()
-        bson.get("testTwo") should beInstanceOf<BsonInt32>()
-
-        val valueOne: BsonValue? = bson.get("testOne")
-        val valueTwo: BsonValue? = bson.get("testTwo")
-
-        valueOne shouldNotBe null
-        valueTwo shouldNotBe null
-
-        val stringOne: BsonString? = valueOne?.asString()
-        val intTwo: BsonInt32? = valueTwo?.asInt32()
-
-        stringOne shouldNotBe null
-        intTwo shouldNotBe null
-
-        stringOne?.getValue() shouldBe "test1"
-        intTwo?.intValue() shouldBe 2
     }
 
     "can generate consistent base64 encoded string" {
@@ -108,12 +77,11 @@ class Conversion : StringSpec({
         checksum shouldNotBe checksumTwo
     }
 
-    "can generate consistent checksums from bson" {
+    "can generate consistent checksums from json" {
         val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
         val json: JsonObject = convertToJson(json_string.toByteArray())
-        val bson: BsonDocument = convertToBson(json.toJsonString())
-        val checksumOne = generateFourByteChecksum(bson.toString())
-        val checksumTwo = generateFourByteChecksum(bson.toString())
+        val checksumOne = generateFourByteChecksum(json.toString())
+        val checksumTwo = generateFourByteChecksum(json.toString())
 
         checksumOne shouldBe checksumTwo
     }

@@ -5,7 +5,6 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
 import java.util.logging.Logger
 import com.beust.klaxon.JsonObject
-import org.bson.BsonDocument
 
 fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, pollTimeout: Duration) =
     GlobalScope.async {
@@ -67,13 +66,17 @@ fun generateKey(body: ByteArray): ByteArray {
     try {
         val json: JsonObject = convertToJson(body)
         val jsonOrdered = sortJsonByKey(json)
-        val bson: BsonDocument = convertToBson(jsonOrdered)
-        val checksumBytes: ByteArray = generateFourByteChecksum(bson.toString())
-        val base64EncodedString: String = encodeToBase64(bson.toString())
+        val base64EncodedString: String = encodeToBase64(jsonOrdered)
+        val checksumBytes: ByteArray = generateFourByteChecksum(jsonOrdered)
         
         return checksumBytes.plus(base64EncodedString.toByteArray())
     } catch (e: IllegalArgumentException) {
         log.warning("Could not parse message body, record will be skipped") 
         return ByteArray(0)
     }
+}
+
+fun getIdFromBody(body: ByteArray) {
+    val log = Logger.getLogger("generateKey")
+    
 }
