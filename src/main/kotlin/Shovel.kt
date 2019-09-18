@@ -1,6 +1,9 @@
+import com.fasterxml.jackson.module.kotlin.readValue
+import parser.JacksonObjectMapper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.isActive
+import model.Record
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
 import java.util.logging.Logger
@@ -15,7 +18,6 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
             kafka.subscribe(Config.Kafka.topicRegex)
             val records = kafka.poll(pollTimeout)
             for (record in records) {
-
                 val newKey: ByteArray = record.key() ?: ByteArray(0)
                 if (newKey.isEmpty()) {
                     log.warning(
@@ -28,11 +30,12 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 }
 
                 try {
+                    val parsedRecord: Record = JacksonObjectMapper.instance.readValue(record.value())
                     hbase.putVersion(
                         topic = record.topic().toByteArray(),
                         key = record.key(),
                         body = record.value(),
-                        version = record.timestamp()
+                        version = parsedRecord.message.lastModifiedDateTime //record.timestamp()
                     )
                     log.info(
                         "Wrote key %s data %s:%d:%d".format(

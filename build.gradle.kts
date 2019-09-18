@@ -23,6 +23,7 @@ dependencies {
     implementation("org.mongodb", "bson", "3.11.0")
     implementation("com.beust", "klaxon", "4.0.2")
     testImplementation("io.kotlintest", "kotlintest-runner-junit5", "3.3.2")
+    implementation("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.9.8")
 }
 
 tasks.withType<Test> {
