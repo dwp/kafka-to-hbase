@@ -99,35 +99,28 @@ class Conversion : StringSpec({
         sortedJson shouldBe jsonStringSorted
     }
 
-    "hash generation is consistent per type" {
-        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val hashOne = "1"
-        val hashTwo = "1"
+    "checksums are different with different inputs" {
+        val jsonStringOne = "{\"testOne\":\"test1\", \"testTwo\":2}"
+        val jsonStringTwo = "{\"testOne\":\"test2\", \"testTwo\":2}"
+        val checksum = generateFourByteChecksum(jsonStringOne)
+        val checksumTwo = generateFourByteChecksum(jsonStringTwo)
 
-        hashOne shouldBe hashTwo
+        checksum shouldNotBe checksumTwo
     }
 
-    "hash generation is different with different types" {
-        val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val hashOne = "1"
-        val hashTwo = "2"
-
-        hashOne shouldNotBe hashTwo
-    }
-
-    "can generate consistent hash from bson" {
+    "can generate consistent checksums from bson" {
         val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
         val json: JsonObject = convertToJson(json_string.toByteArray())
         val bson: BsonDocument = convertToBson(json.toJsonString())
-        val hashOne = "1"
-        val hashTwo = "1"
+        val checksumOne = generateFourByteChecksum(bson.toString())
+        val checksumTwo = generateFourByteChecksum(bson.toString())
 
-        hashOne shouldBe hashTwo
+        checksumOne shouldBe checksumTwo
     }
 
-    "generated checksums are a single byte integer" {
+    "generated checksums are four bytes" {
         assertAll({ input: String ->
-            val checksum = generateTwoByteChecksum(input)
+            val checksum = generateFourByteChecksum(input)
             checksum.size shouldBe 4
         })
     }

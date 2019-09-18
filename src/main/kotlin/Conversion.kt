@@ -38,7 +38,7 @@ fun convertToBson(text: String): BsonDocument {
     return BsonDocument.parse(text)
 }
 
-fun generateTwoByteChecksum(input: String): ByteArray {
+fun generateFourByteChecksum(input: String): ByteArray {
     val bytes = input.toByteArray()
     val checksum = CRC32()
 
