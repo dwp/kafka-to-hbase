@@ -7,6 +7,9 @@ import javax.xml.bind.DatatypeConverter
 import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.KlaxonException
+import com.beust.klaxon.lookup
+import java.lang.RuntimeException
+import java.text.SimpleDateFormat
 
 fun convertToJson(body: ByteArray): JsonObject {
     val log = Logger.getLogger("convertToJson")
@@ -49,4 +52,15 @@ fun encodeToBase64(input: String): String {
 fun decodeFromBase64(input: String): String {
     val decodedBytes: ByteArray = Base64.getDecoder().decode(input);
     return String(decodedBytes);
+}
+
+fun getTimestampAsLong(timeStampAsStr: String?, timeStampPattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ"): Long {
+    val df = SimpleDateFormat(timeStampPattern);
+    return df.parse(timeStampAsStr).time
+}
+
+fun getLastModifiedTimestamp(json: JsonObject): String? {
+    val lastModifiedTimestampStr = json.lookup<String?>("message._lastModifiedDateTime").get(0)
+    if (lastModifiedTimestampStr.isNullOrBlank()) throw RuntimeException("Last modified date time is null or blank")
+    return lastModifiedTimestampStr
 }

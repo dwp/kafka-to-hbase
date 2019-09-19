@@ -9,7 +9,7 @@ class RecordProcessor() {
         try {
             json = convertToJson(record.value())
         } catch (e: IllegalArgumentException) {
-            log.warning("Could not parse message body, record will be skipped") 
+            log.warning("Could not parse message body, record will be skipped")
             return
         }
 
@@ -26,11 +26,13 @@ class RecordProcessor() {
         }
 
         try {
+            val lastModifiedTimestampStr = getLastModifiedTimestamp(json)
+            val lastModifiedTimestampLong = getTimestampAsLong(lastModifiedTimestampStr)
             hbase.putVersion(
                 topic = record.topic().toByteArray(),
                 key = formattedKey,
                 body = record.value(),
-                version = record.timestamp()
+                version = lastModifiedTimestampLong
             )
             log.info(
                 "Wrote key %s data %s:%d:%d".format(
