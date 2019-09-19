@@ -59,7 +59,7 @@ tasks.register<Test>("integration") {
     useJUnitPlatform { }
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
-        events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
+        events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT)
     }
 }
 

@@ -67,17 +67,6 @@ class HbaseClient(
         }
     }
 
-    fun getCellInTimestampsRange(topic: ByteArray, key: ByteArray, timestampMin: Long = 0, timestampMax: Long = TimeRange.INITIAL_MAX_TIMESTAMP): ByteArray? {
-        connection.getTable(TableName.valueOf(dataTable)).use { table ->
-            val result = table.get(Get(key).apply {
-                setTimeRange(timestampMin, timestampMax)
-            })
-
-            return result.getValue(dataFamily, topic)
-        }
-
-    }
-
     fun getCount(key: ByteArray): Long {
         connection.getTable(TableName.valueOf(topicTable)).use { table ->
             val result = table.get(Get(key).apply {

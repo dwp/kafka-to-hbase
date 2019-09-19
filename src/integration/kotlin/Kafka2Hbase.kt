@@ -15,10 +15,13 @@ class Kafka2Hbase : StringSpec({
 
         val body = uniqueBytes()
         val timestamp = getTimestampAsLong(getISO8601Timestamp())
-        val key = uniqueBytes()
+        val key = "key1".toByteArray()
         producer.sendRecord(topic, key, body, timestamp)
 
-        val storedValue = waitFor { hbase.getCellInTimestampsRange(topic, key,0,timestamp) }
+        Thread.sleep(100)
+        val referenceTimestamp = getTimestampAsLong(getISO8601Timestamp())
+
+        val storedValue = waitFor { hbase.getCellBeforeTimestamp(topic, key, referenceTimestamp) }
         storedValue shouldBe body
 
         val counter = waitFor { hbase.getCount(topic) }
@@ -29,35 +32,38 @@ class Kafka2Hbase : StringSpec({
         val topic = uniqueTopicName()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
-        val body = uniqueBytes()
-        val timestamp = getTimestampAsLong(getISO8601Timestamp())
-        val key = uniqueBytes()
-        hbase.putVersion(topic, key, body, timestamp)
+        val body1 = uniqueBytes()
+        val kafkaTimestamp1 = getTimestampAsLong(getISO8601Timestamp())
+        val key = "key2".toByteArray()
+        hbase.putVersion(topic, key, body1, kafkaTimestamp1)
 
-        val newBody = uniqueBytes()
-        val newTimestamp = getTimestampAsLong(getISO8601Timestamp())
-        producer.sendRecord(topic, key, newBody, newTimestamp)
+        Thread.sleep(100)
+        val referenceTimestamp = getTimestampAsLong(getISO8601Timestamp())
 
-        val storedNewValue = waitFor { hbase.getCellInTimestampsRange(topic, key, timestamp, newTimestamp) }
-        storedNewValue shouldBe newBody
+        val body2 = uniqueBytes()
+        val kafkaTimestamp2 = getTimestampAsLong(getISO8601Timestamp())
+        producer.sendRecord(topic, key, body2, kafkaTimestamp2)
 
-        val storedPreviousValue = waitFor { hbase.getCellInTimestampsRange(topic, key, 0,timestamp) }
-        storedPreviousValue shouldBe body
+        println("Looking between timestamps $kafkaTimestamp1 and $kafkaTimestamp2")
+        val storedNewValue = waitFor { hbase.getCellAfterTimestamp(topic, key, referenceTimestamp) }
+        storedNewValue shouldBe body2
+
+        val storedPreviousValue = waitFor { hbase.getCellBeforeTimestamp(topic, key, referenceTimestamp) }
+        storedPreviousValue shouldBe body1
 
         val counter = waitFor { hbase.getCount(topic) }
         counter shouldBe startingCounter + 2
     }
 
     "messages with empty key are skipped" {
-        val topic = uniqueTopicName()
-        val startingCounter = waitFor { hbase.getCount(topic) }
+         val topic = uniqueTopicName()
+         val startingCounter = waitFor { hbase.getCount(topic) }
 
-        val body = uniqueBytes()
-        val timestamp = timestamp()
-        producer.sendRecord(topic, ByteArray(0), body, timestamp)
+         val body = uniqueBytes()
+         val timestamp = timestamp()
+         producer.sendRecord(topic, ByteArray(0), body, timestamp)
 
-        val counter = waitFor { hbase.getCount(topic) }
-        counter shouldBe startingCounter
-    }
-
+         val counter = waitFor { hbase.getCount(topic) }
+         counter shouldBe startingCounter
+     }
 })
