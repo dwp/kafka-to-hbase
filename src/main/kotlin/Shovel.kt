@@ -40,12 +40,13 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
                 }
 
                 try {
-                    val lastModifiedTimestamp = getTimestampAsLong(getLastModifiedTimestamp(json))
+                    val lastModifiedTimestampStr = getLastModifiedTimestamp(json)
+                    val lastModifiedTimestampLong = getTimestampAsLong(lastModifiedTimestampStr)
                     hbase.putVersion(
                         topic = record.topic().toByteArray(),
                         key = record.key(),
                         body = record.value(),
-                        version = lastModifiedTimestamp //record.timestamp()
+                        version = lastModifiedTimestampLong //record.timestamp()
                     )
                     log.info(
                         "Wrote key %s data %s:%d:%d".format(
