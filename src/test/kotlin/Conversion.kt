@@ -13,10 +13,12 @@ import java.util.*
 
 class Conversion : StringSpec({
     configureLogging()
+    
+    val convertor = Convertor()
 
     "valid input converts to json" {
         val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
 
         json should beInstanceOf<JsonObject>()
         json.string("testOne") shouldBe "test1"
@@ -25,7 +27,7 @@ class Conversion : StringSpec({
 
     "valid nested input converts to json" {
         val json_string = "{\"testOne\":{\"testTwo\":2}}"
-        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
         val json_two: JsonObject = json.obj("testOne") as JsonObject
 
         json should beInstanceOf<JsonObject>()
@@ -36,33 +38,33 @@ class Conversion : StringSpec({
         val json_string = "{\"testOne\":"
 
         val exception = shouldThrow<IllegalArgumentException> {
-            convertToJson(json_string.toByteArray())
+            convertor.convertToJson(json_string.toByteArray())
         }
         exception.message shouldBe "Cannot parse invalid JSON"
     }
 
     "can generate consistent base64 encoded string" {
         val json_string_with_fake_hash = "82&%\$dsdsd{\"testOne\":\"test1\", \"testTwo\":2}"
-        val encodedStringOne = encodeToBase64(json_string_with_fake_hash)
-        val encodedStringTwo = encodeToBase64(json_string_with_fake_hash)
+        val encodedStringOne = convertor.encodeToBase64(json_string_with_fake_hash)
+        val encodedStringTwo = convertor.encodeToBase64(json_string_with_fake_hash)
 
         encodedStringOne shouldBe encodedStringTwo
     }
 
     "can encode and decode string with base64" {
         val json_string_with_fake_hash = "82&%\$dsdsd{\"testOne\":\"test1\", \"testTwo\":2}"
-        val encodedString = encodeToBase64(json_string_with_fake_hash)
-        val decodedString = decodeFromBase64(encodedString)
+        val encodedString = convertor.encodeToBase64(json_string_with_fake_hash)
+        val decodedString = convertor.decodeFromBase64(encodedString)
 
         decodedString shouldBe json_string_with_fake_hash
     }
 
     "sorts json by key name" {
         val jsonStringUnsorted = "{\"testA\":\"test1\", \"testC\":2, \"testb\":true}"
-        val jsonObjectUnsorted: JsonObject = convertToJson(jsonStringUnsorted.toByteArray())
+        val jsonObjectUnsorted: JsonObject = convertor.convertToJson(jsonStringUnsorted.toByteArray())
         val jsonStringSorted = "testA=test1,testb=true,testC=2"
 
-        val sortedJson = sortJsonByKey(jsonObjectUnsorted)
+        val sortedJson = convertor.sortJsonByKey(jsonObjectUnsorted)
 
         sortedJson shouldBe jsonStringSorted
     }
@@ -70,24 +72,24 @@ class Conversion : StringSpec({
     "checksums are different with different inputs" {
         val jsonStringOne = "{\"testOne\":\"test1\", \"testTwo\":2}"
         val jsonStringTwo = "{\"testOne\":\"test2\", \"testTwo\":2}"
-        val checksum = generateFourByteChecksum(jsonStringOne)
-        val checksumTwo = generateFourByteChecksum(jsonStringTwo)
+        val checksum = convertor.generateFourByteChecksum(jsonStringOne)
+        val checksumTwo = convertor.generateFourByteChecksum(jsonStringTwo)
 
         checksum shouldNotBe checksumTwo
     }
 
     "can generate consistent checksums from json" {
         val json_string = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val json: JsonObject = convertToJson(json_string.toByteArray())
-        val checksumOne = generateFourByteChecksum(json.toString())
-        val checksumTwo = generateFourByteChecksum(json.toString())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
+        val checksumOne = convertor.generateFourByteChecksum(json.toString())
+        val checksumTwo = convertor.generateFourByteChecksum(json.toString())
 
         checksumOne shouldBe checksumTwo
     }
 
     "generated checksums are four bytes" {
         assertAll({ input: String ->
-            val checksum = generateFourByteChecksum(input)
+            val checksum = convertor.generateFourByteChecksum(input)
             checksum.size shouldBe 4
         })
     }
@@ -117,9 +119,9 @@ class Conversion : StringSpec({
             "        }\n" +
             "    }"
 
-        val json: JsonObject = convertToJson(json_string.toByteArray())
-        val timestamp = getLastModifiedTimestamp(json)
-        val timeStampAsLong = getTimestampAsLong(timestamp)
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
+        val timestamp = convertor.getLastModifiedTimestamp(json)
+        val timeStampAsLong = convertor.getTimestampAsLong(timestamp)
         timestamp shouldBe "2018-12-14T15:01:02.000+0000"
         timeStampAsLong shouldBe 1544799662000
     }
@@ -131,11 +133,11 @@ class Conversion : StringSpec({
             "        }\n" +
             "    }"
 
-        val json: JsonObject = convertToJson(json_string.toByteArray())
-        val timestamp = getLastModifiedTimestamp(json)
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
+        val timestamp = convertor.getLastModifiedTimestamp(json)
         timestamp shouldBe "2018-12-14"
         shouldThrow<ParseException> {
-            getTimestampAsLong(timestamp)
+            convertor.getTimestampAsLong(timestamp)
         }
     }
 
@@ -146,10 +148,10 @@ class Conversion : StringSpec({
             "        }\n" +
             "    }"
 
-        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
         shouldThrow<RuntimeException> {
-            val lastModifiedTimestamp = getLastModifiedTimestamp(json)
-            getTimestampAsLong(lastModifiedTimestamp)
+            val lastModifiedTimestamp = convertor.getLastModifiedTimestamp(json)
+            convertor.getTimestampAsLong(lastModifiedTimestamp)
         }
     }
 
@@ -160,10 +162,10 @@ class Conversion : StringSpec({
             "        }\n" +
             "    }"
 
-        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
         shouldThrow<RuntimeException> {
-            val lastModifiedTimestamp = getLastModifiedTimestamp(json)
-            getTimestampAsLong(lastModifiedTimestamp)
+            val lastModifiedTimestamp = convertor.getLastModifiedTimestamp(json)
+            convertor.getTimestampAsLong(lastModifiedTimestamp)
         }
     }
 
@@ -174,10 +176,10 @@ class Conversion : StringSpec({
             "        }\n" +
             "    }"
 
-        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
         shouldThrow<RuntimeException> {
-            val lastModifiedTimestamp = getLastModifiedTimestamp(json)
-            getTimestampAsLong(lastModifiedTimestamp)
+            val lastModifiedTimestamp = convertor.getLastModifiedTimestamp(json)
+            convertor.getTimestampAsLong(lastModifiedTimestamp)
         }
     }
 
@@ -188,10 +190,10 @@ class Conversion : StringSpec({
             "        }\n" +
             "    }"
 
-        val json: JsonObject = convertToJson(json_string.toByteArray())
+        val json: JsonObject = convertor.convertToJson(json_string.toByteArray())
         shouldThrow<RuntimeException> {
-            val lastModifiedTimestamp = getLastModifiedTimestamp(json)
-            getTimestampAsLong(lastModifiedTimestamp)
+            val lastModifiedTimestamp = convertor.getLastModifiedTimestamp(json)
+            convertor.getTimestampAsLong(lastModifiedTimestamp)
         }
     }
 

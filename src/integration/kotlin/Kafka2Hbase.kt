@@ -8,18 +8,20 @@ class Kafka2Hbase : StringSpec({
 
     val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.props)
     val hbase = HbaseClient.connect()
+    val parser = MessageParser()
+    val convertor = Convertor()
 
     "messages with new identifiers are written to hbase" {
         val topic = uniqueTopicName()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
         val body = uniqueBytes()
-        val timestamp = getTimestampAsLong(getISO8601Timestamp())
-        val key = "key1".toByteArray()
-        producer.sendRecord(topic, key, body, timestamp)
+        val timestamp = convertor.getTimestampAsLong(getISO8601Timestamp())
+        val key = parser.generateKey(convertor.convertToJson(getId()))
+        producer.sendRecord(topic, "key1".toByteArray(), body, timestamp)
 
         Thread.sleep(100)
-        val referenceTimestamp = getTimestampAsLong(getISO8601Timestamp())
+        val referenceTimestamp = convertor.getTimestampAsLong(getISO8601Timestamp())
 
         val storedValue = waitFor { hbase.getCellBeforeTimestamp(topic, key, referenceTimestamp) }
         storedValue shouldBe body
@@ -33,15 +35,15 @@ class Kafka2Hbase : StringSpec({
         val startingCounter = waitFor { hbase.getCount(topic) }
 
         val body1 = uniqueBytes()
-        val kafkaTimestamp1 = getTimestampAsLong(getISO8601Timestamp())
-        val key = "key2".toByteArray()
-        hbase.putVersion(topic, key, body1, kafkaTimestamp1)
+        val kafkaTimestamp1 = convertor.getTimestampAsLong(getISO8601Timestamp())
+        val key = parser.generateKey(convertor.convertToJson(getId()))
+        hbase.putVersion(topic, "key2".toByteArray(), body1, kafkaTimestamp1)
 
         Thread.sleep(100)
-        val referenceTimestamp = getTimestampAsLong(getISO8601Timestamp())
+        val referenceTimestamp = convertor.getTimestampAsLong(getISO8601Timestamp())
 
         val body2 = uniqueBytes()
-        val kafkaTimestamp2 = getTimestampAsLong(getISO8601Timestamp())
+        val kafkaTimestamp2 = convertor.getTimestampAsLong(getISO8601Timestamp())
         producer.sendRecord(topic, key, body2, kafkaTimestamp2)
 
         val storedNewValue = waitFor { hbase.getCellAfterTimestamp(topic, key, referenceTimestamp) }
@@ -54,13 +56,13 @@ class Kafka2Hbase : StringSpec({
         counter shouldBe startingCounter + 2
     }
 
-    "messages with empty key are skipped" {
+    "messages with empty id are skipped" {
         val topic = uniqueTopicName()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
-        val body = uniqueBytes()
+        val body = uniqueBytesNoId()
         val timestamp = timestamp()
-        producer.sendRecord(topic, ByteArray(0), body, timestamp)
+        producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
 
         val counter = waitFor { hbase.getCount(topic) }
         counter shouldBe startingCounter
