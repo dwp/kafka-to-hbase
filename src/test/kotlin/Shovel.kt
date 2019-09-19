@@ -8,7 +8,7 @@ class Shovel : StringSpec({
 
     "generated key is consistent for identical inputs" {
         val json: JsonObject = convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
-        
+
         val keyOne: ByteArray = generateKey(json)
         val keyTwo: ByteArray = generateKey(json)
 
@@ -18,7 +18,7 @@ class Shovel : StringSpec({
     "generated keys are different for different inputs" {
         val jsonOne: JsonObject = convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertToJson("{\"testOne\":\"test1\", \"testTwo\":3}".toByteArray())
-        
+
         val keyOne: ByteArray = generateKey(jsonOne)
         val keyTwo: ByteArray = generateKey(jsonTwo)
 
@@ -28,7 +28,7 @@ class Shovel : StringSpec({
     "generated key is consistent for identical inputs regardless of order" {
         val jsonOne: JsonObject = convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertToJson("{\"testTwo\":2, \"testOne\":\"test1\"}".toByteArray())
-        
+
         val keyOne: ByteArray = generateKey(jsonOne)
         val keyTwo: ByteArray = generateKey(jsonTwo)
 
@@ -38,7 +38,7 @@ class Shovel : StringSpec({
     "generated key is consistent for identical inputs regardless of whitespace" {
         val jsonOne: JsonObject = convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertToJson("{    \"testOne\":              \"test1\",            \"testTwo\":  2}".toByteArray())
-        
+
         val keyOne: ByteArray = generateKey(jsonOne)
         val keyTwo: ByteArray = generateKey(jsonTwo)
 
@@ -48,7 +48,7 @@ class Shovel : StringSpec({
     "generated key is consistent for identical inputs regardless of order and whitespace" {
         val jsonOne: JsonObject = convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertToJson("{    \"testTwo\":              2,            \"testOne\":  \"test1\"}".toByteArray())
-        
+
         val keyOne: ByteArray = generateKey(jsonOne)
         val keyTwo: ByteArray = generateKey(jsonTwo)
 

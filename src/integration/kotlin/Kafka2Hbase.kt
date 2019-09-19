@@ -44,7 +44,6 @@ class Kafka2Hbase : StringSpec({
         val kafkaTimestamp2 = getTimestampAsLong(getISO8601Timestamp())
         producer.sendRecord(topic, key, body2, kafkaTimestamp2)
 
-        println("Looking between timestamps $kafkaTimestamp1 and $kafkaTimestamp2")
         val storedNewValue = waitFor { hbase.getCellAfterTimestamp(topic, key, referenceTimestamp) }
         storedNewValue shouldBe body2
 
@@ -56,14 +55,14 @@ class Kafka2Hbase : StringSpec({
     }
 
     "messages with empty key are skipped" {
-         val topic = uniqueTopicName()
-         val startingCounter = waitFor { hbase.getCount(topic) }
+        val topic = uniqueTopicName()
+        val startingCounter = waitFor { hbase.getCount(topic) }
 
-         val body = uniqueBytes()
-         val timestamp = timestamp()
-         producer.sendRecord(topic, ByteArray(0), body, timestamp)
+        val body = uniqueBytes()
+        val timestamp = timestamp()
+        producer.sendRecord(topic, ByteArray(0), body, timestamp)
 
-         val counter = waitFor { hbase.getCount(topic) }
-         counter shouldBe startingCounter
-     }
+        val counter = waitFor { hbase.getCount(topic) }
+        counter shouldBe startingCounter
+    }
 })
