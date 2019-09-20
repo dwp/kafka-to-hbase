@@ -9,8 +9,8 @@ import com.beust.klaxon.lookup
 import java.lang.RuntimeException
 import java.text.SimpleDateFormat
 
-class Convertor() {
-    val log = Logger.getLogger("Convertor")
+class Converter() {
+    private val log: Logger = Logger.getLogger("Converter")
 
     fun convertToJson(body: ByteArray): JsonObject {
 

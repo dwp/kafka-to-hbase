@@ -6,7 +6,7 @@ import com.beust.klaxon.JsonObject
 class MessageParserTest : StringSpec({
     configureLogging()
 
-    val convertor = Convertor()
+    val convertor = Converter()
 
     "generated keys are consistent for identical inputs" {
         val parser = MessageParser()

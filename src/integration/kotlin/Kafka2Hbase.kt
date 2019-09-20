@@ -10,7 +10,7 @@ class Kafka2Hbase : StringSpec({
     val hbase = HbaseClient.connect()
 
     val parser = MessageParser()
-    val convertor = Convertor()
+    val convertor = Converter()
 
     "messages with new identifiers are written to hbase" {
         val topic = uniqueTopicName()

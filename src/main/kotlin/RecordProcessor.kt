@@ -5,10 +5,10 @@ import com.beust.klaxon.JsonObject
 class RecordProcessor() {
     fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
         var json: JsonObject
-        val convertor = Convertor()
+        val converter = Converter()
 
         try {
-            json = convertor.convertToJson(record.value())
+            json = converter.convertToJson(record.value())
         } catch (e: IllegalArgumentException) {
             log.warning("Could not parse message body for record with data of %s".format(
                     getDataStringForRecord(record)
@@ -28,8 +28,8 @@ class RecordProcessor() {
         }
 
         try {
-            val lastModifiedTimestampStr = convertor.getLastModifiedTimestamp(json)
-            val lastModifiedTimestampLong = convertor.getTimestampAsLong(lastModifiedTimestampStr)
+            val lastModifiedTimestampStr = converter.getLastModifiedTimestamp(json)
+            val lastModifiedTimestampLong = converter.getTimestampAsLong(lastModifiedTimestampStr)
             hbase.putVersion(
                 topic = record.topic().toByteArray(),
                 key = formattedKey,
