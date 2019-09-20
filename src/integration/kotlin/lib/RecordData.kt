@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-val idString = "{\n" +
+const val idString = "{\n" +
         "                \"exampleId\": \"aaaa1111-abcd-4567-1234-1234567890ab\"\n" +
         "            }"
 
@@ -15,7 +15,7 @@ fun getId(): String {
 }
 
 fun uniqueBytes(): ByteArray {
-    val json_string = "{\n" +
+    val jsonString = "{\n" +
         "        \"traceId\": \"00001111-abcd-4567-1234-1234567890ab\",\n" +
         "        \"unitOfWorkId\": \"00002222-abcd-4567-1234-1234567890ab\",\n" +
         "        \"@type\": \"V4\",\n" +
@@ -37,11 +37,11 @@ fun uniqueBytes(): ByteArray {
         "        }\n" +
         "    }"
 
-    return json_string.toByteArray()
+    return jsonString.toByteArray()
 }
 
 fun uniqueBytesNoId(): ByteArray {
-    val json_string = "{\n" +
+    val jsonString = "{\n" +
         "        \"traceId\": \"00001111-abcd-4567-1234-1234567890ab\",\n" +
         "        \"unitOfWorkId\": \"00002222-abcd-4567-1234-1234567890ab\",\n" +
         "        \"@type\": \"V4\",\n" +
@@ -63,7 +63,7 @@ fun uniqueBytesNoId(): ByteArray {
         "        }\n" +
         "    }"
 
-    return json_string.toByteArray()
+    return jsonString.toByteArray()
 }
 
 fun getISO8601Timestamp(): String {
