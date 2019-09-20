@@ -76,7 +76,7 @@ class MessageParserTest : StringSpec({
     "generated keys will vary given values with different types" {
         val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
-        val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test 1\", \"testTwo\":\"2\"}".toByteArray())
+        val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2\"}".toByteArray())
         
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)

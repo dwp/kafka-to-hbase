@@ -33,7 +33,6 @@ class Convertor() {
     fun sortJsonByKey(unsortedJson: JsonObject): String {
         val sortedEntries = unsortedJson.toSortedMap(compareBy<String> { it })
         val json: JsonObject = JsonObject(sortedEntries)
-        val sortedEntriesString = sortedEntries.entries.joinToString(",").replace("[", "").replace("]", "")
         
         return json.toJsonString()
     }
