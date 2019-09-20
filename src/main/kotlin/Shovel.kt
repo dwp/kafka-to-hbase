@@ -18,7 +18,6 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
         while (isActive) {
             kafka.subscribe(Config.Kafka.topicRegex)
             val records = kafka.poll(pollTimeout)
-            var json: JsonObject
             for (record in records) {
                 processor.processRecord(record, hbase, parser, log)
             }

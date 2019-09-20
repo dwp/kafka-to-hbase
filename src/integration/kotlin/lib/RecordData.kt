@@ -10,8 +10,8 @@ val idString = "{\n" +
         "                \"exampleId\": \"aaaa1111-abcd-4567-1234-1234567890ab\"\n" +
         "            }"
 
-fun getId(): ByteArray {
-    return idString.toByteArray()
+fun getId(): String {
+    return idString
 }
 
 fun uniqueBytes(): ByteArray {
@@ -25,7 +25,7 @@ fun uniqueBytes(): ByteArray {
         "            \"@type\": \"MONGO_UPDATE\",\n" +
         "            \"collection\": \"exampleCollectionName\",\n" +
         "            \"db\": \"exampleDbName\",\n" +
-        "            \"_id\": ${idString},\n" +
+        "            \"_id\": ${getId()},\n" +
         "            \"_lastModifiedDateTime\": \"${getISO8601Timestamp()} \",\n" +
         "            \"encryption\": {\n" +
         "                \"encryptionKeyId\": \"55556666-abcd-89ab-1234-1234567890ab\",\n" +
@@ -51,7 +51,7 @@ fun uniqueBytesNoId(): ByteArray {
         "            \"@type\": \"MONGO_UPDATE\",\n" +
         "            \"collection\": \"exampleCollectionName\",\n" +
         "            \"db\": \"exampleDbName\",\n" +
-        "            \"id\": ${idString},\n" +
+        "            \"id\": ${getId()},\n" +
         "            \"_lastModifiedDateTime\": \"${getISO8601Timestamp()} \",\n" +
         "            \"encryption\": {\n" +
         "                \"encryptionKeyId\": \"55556666-abcd-89ab-1234-1234567890ab\",\n" +
