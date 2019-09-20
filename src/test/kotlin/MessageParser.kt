@@ -15,7 +15,7 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(json)
         val keyTwo: ByteArray = parser.generateKey(json)
 
-        keyOne shouldBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe true
     }
 
     "generated keys are different for different inputs" {
@@ -26,7 +26,7 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
 
-        keyOne shouldNotBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe false
     }
 
     "generated keys are consistent for identical inputs regardless of order" {
@@ -37,7 +37,7 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
 
-        keyOne shouldBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe true
     }
 
     "generated keys are consistent for identical inputs regardless of whitespace" {
@@ -48,7 +48,7 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
 
-        keyOne shouldBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe true
     }
 
     "generated keys are consistent for identical inputs regardless of order and whitespace" {
@@ -59,7 +59,7 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
 
-        keyOne shouldBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe true
     }
 
     "generated keys will vary given values with different whitespace" {
@@ -70,10 +70,10 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
 
-        keyOne shouldNotBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe false
     }
 
-    "generated keys will vary given values with different types" {
+    "generated keys will not vary given values with different types" {
         val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2\"}".toByteArray())
@@ -81,7 +81,7 @@ class MessageParserTest : StringSpec({
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
 
-        keyOne shouldNotBe keyTwo
+        keyOne.contentEquals(keyTwo) shouldBe true
     }
 
     "id is returned from valid json" {
