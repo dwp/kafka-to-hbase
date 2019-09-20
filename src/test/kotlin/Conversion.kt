@@ -9,6 +9,7 @@ import com.beust.klaxon.JsonObject
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import io.kotlintest.fail
 
 
 class Conversion : StringSpec({
@@ -62,7 +63,7 @@ class Conversion : StringSpec({
     "sorts json by key name" {
         val jsonStringUnsorted = "{\"testA\":\"test1\", \"testC\":2, \"testB\":true}"
         val jsonObjectUnsorted: JsonObject = convertor.convertToJson(jsonStringUnsorted.toByteArray())
-        val jsonStringSorted = "testA=test1,testB=true,testC=2"
+        val jsonStringSorted = "{\"testA\":\"test1\",\"testB\":true,\"testC\":2}"
 
         val sortedJson = convertor.sortJsonByKey(jsonObjectUnsorted)
 
@@ -72,7 +73,7 @@ class Conversion : StringSpec({
     "sorts json by key name case sensitively" {
         val jsonStringUnsorted = "{\"testb\":true, \"testA\":\"test1\", \"testC\":2}"
         val jsonObjectUnsorted: JsonObject = convertor.convertToJson(jsonStringUnsorted.toByteArray())
-        val jsonStringSorted = "testA=test1,testC=2,testb=true"
+        val jsonStringSorted = "{\"testA\":\"test1\",\"testC\":2,\"testb\":true}"
 
         val sortedJson = convertor.sortJsonByKey(jsonObjectUnsorted)
 
