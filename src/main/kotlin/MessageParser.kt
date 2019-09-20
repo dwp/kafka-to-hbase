@@ -23,9 +23,8 @@ open class MessageParser() {
 
     fun generateKey(json: JsonObject): ByteArray {
         val jsonOrdered = convertor.sortJsonByKey(json)
-        val base64EncodedString: String = convertor.encodeToBase64(jsonOrdered)
         val checksumBytes: ByteArray = convertor.generateFourByteChecksum(jsonOrdered)
         
-        return checksumBytes.plus(base64EncodedString.toByteArray())
+        return checksumBytes.plus(jsonOrdered.toByteArray())
     }
 }

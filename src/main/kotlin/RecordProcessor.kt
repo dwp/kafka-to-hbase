@@ -10,7 +10,10 @@ class RecordProcessor() {
         try {
             json = convertor.convertToJson(record.value())
         } catch (e: IllegalArgumentException) {
-            log.warning("Could not parse message body, record will be skipped")
+            log.warning("Could not parse message body for record with data of %s".format(
+                    getDataStringForRecord(record)
+                )
+            )
             return
         }
 
@@ -18,10 +21,8 @@ class RecordProcessor() {
 
         if (formattedKey.isEmpty()) {
             log.warning(
-                "Empty key was skipped for %s:%d:%d".format(
-                    record.topic() ?: "null",
-                    record.partition(),
-                    record.offset()
+                "Empty key was skipped for record with data of %s".format(
+                    getDataStringForRecord(record)
                 ))
             return
         }
@@ -36,24 +37,26 @@ class RecordProcessor() {
                 version = lastModifiedTimestampLong
             )
             log.info(
-                "Wrote key %s data %s:%d:%d".format(
-                    String(formattedKey),
-                    record.topic() ?: "null",
-                    record.partition(),
-                    record.offset()
+                "Written record to HBase with data of %s".format(
+                    getDataStringForRecord(record)
                 )
             )
         } catch (e: Exception) {
             log.severe(
-                "Error while writing key %s data %s:%d:%d: %s".format(
-                    String(formattedKey),
-                    record.topic() ?: "null",
-                    record.partition(),
-                    record.offset(),
-                    e.toString()
+                "Error writing record to HBase with data of %s".format(
+                    getDataStringForRecord(record)
                 )
             )
             throw e
         }
     }
+}
+
+fun getDataStringForRecord(record: ConsumerRecord<ByteArray, ByteArray>) : String {
+    return "%s:%s:%d:%d".format(
+        String(record.key() ?: ByteArray(0)),
+        record.topic(),
+        record.partition(),
+        record.offset()
+    )
 }
