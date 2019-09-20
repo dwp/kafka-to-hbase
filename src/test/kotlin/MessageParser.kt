@@ -73,10 +73,43 @@ class MessageParserTest : StringSpec({
         keyOne.contentEquals(keyTwo) shouldBe false
     }
 
-    "generated keys will vary given values with different types" {
+    "generated keys will vary given values that are string and int in each input" {
         val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2\"}".toByteArray())
+        
+        val keyOne: ByteArray = parser.generateKey(jsonOne)
+        val keyTwo: ByteArray = parser.generateKey(jsonTwo)
+
+        keyOne.contentEquals(keyTwo) shouldBe false
+    }
+
+    "generated keys will vary given values that are string and float in each input" {
+        val parser = MessageParser()
+        val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2.0}".toByteArray())
+        val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2.0\"}".toByteArray())
+        
+        val keyOne: ByteArray = parser.generateKey(jsonOne)
+        val keyTwo: ByteArray = parser.generateKey(jsonTwo)
+
+        keyOne.contentEquals(keyTwo) shouldBe false
+    }
+
+    "generated keys will vary given values that are string and boolean in each input" {
+        val parser = MessageParser()
+        val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":false}".toByteArray())
+        val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"false\"}".toByteArray())
+        
+        val keyOne: ByteArray = parser.generateKey(jsonOne)
+        val keyTwo: ByteArray = parser.generateKey(jsonTwo)
+
+        keyOne.contentEquals(keyTwo) shouldBe false
+    }
+
+    "generated keys will vary given values that are string and null in each input" {
+        val parser = MessageParser()
+        val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":null}".toByteArray())
+        val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"null\"}".toByteArray())
         
         val keyOne: ByteArray = parser.generateKey(jsonOne)
         val keyTwo: ByteArray = parser.generateKey(jsonTwo)
