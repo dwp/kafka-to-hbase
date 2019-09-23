@@ -4,6 +4,9 @@ import org.apache.kafka.common.serialization.ByteArraySerializer
 import java.time.Duration
 import java.util.*
 import java.util.regex.Pattern
+import org.apache.kafka.clients.producer.ProducerConfig
+
+
 
 fun getEnv(envVar: String): String? {
     val value = System.getenv(envVar)
@@ -38,6 +41,9 @@ object Config {
             put("bootstrap.servers", getEnv("K2HB_KAFKA_BOOTSTRAP_SERVERS") ?: "kafka:9092")
             put("group.id", getEnv("K2HB_KAFKA_CONSUMER_GROUP") ?: "test")
 
+            // TODO Does this apply to consumer
+            put(ProducerConfig.CLIENT_ID_CONFIG, "dlq-producer");
+
             val useSSL = getEnv("K2HB_KAFKA_INSECURE") != "true"
             if (useSSL) {
                 put("security.protocol", "SSL")
@@ -60,6 +66,7 @@ object Config {
 
         val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofHours(1)
         val topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "test-topic.*")
+        val dlqTopic = getEnv("K2HB_KAFKA_DLQ_TOPIC") ?: "test-dql-topic"
 
         fun reportTopicSubscriptionDetails(): String {
             return "Subscribing to topics '%s' with poll timeout '%s' and matadata refresh every '%s ms'"

@@ -6,8 +6,10 @@ import com.beust.klaxon.Parser
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.KlaxonException
 import com.beust.klaxon.lookup
+import org.apache.kafka.clients.producer.Callback
 import java.lang.RuntimeException
 import java.text.SimpleDateFormat
+import org.apache.kafka.clients.producer.ProducerRecord
 
 class Converter() {
     private val log: Logger = Logger.getLogger("Converter")
@@ -26,6 +28,19 @@ class Converter() {
                     e.toString()
                 )
             )
+            try {
+                val malformedRecord = ProducerRecord<ByteArray, ByteArray>(Config.Kafka.dlqTopic, body)
+                val callback = Callback { metadata, exception ->
+                    if (exception != null) {
+                        throw RuntimeException(exception)
+                    } else {
+                        log.info("${metadata}")
+                    }
+                }
+                kafka.producer.send(malformedRecord, callback)
+            } catch (e : Exception){
+                throw RuntimeException("Exception while sending message to DLQ "+e)
+            }
             throw IllegalArgumentException("Cannot parse invalid JSON")
         }
     }

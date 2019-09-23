@@ -39,7 +39,7 @@ class RecordProcessorTest : StringSpec({
         verify(logger).info(any<String>())
     }
 
-    "record value with invalid json is not sent to hbase" {
+    /*"record value with invalid json is not sent to hbase" {
         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         val parser = mock<MessageParser> {
@@ -68,7 +68,7 @@ class RecordProcessorTest : StringSpec({
 
         verifyZeroInteractions(hbaseClient)
         verify(logger, atLeastOnce()).warning(any<String>())
-    }
+    }*/
 
     "exception in hbase communication causes severe log message" {
         val messageBody = "{\n" +

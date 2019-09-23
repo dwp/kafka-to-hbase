@@ -1,12 +1,15 @@
+import Config.Kafka.pollTimeout
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import lib.*
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 
 class Kafka2Hbase : StringSpec({
     configureLogging()
 
     val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.props)
+    val consumer = KafkaConsumer<ByteArray, ByteArray>(Config.Kafka.props)
     val hbase = HbaseClient.connect()
 
     val parser = MessageParser()
@@ -67,5 +70,21 @@ class Kafka2Hbase : StringSpec({
 
         val counter = waitFor { hbase.getCount(topic) }
         counter shouldBe startingCounter
+    }
+
+    "Malfomed messages are written to dlp topic" {
+        val topic = uniqueTopicName()
+
+        val body = "junk".toByteArray()
+        val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
+        val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
+        producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
+
+        Thread.sleep(1000)
+        consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
+        val records = consumer.poll(pollTimeout)
+
+        records.elementAt(0).value() shouldBe body
+
     }
 })
