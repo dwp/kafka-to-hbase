@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "http://dataworks.uk.gov/schemas/message.schema.json",
+  "type": "object",
+  "properties": {
+    "@type": {
+      "type": "string"
+    },
+    "_id": {
+      "type": "object"
+    },
+    "collection": {
+      "type": "string"
+    },
+    "db": {
+      "type": "string"
+    },
+    "dbObject": {
+      "type": "string"
+    },
+    "encryption": {
+      "type": "object",
+      "properties": {
+        "keyEncryptionKeyId": {
+            "type": "string"
+        },
+        "initialisationVector": {
+          "type": "string"
+        },
+        "encryptedEncryptionKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyEncryptionKeyId",
+        "initialisationVector",
+        "encryptedEncryptionKey"
+      ]
+    }
+  },
+  "required": [
+    "@type",
+    "_id",
+    "collection",
+    "db",
+    "dbObject",
+    "encryption"
+  ]
+}
