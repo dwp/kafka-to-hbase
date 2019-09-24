@@ -1,5 +1,4 @@
 import java.util.logging.Logger
-import java.util.Base64
 import java.util.zip.CRC32
 import java.nio.ByteBuffer
 import com.beust.klaxon.Parser
@@ -10,6 +9,11 @@ import org.apache.kafka.clients.producer.Callback
 import java.lang.RuntimeException
 import java.text.SimpleDateFormat
 import org.apache.kafka.clients.producer.ProducerRecord
+import java.io.ByteArrayOutputStream
+import java.util.*
+import java.io.ObjectOutputStream
+
+
 
 class Converter() {
     private val log: Logger = Logger.getLogger("Converter")
@@ -29,7 +33,15 @@ class Converter() {
                 )
             )
             try {
-                val malformedRecord = ProducerRecord<ByteArray, ByteArray>(Config.Kafka.dlqTopic, body)
+                val malformedRecord = MalformedRecord(body, "Not a valid json".toByteArray())
+                val producerRecord = ProducerRecord(
+                    Config.Kafka.dlqTopic,
+                    null,
+                    System.currentTimeMillis(),
+                    getBytesFromUUID(UUID.randomUUID()),
+                    getObjectAsByteArray(malformedRecord),
+                    null
+                )
                 val callback = Callback { metadata, exception ->
                     if (exception != null) {
                         throw RuntimeException(exception)
@@ -37,7 +49,7 @@ class Converter() {
                         log.info("${metadata}")
                     }
                 }
-                kafka.producer.send(malformedRecord, callback)
+                kafka.producer.send(producerRecord, callback)
             } catch (e : Exception){
                 throw RuntimeException("Exception while sending message to DLQ "+e)
             }
@@ -79,5 +91,22 @@ class Converter() {
         val lastModifiedTimestampStr = json.lookup<String?>("message._lastModifiedDateTime").get(0)
         if (lastModifiedTimestampStr.isNullOrBlank()) throw RuntimeException("Last modified date time is null or blank")
         return lastModifiedTimestampStr
+    }
+
+
+    fun getBytesFromUUID(uuid: UUID): ByteArray {
+        val bb = ByteBuffer.wrap(ByteArray(16))
+        bb.putLong(uuid.mostSignificantBits)
+        bb.putLong(uuid.leastSignificantBits)
+
+        return bb.array()
+    }
+
+    fun getObjectAsByteArray(obj : Any): ByteArray? {
+        val bos = ByteArrayOutputStream()
+        val oos = ObjectOutputStream(bos)
+        oos.writeObject(obj)
+        oos.flush()
+        return bos.toByteArray()
     }
 }
