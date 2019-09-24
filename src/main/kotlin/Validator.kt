@@ -9,11 +9,10 @@ class Validator {
         try {
             val jsonObject = JSONObject(json)
             val schema = schema()
-            println(jsonObject)
             schema.validate(jsonObject)
         }
         catch (e: ValidationException) {
-            throw InvalidMessageException("Message failed schema validation", e)
+            throw InvalidMessageException("Message failed schema validation: '${e.message}'.", e)
         }
     }
 
@@ -38,25 +37,3 @@ class Validator {
     private fun schemaLocation() = Config.Validator.properties["schema.location"] as String
     private var _schemaLoader: SchemaLoader? = null
 }
-//
-//
-//fun main() {
-//    Validator().validate("""{
-//        |   "message": {
-//        |       "@type": "hello",
-//        |       "_id": {
-//        |           "declarationId": 1
-//        |       },
-//        |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104+0000",
-//        |       "collection" : "addresses",
-//        |       "db": "core",
-//        |       "dbObject": "asd",
-//        |       "encryption": {
-//        |           "keyEncryptionKeyId": "cloudhsm:7,14",
-//        |           "initialisationVector": "iv",
-//        |           "encryptedEncryptionKey": "=="
-//        |       }
-//        |   }
-//        |}
-//    """.trimMargin())
-//}
