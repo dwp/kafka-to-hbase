@@ -1,20 +1,23 @@
-import org.everit.json.schema.Schema
+import org.everit.json.schema.ValidationException
 import org.everit.json.schema.loader.SchemaLoader
 import org.json.JSONObject
 import org.json.JSONTokener
 
 class Validator {
-    fun isValid(json: String): Boolean {
-        val jsonObject = JSONObject(json)
-        val schema = schema()
-        schema.validate(jsonObject)
-        println(jsonObject)
-        return true
+
+    fun validate(json: String){
+        try {
+            val jsonObject = JSONObject(json)
+            val schema = schema()
+            println(jsonObject)
+            schema.validate(jsonObject)
+        }
+        catch (e: ValidationException) {
+            throw InvalidMessageException("Message failed schema validation", e)
+        }
     }
 
-    private fun schema(): Schema {
-        return schemaLoader().load().build()
-    }
+    private fun schema() = schemaLoader().load().build()
 
     @Synchronized
     private fun schemaLoader(): SchemaLoader {
@@ -27,31 +30,33 @@ class Validator {
         return _schemaLoader!!
     }
 
-    private fun schemaObject(): JSONObject {
-        val location = Config.Validator.properties["schema.location"]
-        println("location: '$location'.")
-        return javaClass.getResourceAsStream(Config.Validator.properties["schema.location"] as String).use { inputStream ->
+    private fun schemaObject() =
+        javaClass.getResourceAsStream(schemaLocation()).use { inputStream ->
             JSONObject(JSONTokener(inputStream))
         }
-    }
 
+    private fun schemaLocation() = Config.Validator.properties["schema.location"] as String
     private var _schemaLoader: SchemaLoader? = null
 }
-
-
-fun main() {
-    val valid = Validator().isValid("""{
-        |   "@type": "hello",
-        |   "_id": {},
-        |   "collection" : "addresses",
-        |   "db": "core",
-        |   "dbObject": "abcdefghijklm",
-        |   "encryption": {
-        |       "keyEncryptionKeyId": "123",
-        |       "initialisationVector": "iv",
-        |       "encryptedEncryptionKey": "=="
-        |   } 
-        |}
-    """.trimMargin())
-    println("$valid")
-}
+//
+//
+//fun main() {
+//    Validator().validate("""{
+//        |   "message": {
+//        |       "@type": "hello",
+//        |       "_id": {
+//        |           "declarationId": 1
+//        |       },
+//        |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104+0000",
+//        |       "collection" : "addresses",
+//        |       "db": "core",
+//        |       "dbObject": "asd",
+//        |       "encryption": {
+//        |           "keyEncryptionKeyId": "cloudhsm:7,14",
+//        |           "initialisationVector": "iv",
+//        |           "encryptedEncryptionKey": "=="
+//        |       }
+//        |   }
+//        |}
+//    """.trimMargin())
+//}
