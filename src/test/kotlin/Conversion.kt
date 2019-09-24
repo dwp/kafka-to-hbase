@@ -6,6 +6,8 @@ import io.kotlintest.properties.assertAll
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.specs.StringSpec
 import com.beust.klaxon.JsonObject
+import com.nhaarman.mockitokotlin2.*
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -13,12 +15,14 @@ import java.util.*
 
 class Conversion : StringSpec({
     configureLogging()
-    
-    val converter = Converter()
+
+    val converter = spy(Converter())
+    doNothing().whenever(converter).sendMessageToDlq(any())
 
     "valid input converts to json" {
         val jsonString = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
 
         json should beInstanceOf<JsonObject>()
         json.string("testOne") shouldBe "test1"
@@ -27,21 +31,22 @@ class Conversion : StringSpec({
 
     "valid nested input converts to json" {
         val jsonString = "{\"testOne\":{\"testTwo\":2}}"
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         val jsonTwo: JsonObject = json.obj("testOne") as JsonObject
 
         json should beInstanceOf<JsonObject>()
         jsonTwo.int("testTwo") shouldBe 2
     }
 
-   /* "invalid nested input throws exception" {
-        val jsonString = "{\"testOne\":"
-
+    "invalid nested input throws exception" {
+       val jsonString = "{\"testOne\":"
+       val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
         val exception = shouldThrow<IllegalArgumentException> {
-            converter.convertToJson(jsonString.toByteArray())
+            converter.convertToJson(consumerRecord)
         }
         exception.message shouldBe "Cannot parse invalid JSON"
-    }*/
+    }
 
     "can generate consistent base64 encoded string" {
         val jsonStringWithFakeHash = "82&%\$dsdsd{\"testOne\":\"test1\", \"testTwo\":2}"
@@ -61,7 +66,8 @@ class Conversion : StringSpec({
 
     "sorts json by key name" {
         val jsonStringUnsorted = "{\"testA\":\"test1\", \"testC\":2, \"testB\":true}"
-        val jsonObjectUnsorted: JsonObject = converter.convertToJson(jsonStringUnsorted.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonStringUnsorted.toByteArray())
+        val jsonObjectUnsorted: JsonObject = converter.convertToJson(consumerRecord)
         val jsonStringSorted = "{\"testA\":\"test1\",\"testB\":true,\"testC\":2}"
 
         val sortedJson = converter.sortJsonByKey(jsonObjectUnsorted)
@@ -71,7 +77,8 @@ class Conversion : StringSpec({
 
     "sorts json by key name case sensitively" {
         val jsonStringUnsorted = "{\"testb\":true, \"testA\":\"test1\", \"testC\":2}"
-        val jsonObjectUnsorted: JsonObject = converter.convertToJson(jsonStringUnsorted.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonStringUnsorted.toByteArray())
+        val jsonObjectUnsorted: JsonObject = converter.convertToJson(consumerRecord)
         val jsonStringSorted = "{\"testA\":\"test1\",\"testC\":2,\"testb\":true}"
 
         val sortedJson = converter.sortJsonByKey(jsonObjectUnsorted)
@@ -90,7 +97,8 @@ class Conversion : StringSpec({
 
     "can generate consistent checksums from json" {
         val jsonString = "{\"testOne\":\"test1\", \"testTwo\":2}"
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         val checksumOne = converter.generateFourByteChecksum(json.toString())
         val checksumTwo = converter.generateFourByteChecksum(json.toString())
 
@@ -128,8 +136,8 @@ class Conversion : StringSpec({
             "            \"dbObject\": \"bubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9A\"\n" +
             "        }\n" +
             "    }"
-
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         val timestamp = converter.getLastModifiedTimestamp(json)
         val timeStampAsLong = converter.getTimestampAsLong(timestamp)
         timestamp shouldBe "2018-12-14T15:01:02.000+0000"
@@ -142,8 +150,8 @@ class Conversion : StringSpec({
             "            \"_lastModifiedDateTime\": \"2018-12-14\",\n" +
             "        }\n" +
             "    }"
-
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         val timestamp = converter.getLastModifiedTimestamp(json)
         timestamp shouldBe "2018-12-14"
         shouldThrow<ParseException> {
@@ -157,8 +165,8 @@ class Conversion : StringSpec({
             "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
             "        }\n" +
             "    }"
-
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         shouldThrow<RuntimeException> {
             val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
             converter.getTimestampAsLong(lastModifiedTimestamp)
@@ -171,8 +179,8 @@ class Conversion : StringSpec({
             "           \"_lastModifiedDateTime1\": \"2018-12-14T15:01:02.000+0000\",\n" +
             "        }\n" +
             "    }"
-
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         shouldThrow<RuntimeException> {
             val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
             converter.getTimestampAsLong(lastModifiedTimestamp)
@@ -185,8 +193,8 @@ class Conversion : StringSpec({
             "           \"_lastModifiedDateTime\": \"\",\n" +
             "        }\n" +
             "    }"
-
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         shouldThrow<RuntimeException> {
             val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
             converter.getTimestampAsLong(lastModifiedTimestamp)
@@ -199,8 +207,8 @@ class Conversion : StringSpec({
             "           \"_lastModifiedDateTime\": \"   \",\n" +
             "        }\n" +
             "    }"
-
-        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val consumerRecord = ConsumerRecord("",0,1,"key".toByteArray(),jsonString.toByteArray())
+        val json: JsonObject = converter.convertToJson(consumerRecord)
         shouldThrow<RuntimeException> {
             val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
             converter.getTimestampAsLong(lastModifiedTimestamp)

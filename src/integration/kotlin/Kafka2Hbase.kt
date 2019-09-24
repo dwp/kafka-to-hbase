@@ -2,6 +2,7 @@ import Config.Kafka.pollTimeout
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import lib.*
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 
@@ -77,7 +78,6 @@ class Kafka2Hbase : StringSpec({
 
         val body = "junk".toByteArray()
         val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-        val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
         producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
 
         Thread.sleep(1000)
