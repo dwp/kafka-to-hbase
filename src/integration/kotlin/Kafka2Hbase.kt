@@ -84,7 +84,8 @@ class Kafka2Hbase : StringSpec({
         consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
         val records = consumer.poll(pollTimeout)
 
-        records.elementAt(0).value() shouldBe body
+        val malformedRecord  = MalformedRecord(body, "Not a valid json".toByteArray())
+        records.elementAt(0).value() shouldBe malformedRecord
 
     }
 })

@@ -5,13 +5,13 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
 
-class RecordProcessor() {
+open class RecordProcessor() {
     fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
         var json: JsonObject
         val converter = Converter()
 
         try {
-            json = converter.convertToJson(record)
+            json = converter.convertToJson(record.value())
         } catch (e: IllegalArgumentException) {
             log.warning("Could not parse message body for record with data of %s".format(
                 getDataStringForRecord(record)
@@ -54,35 +54,43 @@ class RecordProcessor() {
             throw e
         }
     }
-}
 
- fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>) {
-    val body = record.value()
-    val malformedRecord = MalformedRecord(body, "Not a valid json".toByteArray())
-    try {
-        val producerRecord = ProducerRecord(
-            Config.Kafka.dlqTopic,
-            null,
-            System.currentTimeMillis(),
-            record.key(),
-            getObjectAsByteArray(malformedRecord),
-            null
-        )
-        /*val callback = Callback { metadata, exception ->
-            if (exception != null) {
-                throw RuntimeException(exception)
-            } else {
-                log.info(""+Thread.currentThread())
-                log.info("${metadata}")
+    open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>) {
+        val body = record.value()
+        val malformedRecord = MalformedRecord(body, "Not a valid json".toByteArray())
+        try {
+            val producerRecord = ProducerRecord(
+                Config.Kafka.dlqTopic,
+                null,
+                System.currentTimeMillis(),
+                record.key(),
+                getObjectAsByteArray(malformedRecord),
+                null
+            )
+            /*val callback = Callback { metadata, exception ->
+                if (exception != null) {
+                    throw RuntimeException(exception)
+                } else {
+                    log.info(""+Thread.currentThread())
+                    log.info("${metadata}")
+                }
             }
+            kafka.producer.send(producerRecord, callback)*/
+            kafka.producer.send(producerRecord)
+        } catch (e: Exception) {
+            log.warning(
+                ("Error while sending message to dlq : " +
+                    "key %s from topic %s with offset %s : %s").format(record.key(), record.topic(), record.offset(), e.toString()))
+            throw DlqException("Exception while sending message to DLQ " + e)
         }
-        kafka.producer.send(producerRecord, callback)*/
-        kafka.producer.send(producerRecord)
-    } catch (e: Exception) {
-        log.warning(
-            ("Error while sending message to dlq : " +
-                "key %s from topic %s with offset %s : %s").format(record.key(), record.topic(), record.offset(), e.toString()))
-        throw DlqException("Exception while sending message to DLQ " + e)
+    }
+
+    fun getObjectAsByteArray(obj: Any): ByteArray? {
+        val bos = ByteArrayOutputStream()
+        val oos = ObjectOutputStream(bos)
+        oos.writeObject(obj)
+        oos.flush()
+        return bos.toByteArray()
     }
 }
 
@@ -93,13 +101,5 @@ fun getDataStringForRecord(record: ConsumerRecord<ByteArray, ByteArray>): String
         record.partition(),
         record.offset()
     )
-}
-
-fun getObjectAsByteArray(obj: Any): ByteArray? {
-    val bos = ByteArrayOutputStream()
-    val oos = ObjectOutputStream(bos)
-    oos.writeObject(obj)
-    oos.flush()
-    return bos.toByteArray()
 }
 

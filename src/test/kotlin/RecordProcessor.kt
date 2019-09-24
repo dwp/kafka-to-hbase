@@ -2,21 +2,15 @@ import io.kotlintest.fail
 import io.kotlintest.specs.StringSpec
 import org.apache.kafka.common.record.TimestampType
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.atLeastOnce
-import com.nhaarman.mockitokotlin2.whenever
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.doThrow
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import java.util.logging.Logger
 import com.beust.klaxon.JsonObject
+import com.nhaarman.mockitokotlin2.*
 
 class RecordProcessorTest : StringSpec({
     configureLogging()
 
-    val processor = RecordProcessor()
+    val processor = spy(RecordProcessor())
+    doNothing().whenever(processor).sendMessageToDlq(any())
     val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
     val hbaseClient = mock<HbaseClient>()
     val logger = mock<Logger>()
@@ -39,7 +33,7 @@ class RecordProcessorTest : StringSpec({
         verify(logger).info(any<String>())
     }
 
-    /*"record value with invalid json is not sent to hbase" {
+    "record value with invalid json is not sent to hbase" {
         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         val parser = mock<MessageParser> {
@@ -68,7 +62,7 @@ class RecordProcessorTest : StringSpec({
 
         verifyZeroInteractions(hbaseClient)
         verify(logger, atLeastOnce()).warning(any<String>())
-    }*/
+    }
 
     "exception in hbase communication causes severe log message" {
         val messageBody = "{\n" +
