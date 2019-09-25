@@ -1,23 +1,26 @@
-import io.kotlintest.fail
-import io.kotlintest.specs.StringSpec
-import org.apache.kafka.common.record.TimestampType
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import java.util.logging.Logger
 import com.beust.klaxon.JsonObject
 import com.nhaarman.mockitokotlin2.*
-import io.kotlintest.should
-import io.kotlintest.shouldBe
+import io.kotlintest.fail
 import io.kotlintest.shouldThrow
+import io.kotlintest.specs.StringSpec
 import io.mockk.every
 import io.mockk.mockkObject
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.common.serialization.ByteArraySerializer
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.clients.producer.Callback
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.Metric
+import org.apache.kafka.common.MetricName
+import org.apache.kafka.common.PartitionInfo
+import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.record.TimestampType
 import org.junit.Assert.assertEquals
-import java.util.*
-import java.io.ObjectInputStream
 import java.io.ByteArrayInputStream
-
-
+import java.io.ObjectInputStream
+import java.time.Duration
+import java.util.concurrent.Future
+import java.util.logging.Logger
 
 
 class RecordProcessorTest : StringSpec({
@@ -30,47 +33,80 @@ class RecordProcessorTest : StringSpec({
     val hbaseClient = mock<HbaseClient>()
     val logger = mock<Logger>()
 
-    /* "valid record is sent to hbase successfully" {
-         val messageBody = "{\n" +
-             "        \"message\": {\n" +
-             "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-             "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-             "        }\n" +
-             "    }"
-         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-         val parser = mock<MessageParser> {
-             on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
-         }
+    "valid record is sent to hbase successfully" {
+        val messageBody = "{\n" +
+            "        \"message\": {\n" +
+            "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+            "        }\n" +
+            "    }"
+        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
+        val parser = mock<MessageParser> {
+            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
+        }
 
-         processor.processRecord(record, hbaseClient, parser, logger)
+        processor.processRecord(record, hbaseClient, parser, logger)
 
-         verify(hbaseClient).putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)
-         verify(logger).info(any<String>())
-     }
+        verify(hbaseClient).putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)
+        verify(logger).info(any<String>())
+    }
 
-     "record value with invalid json is not sent to hbase" {
-         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
-         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-         val parser = mock<MessageParser> {
-             on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
-         }
+    "record value with invalid json is not sent to hbase" {
+        val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
+        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
+        val parser = mock<MessageParser> {
+            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
+        }
 
-         processor.processRecord(record, hbaseClient, parser, logger)
+        processor.processRecord(record, hbaseClient, parser, logger)
 
-         verifyZeroInteractions(hbaseClient)
-     }
+        verifyZeroInteractions(hbaseClient)
+    }
 
     "Exception should be thrown when dlq topic is not available and message  is not sent to hbase" {
-        mockkObject(Producer)
-        every { Producer.getInstance() } returns KafkaProducer(Properties().apply {
-            put("bootstrap.servers", getEnv("K2HB_KAFKA_BOOTSTRAP_SERVERS") ?: "kafka:9092")
+        mockkObject(DlqProducer)
+        val obj = object : org.apache.kafka.clients.producer.Producer<ByteArray, ByteArray> {
+            override fun partitionsFor(topic: String?): MutableList<PartitionInfo> {
+                throw Exception("")
+            }
 
-            put("key.serializer", ByteArraySerializer::class.java)
-            put("value.serializer", ByteArraySerializer::class.java)
-            put("group.id", getEnv("K2HB_KAFKA_CONSUMER_GROUP") ?: "test")
-            put("auto.offset.reset", "earliest")
-            put("metaDataRefreshKey", getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
-        })
+            override fun flush() {
+            }
+
+            override fun abortTransaction() {
+            }
+
+            override fun commitTransaction() {
+            }
+
+            override fun beginTransaction() {
+            }
+
+            override fun initTransactions() {
+            }
+
+            override fun sendOffsetsToTransaction(offsets: MutableMap<TopicPartition, OffsetAndMetadata>?, consumerGroupId: String?) {
+            }
+
+            override fun send(record: ProducerRecord<ByteArray, ByteArray>?): Future<RecordMetadata> {
+                throw Exception("")
+            }
+
+            override fun send(record: ProducerRecord<ByteArray, ByteArray>?, callback: Callback?): Future<RecordMetadata> {
+                throw Exception("")
+            }
+
+            override fun close() {
+            }
+
+            override fun close(timeout: Duration?) {
+            }
+
+            override fun metrics(): MutableMap<MetricName, out Metric> {
+                throw Exception("")
+            }
+        }
+        every { DlqProducer.getInstance() } returns obj
         val processor = RecordProcessor()
         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
@@ -83,10 +119,10 @@ class RecordProcessorTest : StringSpec({
         }
 
         verifyZeroInteractions(hbaseClient)
-        //verify(logger).warning(any<String>())
-    } */
+        verify(logger).warning(any<String>())
+    }
 
-    /*"record value with invalid _id field is not sent to hbase" {
+    "record value with invalid _id field is not sent to hbase" {
         val messageBody = "{\n" +
             "        \"message\": {\n" +
             "           \"id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
@@ -126,12 +162,12 @@ class RecordProcessorTest : StringSpec({
         }
     }
 
-    "invvalid record " {
-        val malformedRecord = MalformedRecord("junk".toByteArray(), "Not a valid json".toByteArray())
+    "Malformed record object be converted to bytearray " {
+        val malformedRecord = MalformedRecord("junk", "Not a valid json")
         val byteArray = processor.getObjectAsByteArray(malformedRecord)
         val bi = ByteArrayInputStream(byteArray)
         val oi = ObjectInputStream(bi)
-        val actual =  oi.readObject()
-        assertEquals(malformedRecord,actual)
-    }*/
+        val actual = oi.readObject()
+        assertEquals(malformedRecord, actual)
+    }
 })
