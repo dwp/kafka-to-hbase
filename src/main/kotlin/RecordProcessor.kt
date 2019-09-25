@@ -1,11 +1,11 @@
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import java.util.logging.Logger
+import Config.Kafka.dlqTopic
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.Klaxon
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
-import Config.Kafka.dlqTopic
-import com.beust.klaxon.Klaxon
+import java.util.logging.Logger
 
 open class RecordProcessor() {
     fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
@@ -60,18 +60,18 @@ open class RecordProcessor() {
     open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>) {
         val body = record.value()
         val malformedRecord = MalformedRecord(String(body), "Not a valid json")
-        val jsonString = Klaxon().toJsonString(malformedRecord)
         try {
-            val producerRecord  = ProducerRecord<ByteArray, ByteArray>(
+            val jsonString = Klaxon().toJsonString(malformedRecord)
+            val producerRecord = ProducerRecord<ByteArray, ByteArray>(
                 dlqTopic,
-               null ,
+                null,
                 null,
                 record.key(),
                 jsonString.toByteArray(),
                 null
             )
-           val metadata  =  DlqProducer.getInstance()?.send(producerRecord)?.get()
-            log.info("metadata topic : %s offset : %s".format(metadata?.topic(),metadata?.offset()))
+            val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
+            log.info("metadata topic : %s offset : %s".format(metadata?.topic(), metadata?.offset()))
         } catch (e: Exception) {
             log.warning(
                 ("Error while sending message to dlq : " +

@@ -1,1 +1,1 @@
-class DlqException(message:String ) : Exception(message)
+class DlqException(message: String) : Exception(message)

@@ -4,8 +4,6 @@ import org.apache.kafka.common.serialization.ByteArraySerializer
 import java.time.Duration
 import java.util.*
 import java.util.regex.Pattern
-import org.apache.kafka.clients.producer.ProducerConfig
-
 
 
 fun getEnv(envVar: String): String? {
@@ -65,8 +63,6 @@ object Config {
         val producerProps = Properties().apply {
             put("bootstrap.servers", getEnv("K2HB_KAFKA_BOOTSTRAP_SERVERS") ?: "kafka:9092")
             put("group.id", getEnv("K2HB_KAFKA_CONSUMER_GROUP") ?: "test")
-
-           // put(ProducerConfig.CLIENT_ID_CONFIG, "dlq-producer")
 
             val sslVal = getEnv("K2HB_KAFKA_INSECURE") ?: "true"
             val useSSL = sslVal != "true"

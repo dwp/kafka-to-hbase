@@ -119,7 +119,7 @@ class RecordProcessorTest : StringSpec({
         }
 
         verifyZeroInteractions(hbaseClient)
-        verify(logger).warning(any<String>())
+        verify(logger, times(2)).warning(any<String>())
     }
 
     "record value with invalid _id field is not sent to hbase" {
