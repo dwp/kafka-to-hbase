@@ -67,8 +67,10 @@ open class RecordProcessor() {
                 dlqTopic,
                     value
             )
+            log.info("before-------------------------->")
            val metadata  =  producer.send(producerRecord).get()
-            log.info(""+metadata)
+            log.info("after-------------------------->"+metadata)
+
         } catch (e: Exception) {
             log.warning(
                 ("Error while sending message to dlq : " +

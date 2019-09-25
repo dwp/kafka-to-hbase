@@ -82,7 +82,7 @@ class Kafka2Hbase : StringSpec({
         val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
         producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
 
-        Thread.sleep(5000)
+        Thread.sleep(20000)
         consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
         val records = consumer.poll(pollTimeout)
 
