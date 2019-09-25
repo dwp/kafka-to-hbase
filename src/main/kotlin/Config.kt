@@ -37,14 +37,39 @@ object Config {
     }
 
     object Kafka {
-        val props = Properties().apply {
+        val consumerProps = Properties().apply {
             put("bootstrap.servers", getEnv("K2HB_KAFKA_BOOTSTRAP_SERVERS") ?: "kafka:9092")
             put("group.id", getEnv("K2HB_KAFKA_CONSUMER_GROUP") ?: "test")
 
-            // TODO Does this apply to consumer
-            put(ProducerConfig.CLIENT_ID_CONFIG, "dlq-producer");
+            val sslVal = getEnv("K2HB_KAFKA_INSECURE") ?: "true"
+            val useSSL = sslVal != "true"
+            if (useSSL) {
+                put("security.protocol", "SSL")
+                put("ssl.truststore.location", getEnv("K2HB_TRUSTSTORE_PATH"))
+                put("ssl.truststore.password", getEnv("K2HB_TRUSTSTORE_PASSWORD"))
+                put("ssl.keystore.location", getEnv("K2HB_KEYSTORE_PATH"))
+                put("ssl.keystore.password", getEnv("K2HB_KEYSTORE_PASSWORD"))
+                put("ssl.key.password", getEnv("K2HB_PRIVATE_KEY_PASSWORD"))
+            }
 
-            val useSSL = getEnv("K2HB_KAFKA_INSECURE") != "true"
+            put("key.deserializer", ByteArrayDeserializer::class.java)
+            put("value.deserializer", ByteArrayDeserializer::class.java)
+
+            put("key.serializer", ByteArraySerializer::class.java)
+            put("value.serializer", ByteArraySerializer::class.java)
+
+            put("auto.offset.reset", "earliest")
+            put(metaDataRefreshKey, getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
+        }
+
+        val producerProps = Properties().apply {
+            put("bootstrap.servers", getEnv("K2HB_KAFKA_BOOTSTRAP_SERVERS") ?: "kafka:9092")
+            put("group.id", getEnv("K2HB_KAFKA_CONSUMER_GROUP") ?: "test")
+
+           // put(ProducerConfig.CLIENT_ID_CONFIG, "dlq-producer")
+
+            val sslVal = getEnv("K2HB_KAFKA_INSECURE") ?: "true"
+            val useSSL = sslVal != "true"
             if (useSSL) {
                 put("security.protocol", "SSL")
                 put("ssl.truststore.location", getEnv("K2HB_TRUSTSTORE_PATH"))
@@ -70,7 +95,7 @@ object Config {
 
         fun reportTopicSubscriptionDetails(): String {
             return "Subscribing to topics '%s' with poll timeout '%s' and matadata refresh every '%s ms'"
-                .format(topicRegex.pattern(), pollTimeout.toString(), props.getProperty(metaDataRefreshKey))
+                .format(topicRegex.pattern(), pollTimeout.toString(), consumerProps.getProperty(metaDataRefreshKey))
         }
     }
 }

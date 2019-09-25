@@ -4,6 +4,8 @@ import com.beust.klaxon.JsonObject
 import org.apache.kafka.clients.producer.ProducerRecord
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
+import Config.Kafka.dlqTopic
+import org.apache.kafka.clients.producer.KafkaProducer
 
 open class RecordProcessor() {
     fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
@@ -58,25 +60,15 @@ open class RecordProcessor() {
     open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>) {
         val body = record.value()
         val malformedRecord = MalformedRecord(body, "Not a valid json".toByteArray())
+        val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
+        val value = getObjectAsByteArray(malformedRecord)
         try {
-            val producerRecord = ProducerRecord(
-                Config.Kafka.dlqTopic,
-                null,
-                System.currentTimeMillis(),
-                record.key(),
-                getObjectAsByteArray(malformedRecord),
-                null
+            val producerRecord  = ProducerRecord<ByteArray, ByteArray>(
+                dlqTopic,
+                    value
             )
-            /*val callback = Callback { metadata, exception ->
-                if (exception != null) {
-                    throw RuntimeException(exception)
-                } else {
-                    log.info(""+Thread.currentThread())
-                    log.info("${metadata}")
-                }
-            }
-            kafka.producer.send(producerRecord, callback)*/
-            kafka.producer.send(producerRecord)
+           val metadata  =  producer.send(producerRecord).get()
+            log.info(""+metadata)
         } catch (e: Exception) {
             log.warning(
                 ("Error while sending message to dlq : " +
@@ -85,7 +77,7 @@ open class RecordProcessor() {
         }
     }
 
-    fun getObjectAsByteArray(obj: Any): ByteArray? {
+    fun getObjectAsByteArray(obj: MalformedRecord): ByteArray? {
         val bos = ByteArrayOutputStream()
         val oos = ObjectOutputStream(bos)
         oos.writeObject(obj)
