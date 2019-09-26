@@ -18,7 +18,7 @@ class Kafka2Hbase : StringSpec({
     val parser = MessageParser()
     val converter = Converter()
 
-    "messages with new identifiers are written to hbase" {
+    "messages with new identifiers are written to hbase but not to dlq" {
         val topic = uniqueTopicName()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
@@ -27,7 +27,7 @@ class Kafka2Hbase : StringSpec({
         val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
         producer.sendRecord(topic, "key1".toByteArray(), body, timestamp)
 
-        Thread.sleep(100)
+        Thread.sleep(1000)
         val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
 
         val storedValue = waitFor { hbase.getCellBeforeTimestamp(topic, key, referenceTimestamp) }
@@ -42,17 +42,18 @@ class Kafka2Hbase : StringSpec({
 
     }
 
-    "messages with previously received identifiers are written as new versions" {
+    "messages with previously received identifiers are written as new versions to hbase but not to dlq" {
         val topic = uniqueTopicName()
         val startingCounter = waitFor { hbase.getCount(topic) }
 
         val body1 = uniqueBytes()
         val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
         val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
-        hbase.putVersion(topic, "key2".toByteArray(), body1, kafkaTimestamp1)
+        hbase.putVersion(topic, key, body1, kafkaTimestamp1)
 
-        Thread.sleep(100)
+        Thread.sleep(1000)
         val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
+        Thread.sleep(1000)
 
         val body2 = uniqueBytes()
         val kafkaTimestamp2 = converter.getTimestampAsLong(getISO8601Timestamp())
@@ -84,9 +85,10 @@ class Kafka2Hbase : StringSpec({
         counter shouldBe startingCounter
     }
 
-    "Malfomed messages are written to dlq topic" {
+    "Invalid json messages are written to dlq topic" {
         val topic = uniqueTopicName()
 
+        val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
         val body = "junk".toByteArray()
         val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
         producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
@@ -94,10 +96,10 @@ class Kafka2Hbase : StringSpec({
         consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
         val records = consumer.poll(pollTimeout)
 
-        val malformedRecord = MalformedRecord(String(body), "Not a valid json")
+        val malformedRecord = MalformedRecord("key3", String(body), "Not a valid json")
         val expected = Klaxon().toJsonString(malformedRecord)
         val actual = String(records.elementAt(0).value())
         expected shouldBe actual
-
     }
+
 })

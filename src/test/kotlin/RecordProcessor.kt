@@ -35,11 +35,11 @@ class RecordProcessorTest : StringSpec({
 
     "valid record is sent to hbase successfully" {
         val messageBody = "{\n" +
-            "        \"message\": {\n" +
-            "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-            "        }\n" +
-            "    }"
+                "        \"message\": {\n" +
+                "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+                "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+                "        }\n" +
+                "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         val parser = mock<MessageParser> {
             on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
@@ -124,11 +124,11 @@ class RecordProcessorTest : StringSpec({
 
     "record value with invalid _id field is not sent to hbase" {
         val messageBody = "{\n" +
-            "        \"message\": {\n" +
-            "           \"id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-            "        }\n" +
-            "    }"
+                "        \"message\": {\n" +
+                "           \"id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+                "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+                "        }\n" +
+                "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         val parser = mock<MessageParser> {
             on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(ByteArray(0))
@@ -142,11 +142,11 @@ class RecordProcessorTest : StringSpec({
 
     "exception in hbase communication causes severe log message" {
         val messageBody = "{\n" +
-            "        \"message\": {\n" +
-            "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-            "        }\n" +
-            "    }"
+                "        \"message\": {\n" +
+                "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+                "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+                "        }\n" +
+                "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         val parser = mock<MessageParser> {
             on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
@@ -162,8 +162,8 @@ class RecordProcessorTest : StringSpec({
         }
     }
 
-    "Malformed record object be converted to bytearray " {
-        val malformedRecord = MalformedRecord("junk", "Not a valid json")
+    "Malformed record object can be converted to bytearray " {
+        val malformedRecord = MalformedRecord("key","junk", "Not a valid json")
         val byteArray = processor.getObjectAsByteArray(malformedRecord)
         val bi = ByteArrayInputStream(byteArray)
         val oi = ObjectInputStream(bi)

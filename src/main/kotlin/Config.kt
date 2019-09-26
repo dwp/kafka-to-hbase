@@ -97,7 +97,7 @@ object Config {
 
         fun reportTopicSubscriptionDetails(): String {
             return "Subscribing to topics '%s' with poll timeout '%s' and matadata refresh every '%s ms'"
-                .format(topicRegex.pattern(), pollTimeout.toString(), consumerProps.getProperty(metaDataRefreshKey))
+                    .format(topicRegex.pattern(), pollTimeout.toString(), consumerProps.getProperty(metaDataRefreshKey))
         }
     }
 }
