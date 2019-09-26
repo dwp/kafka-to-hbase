@@ -11,6 +11,8 @@ class Kafka2Hbase : StringSpec({
 
     val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
     val consumer = KafkaConsumer<ByteArray, ByteArray>(Config.Kafka.consumerProps)
+
+
     val hbase = HbaseClient.connect()
 
     val parser = MessageParser()
@@ -37,6 +39,7 @@ class Kafka2Hbase : StringSpec({
         consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
         val records = consumer.poll(pollTimeout)
         records.count() shouldBe 0
+
     }
 
     "messages with previously received identifiers are written as new versions" {
@@ -46,7 +49,7 @@ class Kafka2Hbase : StringSpec({
         val body1 = uniqueBytes()
         val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
         val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
-        hbase.putVersion(topic, key, body1, kafkaTimestamp1)
+        hbase.putVersion(topic, "key2".toByteArray(), body1, kafkaTimestamp1)
 
         Thread.sleep(100)
         val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
@@ -54,6 +57,10 @@ class Kafka2Hbase : StringSpec({
         val body2 = uniqueBytes()
         val kafkaTimestamp2 = converter.getTimestampAsLong(getISO8601Timestamp())
         producer.sendRecord(topic, "key2".toByteArray(), body2, kafkaTimestamp2)
+
+        consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
+        val records = consumer.poll(pollTimeout)
+        records.count() shouldBe 0
 
         val storedNewValue = waitFor { hbase.getCellAfterTimestamp(topic, key, referenceTimestamp) }
         storedNewValue shouldBe body2
