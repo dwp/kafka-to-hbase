@@ -33,6 +33,10 @@ class Kafka2Hbase : StringSpec({
 
         val counter = waitFor { hbase.getCount(topic) }
         counter shouldBe startingCounter + 1
+
+        consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
+        val records = consumer.poll(pollTimeout)
+        records.count() shouldBe 0
     }
 
     "messages with previously received identifiers are written as new versions" {
@@ -73,14 +77,13 @@ class Kafka2Hbase : StringSpec({
         counter shouldBe startingCounter
     }
 
-    "Malfomed messages are written to dlp topic" {
+    "Malfomed messages are written to dlq topic" {
         val topic = uniqueTopicName()
 
         val body = "junk".toByteArray()
         val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
         producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
 
-        Thread.sleep(20000)
         consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
         val records = consumer.poll(pollTimeout)
 
