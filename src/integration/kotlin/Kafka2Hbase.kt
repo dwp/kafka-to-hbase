@@ -11,10 +11,7 @@ class Kafka2Hbase : StringSpec({
 
     val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
     val consumer = KafkaConsumer<ByteArray, ByteArray>(Config.Kafka.consumerProps)
-
-
     val hbase = HbaseClient.connect()
-
     val parser = MessageParser()
     val converter = Converter()
 
@@ -39,7 +36,6 @@ class Kafka2Hbase : StringSpec({
         consumer.subscribe(mutableListOf(Config.Kafka.dlqTopic))
         val records = consumer.poll(pollTimeout)
         records.count() shouldBe 0
-
     }
 
     "messages with previously received identifiers are written as new versions to hbase but not to dlq" {
@@ -101,5 +97,4 @@ class Kafka2Hbase : StringSpec({
         val actual = String(records.elementAt(0).value())
         expected shouldBe actual
     }
-
 })

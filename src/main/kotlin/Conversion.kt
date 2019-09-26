@@ -20,9 +20,7 @@ class Converter() {
             return json
         } catch (e: KlaxonException) {
             log.warning(
-                    "Error while parsing message in to json: %s".format(
-                            e.toString()
-                    )
+                    "Error while parsing message in to json: ${e.toString()}"
             )
             throw IllegalArgumentException("Cannot parse invalid JSON")
         }

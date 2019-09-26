@@ -96,8 +96,9 @@ object Config {
         val dlqTopic = getEnv("K2HB_KAFKA_DLQ_TOPIC") ?: "test-dlq-topic"
 
         fun reportTopicSubscriptionDetails(): String {
-            return "Subscribing to topics '%s' with poll timeout '%s' and matadata refresh every '%s ms'"
-                    .format(topicRegex.pattern(), pollTimeout.toString(), consumerProps.getProperty(metaDataRefreshKey))
+            return "Subscribing to topics ${topicRegex.pattern()} " +
+                    "with poll timeout ${pollTimeout} " +
+                    "and matadata refresh every ${consumerProps.getProperty(metaDataRefreshKey)} ms"
         }
     }
 }

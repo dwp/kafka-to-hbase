@@ -15,9 +15,7 @@ open class RecordProcessor() {
         try {
             json = converter.convertToJson(record.value())
         } catch (e: IllegalArgumentException) {
-            log.warning("Could not parse message body for record with data of %s".format(
-                    getDataStringForRecord(record)
-            )
+            log.warning("Could not parse message body for record with data of ${getDataStringForRecord(record)}"
             )
             sendMessageToDlq(record)
             return
@@ -27,9 +25,7 @@ open class RecordProcessor() {
 
         if (formattedKey.isEmpty()) {
             log.warning(
-                    "Empty key was skipped for record with data of %s".format(
-                            getDataStringForRecord(record)
-                    ))
+                    "Empty key was skipped for record with data of ${getDataStringForRecord(record)}")
             return
         }
 
@@ -43,15 +39,11 @@ open class RecordProcessor() {
                     version = lastModifiedTimestampLong
             )
             log.info(
-                    "Written record to HBase with data of %s".format(
-                            getDataStringForRecord(record)
-                    )
+                    "Written record to HBase with data of ${getDataStringForRecord(record)}"
             )
         } catch (e: Exception) {
             log.severe(
-                    "Error writing record to HBase with data of %s".format(
-                            getDataStringForRecord(record)
-                    )
+                    "Error writing record to HBase with data of ${getDataStringForRecord(record)}"
             )
             throw e
         }
@@ -71,11 +63,11 @@ open class RecordProcessor() {
                     null
             )
             val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
-            log.info("metadata topic : %s offset : %s".format(metadata?.topic(), metadata?.offset()))
+            log.info("metadata topic : ${metadata?.topic()} offset : ${metadata?.offset()}")
         } catch (e: Exception) {
             log.warning(
                     ("Error while sending message to dlq : " +
-                            "key %s from topic %s with offset %s : %s").format(record.key(), record.topic(), record.offset(), e.toString()))
+                            "key ${record.key()} from topic ${record.topic()} with offset ${record.offset()} : $e"))
             throw DlqException("Exception while sending message to DLQ " + e)
         }
     }
@@ -90,12 +82,5 @@ open class RecordProcessor() {
 }
 
 fun getDataStringForRecord(record: ConsumerRecord<ByteArray, ByteArray>): String {
-    return "%s:%s:%d:%d".format(
-            String(record.key() ?: ByteArray(0)),
-            record.topic(),
-            record.partition(),
-            record.offset()
-    )
+    return "${String(record.key() ?: ByteArray(0))}:${record.topic()}:${record.partition()}:${record.offset()}"
 }
-
-

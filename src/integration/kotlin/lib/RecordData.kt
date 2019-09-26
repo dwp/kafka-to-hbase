@@ -78,5 +78,6 @@ fun timestamp(): Long {
 }
 
 fun uniqueTopicName(): ByteArray {
-    return "test-topic-%s".format(Instant.now().toEpochMilli()).toByteArray()
+    val time = Instant.now().toEpochMilli()
+    return "test-topic-$time".toByteArray()
 }

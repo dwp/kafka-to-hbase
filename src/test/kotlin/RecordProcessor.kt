@@ -163,7 +163,7 @@ class RecordProcessorTest : StringSpec({
     }
 
     "Malformed record object can be converted to bytearray " {
-        val malformedRecord = MalformedRecord("key","junk", "Not a valid json")
+        val malformedRecord = MalformedRecord("key", "junk", "Not a valid json")
         val byteArray = processor.getObjectAsByteArray(malformedRecord)
         val bi = ByteArrayInputStream(byteArray)
         val oi = ObjectInputStream(bi)
