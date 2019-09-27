@@ -5,6 +5,7 @@ import org.json.JSONTokener
 
 open class Validator {
 
+    @Throws(InvalidMessageException::class)
     open fun validate(json: String) {
         try {
             val jsonObject = JSONObject(json)
