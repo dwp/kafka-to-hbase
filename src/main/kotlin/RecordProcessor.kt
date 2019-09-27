@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream
 import java.util.logging.Logger
 
 open class RecordProcessor(private val validator: Validator, private val converter: Converter) {
-    fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
+    open fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
         val json: JsonObject
 
         try {
