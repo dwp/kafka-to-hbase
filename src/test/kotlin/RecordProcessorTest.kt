@@ -34,6 +34,8 @@ class RecordProcessorTest : StringSpec() {
     lateinit var processor: RecordProcessor
     val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
+    override fun isInstancePerTest(): Boolean = true
+
     override fun beforeTest(testCase: TestCase) {
         super.beforeTest(testCase)
         println("Before every spec/test case")
