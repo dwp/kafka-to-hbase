@@ -1,6 +1,5 @@
 import com.beust.klaxon.JsonObject
 import com.nhaarman.mockitokotlin2.*
-import io.kotlintest.TestCase
 import io.kotlintest.fail
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
@@ -36,10 +35,10 @@ class RecordProcessorTest : StringSpec() {
 
     override fun isInstancePerTest(): Boolean = true
 
-     fun reset() {
+    fun reset() {
         println("Before every spec/test case")
         mockValidator = mock()
-        mockConverter = mock()
+        mockConverter = spy()
         mockMessageParser = mock()
         hbaseClient = mock()
         logger = mock()
@@ -62,6 +61,7 @@ class RecordProcessorTest : StringSpec() {
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
 
+
             processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
             verify(hbaseClient).putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)
@@ -69,6 +69,7 @@ class RecordProcessorTest : StringSpec() {
         }
 
         "record value with invalid json is not sent to hbase" {
+            reset()
             val messageBody = """{"message":{"_id":{"test_key_a":,"test_key_b":"test_value_b"}}}"""
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
@@ -78,6 +79,7 @@ class RecordProcessorTest : StringSpec() {
         }
 
         "Exception should be thrown when dlq topic is not available and message  is not sent to hbase" {
+            reset()
             mockkObject(DlqProducer)
             val obj = object : org.apache.kafka.clients.producer.Producer<ByteArray, ByteArray> {
                 override fun partitionsFor(topic: String?): MutableList<PartitionInfo> {
@@ -131,10 +133,11 @@ class RecordProcessorTest : StringSpec() {
             }
 
             verifyZeroInteractions(hbaseClient)
-            verify(logger, times(2)).warning(any<String>())
+            verify(logger, times(1)).warning(any<String>())
         }
 
         "record value with invalid _id field is not sent to hbase" {
+            reset()
             val messageBody = """{
         "message": {
            "id":{"test_key_a":"test_value_a","test_key_b":"test_value_b"},
@@ -151,6 +154,7 @@ class RecordProcessorTest : StringSpec() {
         }
 
         "exception in hbase communication causes severe log message" {
+            reset()
             val messageBody = """{
         "message": {
            "_id":{"test_key_a":"test_value_a","test_key_b":"test_value_b"},
@@ -171,6 +175,7 @@ class RecordProcessorTest : StringSpec() {
         }
 
         "Malformed record object can be converted to bytearray " {
+            reset()
             val malformedRecord = MalformedRecord("key", "junk", "Not a valid json")
             val byteArray = processor.getObjectAsByteArray(malformedRecord)
             val bi = ByteArrayInputStream(byteArray)
@@ -180,12 +185,15 @@ class RecordProcessorTest : StringSpec() {
         }
 
         "Json that fails schema validation is sent to the dlq" {
+            reset()
             val messageBody = "Hello everyone"
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
             val jsonObject = JsonObject()
-            whenever(mockConverter.convertToJson(record.value())).thenReturn(jsonObject)
-            whenever(mockValidator.validate(jsonObject.toJsonString())).thenThrow(InvalidMessageException("oops!!", Exception()))
+            doReturn(jsonObject).`when`(mockConverter).convertToJson(record.value())
+            // whenever(mockConverter.convertToJson(record.value())).thenReturn(jsonObject)
+            doThrow(InvalidMessageException("oops!!", Exception())).`when`(mockValidator).validate(jsonObject.toJsonString())
+            //whenever(mockValidator.validate(jsonObject.toJsonString())).thenThrow(InvalidMessageException("oops!!", Exception()))
 
             processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
@@ -195,10 +203,13 @@ class RecordProcessorTest : StringSpec() {
         }
 
         "Invalid Json that fails parsing is sent to the dlq" {
+            reset()
             val messageBody = "Hello everyone"
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
-            whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
-            whenever(mockConverter.convertToJson(record.value())).thenThrow(IllegalArgumentException())
+            doReturn(testByteArray).`when`(mockMessageParser).generateKeyFromRecordBody(any())
+            //whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
+            doThrow(IllegalArgumentException()).`when`(mockConverter).convertToJson(record.value())
+            //whenever(mockConverter.convertToJson(record.value())).thenThrow(IllegalArgumentException())
 
             processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
