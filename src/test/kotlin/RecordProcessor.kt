@@ -1,4 +1,3 @@
-import com.beust.klaxon.JsonObject
 import com.nhaarman.mockitokotlin2.*
 import io.kotlintest.fail
 import io.kotlintest.shouldThrow
@@ -27,11 +26,9 @@ class RecordProcessorTest : StringSpec({
 
     configureLogging()
     val mockValidator = mock<Validator>()
-    val mockConverter = mock<Converter>()
+    val mockConverter = spy<Converter>()
     val mockMessageParser = mock<MessageParser>()
-    val jsonObject = JsonObject()
     val processor = spy(RecordProcessor(mockValidator, mockConverter))
-    doNothing().whenever(mockConverter).getLastModifiedTimestamp(any())
     doNothing().whenever(mockValidator).validate(any())
     doNothing().whenever(processor).sendMessageToDlq(any(), any())
 
@@ -48,7 +45,6 @@ class RecordProcessorTest : StringSpec({
             "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
-        whenever(mockConverter.convertToJson(any())).thenReturn(jsonObject)
 
         processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
@@ -60,7 +56,6 @@ class RecordProcessorTest : StringSpec({
         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
-
         processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
         verifyZeroInteractions(hbaseClient)
@@ -131,7 +126,7 @@ class RecordProcessorTest : StringSpec({
             "        }\n" +
             "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
+        whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(ByteArray(0))
 
         processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
@@ -170,12 +165,5 @@ class RecordProcessorTest : StringSpec({
 
     "Json that fails schema validation is sent to the dlq" {
         val messageBody = "Hello everyone"
-        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
-
-        processor.processRecord(record, hbaseClient, mockMessageParser, logger)
-
-        verify(hbaseClient).putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)
-        verify(logger).info(any<String>())
     }
 })

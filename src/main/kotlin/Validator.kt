@@ -21,17 +21,17 @@ open class Validator {
     private fun schemaLoader(): SchemaLoader {
         if (_schemaLoader == null) {
             _schemaLoader = SchemaLoader.builder()
-                    .schemaJson(schemaObject())
-                    .draftV7Support()
-                    .build()
+                .schemaJson(schemaObject())
+                .draftV7Support()
+                .build()
         }
         return _schemaLoader!!
     }
 
     private fun schemaObject() =
-            javaClass.getResourceAsStream(schemaLocation()).use { inputStream ->
-                JSONObject(JSONTokener(inputStream))
-            }
+        javaClass.getResourceAsStream(schemaLocation()).use { inputStream ->
+            JSONObject(JSONTokener(inputStream))
+        }
 
     private fun schemaLocation() = Config.Validator.properties["schema.location"] as String
     private var _schemaLoader: SchemaLoader? = null
