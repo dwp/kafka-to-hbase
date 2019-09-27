@@ -81,3 +81,8 @@ fun uniqueTopicName(): ByteArray {
     val time = Instant.now().toEpochMilli()
     return "test-topic-$time".toByteArray()
 }
+
+fun uniqueDlqName(): ByteArray {
+    val time = Instant.now().toEpochMilli()
+    return "dlq-$time".toByteArray()
+}
