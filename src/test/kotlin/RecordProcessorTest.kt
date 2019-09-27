@@ -1,3 +1,4 @@
+import com.beust.klaxon.JsonObject
 import com.nhaarman.mockitokotlin2.*
 import io.kotlintest.fail
 import io.kotlintest.shouldThrow
@@ -28,9 +29,12 @@ class RecordProcessorTest : StringSpec({
     val mockValidator = mock<Validator>()
     val mockConverter = mock<Converter>()
     val mockMessageParser = mock<MessageParser>()
+    val jsonObject = JsonObject()
     val processor = spy(RecordProcessor(mockValidator, mockConverter))
+    doNothing().whenever(mockConverter).getLastModifiedTimestamp(any())
     doNothing().whenever(mockValidator).validate(any())
     doNothing().whenever(processor).sendMessageToDlq(any(), any())
+
     val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
     val hbaseClient = mock<HbaseClient>()
     val logger = mock<Logger>()
@@ -44,6 +48,7 @@ class RecordProcessorTest : StringSpec({
             "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
         whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
+        whenever(mockConverter.convertToJson(any())).thenReturn(jsonObject)
 
         processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
