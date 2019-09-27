@@ -36,8 +36,7 @@ class RecordProcessorTest : StringSpec() {
 
     override fun isInstancePerTest(): Boolean = true
 
-    override fun beforeTest(testCase: TestCase) {
-        super.beforeTest(testCase)
+     fun reset() {
         println("Before every spec/test case")
         mockValidator = mock()
         mockConverter = mock()
@@ -45,14 +44,15 @@ class RecordProcessorTest : StringSpec() {
         hbaseClient = mock()
         logger = mock()
         processor = spy(RecordProcessor(mockValidator, mockConverter))
+        doNothing().whenever(mockValidator).validate(any())
+        doNothing().whenever(processor).sendMessageToDlq(any(), any())
     }
 
     init {
         configureLogging()
-        doNothing().whenever(mockValidator).validate(any())
-        doNothing().whenever(processor).sendMessageToDlq(any(), any())
 
         "valid record is sent to hbase successfully" {
+            reset()
             val messageBody = """{
         "message": {
            "_id":{"test_key_a":"test_value_a","test_key_b":"test_value_b"},
