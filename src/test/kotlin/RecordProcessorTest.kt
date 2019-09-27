@@ -18,6 +18,7 @@ import org.apache.kafka.common.record.TimestampType
 import org.junit.Assert.assertEquals
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
+import java.lang.IllegalArgumentException
 import java.time.Duration
 import java.util.concurrent.Future
 import java.util.logging.Logger
@@ -162,11 +163,11 @@ class RecordProcessorTest : StringSpec({
         val oi = ObjectInputStream(bi)
         val actual = oi.readObject()
         assertEquals(malformedRecord, actual)
-    } */
+    }
 
     "Json that fails schema validation is sent to the dlq" {
         val messageBody = "Hello everyone"
-        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
+        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
         whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
         val jsonObject = JsonObject()
         whenever(mockConverter.convertToJson(record.value())).thenReturn(jsonObject)
@@ -175,7 +176,21 @@ class RecordProcessorTest : StringSpec({
         processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
         verifyZeroInteractions(hbaseClient)
-        verify(processor.sendMessageToDlq(eq(record), eq("Invalid schema for bob: Message failed schema validation:oops!!")), times(1))
-        verify(logger).info(any<String>())
+        verify(processor,times(1)).sendMessageToDlq(eq(record), eq("Invalid schema for key:testTopic:1:11: oops!!"))
+        verify(logger).warning(any<String>())
+    }*/
+
+    "Invalid Json that fails parsing is sent to the dlq" {
+        val messageBody = "Hello everyone"
+        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
+        whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
+        whenever(mockConverter.convertToJson(record.value())).thenThrow(IllegalArgumentException())
+
+        processor.processRecord(record, hbaseClient, mockMessageParser, logger)
+
+        verifyZeroInteractions(hbaseClient)
+        verify(processor,times(1)).sendMessageToDlq(eq(record), eq("Invalid json"))
+        verifyZeroInteractions(mockValidator)
+        verify(logger).warning(any<String>())
     }
 })
