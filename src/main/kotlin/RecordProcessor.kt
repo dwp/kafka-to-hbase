@@ -10,11 +10,9 @@ import java.util.logging.Logger
 open class RecordProcessor(private val validator: Validator, private val converter: Converter) {
     open fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser, log: Logger) {
         val json: JsonObject
-
         try {
             json = converter.convertToJson(record.value())
             validator.validate(json.toJsonString())
-
         } catch (e: IllegalArgumentException) {
             log.warning("Could not parse message body for record with data of ${getDataStringForRecord(record)}")
             sendMessageToDlq(record, "Invalid json")
@@ -27,6 +25,8 @@ open class RecordProcessor(private val validator: Validator, private val convert
         }
 
         val formattedKey = parser.generateKeyFromRecordBody(json)
+
+
         if (formattedKey.isEmpty()) {
             log.warning("Empty key was skipped for record with data of ${getDataStringForRecord(record)}")
             return
@@ -41,7 +41,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
                 body = record.value(),
                 version = lastModifiedTimestampLong
             )
-            log.info("Written record to HBase with data of ${getDataStringForRecord(record)}")
+            log.info("Written record '${String(formattedKey)}' to HBase with data of ${getDataStringForRecord(record)}")
         } catch (e: Exception) {
             log.severe("Error writing record to HBase with data of ${getDataStringForRecord(record)}")
             throw e
