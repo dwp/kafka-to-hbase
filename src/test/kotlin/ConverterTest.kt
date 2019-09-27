@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class Conversion : StringSpec({
+class ConverterTest : StringSpec({
     configureLogging()
 
     val converter = Converter()

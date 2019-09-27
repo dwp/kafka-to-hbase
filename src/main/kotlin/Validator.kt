@@ -3,9 +3,9 @@ import org.everit.json.schema.loader.SchemaLoader
 import org.json.JSONObject
 import org.json.JSONTokener
 
-class Validator {
+open class Validator {
 
-    fun validate(json: String) {
+    open fun validate(json: String) {
         try {
             val jsonObject = JSONObject(json)
             val schema = schema()

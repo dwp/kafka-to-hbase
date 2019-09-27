@@ -8,10 +8,10 @@ import java.util.*
 import java.util.logging.Logger
 import java.util.zip.CRC32
 
-class Converter() {
+open class Converter() {
     private val log: Logger = Logger.getLogger("Converter")
 
-    fun convertToJson(body: ByteArray): JsonObject {
+    open fun convertToJson(body: ByteArray): JsonObject {
 
         try {
             val parser: Parser = Parser.default()

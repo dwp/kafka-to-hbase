@@ -12,7 +12,9 @@ fun shovelAsync(kafka: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClient, 
             log.info(Config.Kafka.reportTopicSubscriptionDetails())
 
             val parser = MessageParser()
-            val processor = RecordProcessor()
+            val validator = Validator()
+            val converter = Converter()
+            val processor = RecordProcessor(validator, converter)
 
             while (isActive) {
                 kafka.subscribe(Config.Kafka.topicRegex)

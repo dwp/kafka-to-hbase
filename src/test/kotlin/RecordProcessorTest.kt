@@ -1,4 +1,3 @@
-import com.beust.klaxon.JsonObject
 import com.nhaarman.mockitokotlin2.*
 import io.kotlintest.fail
 import io.kotlintest.shouldThrow
@@ -26,26 +25,27 @@ import java.util.logging.Logger
 class RecordProcessorTest : StringSpec({
 
     configureLogging()
-
-    val processor = spy(RecordProcessor())
-    doNothing().whenever(processor).sendMessageToDlq(any())
+    val mockValidator = mock<Validator>()
+    val mockConverter = mock<Converter>()
+    val mockMessageParser = mock<MessageParser>()
+    val processor = spy(RecordProcessor(mockValidator, mockConverter))
+    doNothing().whenever(mockValidator).validate(any())
+    doNothing().whenever(processor).sendMessageToDlq(any(), any())
     val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
     val hbaseClient = mock<HbaseClient>()
     val logger = mock<Logger>()
 
     "valid record is sent to hbase successfully" {
         val messageBody = "{\n" +
-                "        \"message\": {\n" +
-                "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-                "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-                "        }\n" +
-                "    }"
+            "        \"message\": {\n" +
+            "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+            "        }\n" +
+            "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        val parser = mock<MessageParser> {
-            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
-        }
+        every { mockMessageParser.generateKeyFromRecordBody(any()) } returns testByteArray
 
-        processor.processRecord(record, hbaseClient, parser, logger)
+        processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
         verify(hbaseClient).putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)
         verify(logger).info(any<String>())
@@ -54,11 +54,9 @@ class RecordProcessorTest : StringSpec({
     "record value with invalid json is not sent to hbase" {
         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        val parser = mock<MessageParser> {
-            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
-        }
+        every { mockMessageParser.generateKeyFromRecordBody(any()) } returns testByteArray
 
-        processor.processRecord(record, hbaseClient, parser, logger)
+        processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
         verifyZeroInteractions(hbaseClient)
     }
@@ -107,15 +105,13 @@ class RecordProcessorTest : StringSpec({
             }
         }
         every { DlqProducer.getInstance() } returns obj
-        val processor = RecordProcessor()
+        val processor = RecordProcessor(mockValidator, mockConverter)
         val messageBody = "{\"message\":{\"_id\":{\"test_key_a\":,\"test_key_b\":\"test_value_b\"}}}"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        val parser = mock<MessageParser> {
-            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
-        }
+        every { mockMessageParser.generateKeyFromRecordBody(any()) } returns testByteArray
 
         shouldThrow<DlqException> {
-            processor.processRecord(record, hbaseClient, parser, logger)
+            processor.processRecord(record, hbaseClient, mockMessageParser, logger)
         }
 
         verifyZeroInteractions(hbaseClient)
@@ -124,17 +120,15 @@ class RecordProcessorTest : StringSpec({
 
     "record value with invalid _id field is not sent to hbase" {
         val messageBody = "{\n" +
-                "        \"message\": {\n" +
-                "           \"id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-                "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-                "        }\n" +
-                "    }"
+            "        \"message\": {\n" +
+            "           \"id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+            "        }\n" +
+            "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        val parser = mock<MessageParser> {
-            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(ByteArray(0))
-        }
+        every { mockMessageParser.generateKeyFromRecordBody(any()) } returns testByteArray
 
-        processor.processRecord(record, hbaseClient, parser, logger)
+        processor.processRecord(record, hbaseClient, mockMessageParser, logger)
 
         verifyZeroInteractions(hbaseClient)
         verify(logger, atLeastOnce()).warning(any<String>())
@@ -142,20 +136,18 @@ class RecordProcessorTest : StringSpec({
 
     "exception in hbase communication causes severe log message" {
         val messageBody = "{\n" +
-                "        \"message\": {\n" +
-                "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
-                "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
-                "        }\n" +
-                "    }"
+            "        \"message\": {\n" +
+            "           \"_id\":{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"},\n" +
+            "           \"_lastModifiedDateTime\": \"2018-12-14T15:01:02.000+0000\",\n" +
+            "        }\n" +
+            "    }"
         val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
-        val parser = mock<MessageParser> {
-            on { generateKeyFromRecordBody(any<JsonObject>()) }.doReturn(testByteArray)
-        }
+        every { mockMessageParser.generateKeyFromRecordBody(any()) } returns testByteArray
 
         whenever(hbaseClient.putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)).doThrow(RuntimeException("testException"))
 
         try {
-            processor.processRecord(record, hbaseClient, parser, logger)
+            processor.processRecord(record, hbaseClient, mockMessageParser, logger)
             fail("test did not throw an exception")
         } catch (e: RuntimeException) {
             verify(logger, atLeastOnce()).severe(any<String>())
@@ -169,5 +161,16 @@ class RecordProcessorTest : StringSpec({
         val oi = ObjectInputStream(bi)
         val actual = oi.readObject()
         assertEquals(malformedRecord, actual)
+    }
+
+    "Json that fails schema validation is sent to the dlq" {
+        val messageBody = "Hello everyone"
+        val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("testTopic", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
+        every { mockMessageParser.generateKeyFromRecordBody(any()) } returns testByteArray
+
+        processor.processRecord(record, hbaseClient, mockMessageParser, logger)
+
+        verify(hbaseClient).putVersion("testTopic".toByteArray(), testByteArray, messageBody.toByteArray(), 1544799662000)
+        verify(logger).info(any<String>())
     }
 })
