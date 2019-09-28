@@ -1,4 +1,4 @@
-# Kafka2HbaseIntTest
+# Kafka2Hbase
 
 Providing a way of migrating data in Kafka topics into tables in Hbase,
 preserving versions based on Kafka message timestamps.
@@ -34,7 +34,7 @@ ROW                                                          COLUMN+CELL
 1 row(s) in 0.0100 seconds
 ```
 
-Kafka2HbaseIntTest will attempt to create the required namespaces, tables and
+Kafka2Hbase will attempt to create the required namespaces, tables and
 column families on startup. If they already exist, nothing will happen. By
 default the data table column family has a maximum of MAXINT versions
 (approximately 2.1 billion) and a minimum of 1 version. There is no TTL.
@@ -95,6 +95,28 @@ They can be executed with the following command.
 
     make test
 
+## Run in and IDE
+
+Both Kafka2HBase and the integration tests can be run in an IDE to facilitate 
+quicker feedback then a containerized approach. This is useful during active development.
+
+To do this first bring up the hbase, kafka and zookeeper containers:
+
+    make services
+    
+On the run configuration for Kafka2Hbase set the following environment variable (nb not system
+ properties)
+ 
+    K2HB_HBASE_ZOOKEEPER_QUORUM=localhost;K2HB_KAFKA_POLL_TIMEOUT=PT2S
+
+And on the run configuration for the integration tests set these:
+
+    K2HB_KAFKA_BOOTSTRAP_SERVERS=localhost:9092;K2HB_HBASE_ZOOKEEPER_QUORUM=localhost
+
+Then insert into your local hosts file the names, IP addresses of the kafka and hbase containers:
+
+    ./hosts.sh
+ 
 ## Getting logs
 
 The services are listed in the `docker-compose.yaml` file and logs can be
@@ -116,14 +138,14 @@ can be run as a separate container.
 ## Configuration
 
 There are a number of environment variables that can be used to configure
-the system. Some of them are for configuring Kafka2HbaseIntTest itself, and some
+the system. Some of them are for configuring Kafka2Hbase itself, and some
 are for configuring the built-in ACM PCA client to perform mutual auth.
 
-### Kafka2HbaseIntTest Configuration
+### Kafka2Hbase Configuration
 
 #### Hbase
 
-By default Kafka2HbaseIntTest will connect to Zookeeper at `zookeeper:2181` use the parent uri `hbase` 
+By default Kafka2Hbase will connect to Zookeeper at `zookeeper:2181` use the parent uri `hbase` 
 and create tables in the `k2hb` namespace. The data will be stored in `cf:data`
 with at least `1` version and at most `10` versions and a TTL of 10 days.
 
@@ -146,7 +168,7 @@ with at least `1` version and at most `10` versions and a TTL of 10 days.
 
 #### Kafka
 
-By default Kafka2HbaseIntTest will connect to Kafka at `kafka:9092` in the `k2hb`
+By default Kafka2Hbase will connect to Kafka at `kafka:9092` in the `k2hb`
 consumer group. It will poll the `test-topic` topic with a poll timeout of
 `10` days, and refresh the topics list every 10 seconds (`10000` ms).
 
