@@ -1,4 +1,4 @@
-# Kafka2Hbase
+# Kafka2HbaseIntTest
 
 Providing a way of migrating data in Kafka topics into tables in Hbase,
 preserving versions based on Kafka message timestamps.
@@ -34,7 +34,7 @@ ROW                                                          COLUMN+CELL
 1 row(s) in 0.0100 seconds
 ```
 
-Kafka2Hbase will attempt to create the required namespaces, tables and
+Kafka2HbaseIntTest will attempt to create the required namespaces, tables and
 column families on startup. If they already exist, nothing will happen. By
 default the data table column family has a maximum of MAXINT versions
 (approximately 2.1 billion) and a minimum of 1 version. There is no TTL.
@@ -116,14 +116,14 @@ can be run as a separate container.
 ## Configuration
 
 There are a number of environment variables that can be used to configure
-the system. Some of them are for configuring Kafka2Hbase itself, and some
+the system. Some of them are for configuring Kafka2HbaseIntTest itself, and some
 are for configuring the built-in ACM PCA client to perform mutual auth.
 
-### Kafka2Hbase Configuration
+### Kafka2HbaseIntTest Configuration
 
 #### Hbase
 
-By default Kafka2Hbase will connect to Zookeeper at `zookeeper:2181` use the parent uri `hbase` 
+By default Kafka2HbaseIntTest will connect to Zookeeper at `zookeeper:2181` use the parent uri `hbase` 
 and create tables in the `k2hb` namespace. The data will be stored in `cf:data`
 with at least `1` version and at most `10` versions and a TTL of 10 days.
 
@@ -146,7 +146,7 @@ with at least `1` version and at most `10` versions and a TTL of 10 days.
 
 #### Kafka
 
-By default Kafka2Hbase will connect to Kafka at `kafka:9092` in the `k2hb`
+By default Kafka2HbaseIntTest will connect to Kafka at `kafka:9092` in the `k2hb`
 consumer group. It will poll the `test-topic` topic with a poll timeout of
 `10` days, and refresh the topics list every 10 seconds (`10000` ms).
 
