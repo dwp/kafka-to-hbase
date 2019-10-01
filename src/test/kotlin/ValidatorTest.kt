@@ -35,7 +35,7 @@ class ValidatorTest : StringSpec({
             |       "_id": {
             |           "declarationId": 1
             |       },
-            |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104+0000",
+            |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104",
             |       "collection" : "addresses",
             |       "db": "core",
             |       "dbObject": "asd",
