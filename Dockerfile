@@ -33,7 +33,7 @@ COPY src/ ./src
 RUN $GRADLE distTar
 
 # Second build stage starts here
-FROM openjdk:8-slim
+FROM openjdk:8-alpine
 
 ARG http_proxy_full=""
 
