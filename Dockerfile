@@ -55,18 +55,17 @@ RUN echo "ENV http: ${http_proxy}" \
 
 ENV acm_cert_helper_version 0.8.0
 # Note you get an error when trying to add gosu and uuid in the same line
-RUN echo "===> Installing Dependencies ..."; \
-    apk update; \
-    apk add --no-cache --virtual gosu; \
-    apk add --no-cache --virtual uuid; \
-    echo "===> Installing acm_pca_cert_generator ..."; \
-    apk add --no-cache --virtual .build-deps g++ python3-dev libffi-dev openssl-dev gcc; \
-    apk add --no-cache --update python3; \
-    pip3 install --upgrade pip setuptools; \
-    pip3 install https://github.com/dwp/acm-pca-cert-generator/releases/download/${acm_cert_helper_version}/acm_cert_helper-${acm_cert_helper_version}.tar.gz; \
-    echo "===> Cleaning up ..."; \
-    rm -rf /tmp/* /var/lib/apt/lists/*; \
-    echo "==Dependencies done=="
+RUN echo "===> Installing Dependencies ..." \
+    && apk update \
+    && apk add --no-cache --virtual gosu \
+    && apk add --no-cache --virtual uuid \
+    && echo "===> Installing acm_pca_cert_generator ..." \
+    && apk add --no-cache g++ python3-dev libffi-dev openssl-dev gcc su-exec \
+    && pip3 install --upgrade pip setuptools \
+    && pip3 install https://github.com/dwp/acm-pca-cert-generator/releases/download/${acm_cert_helper_version}/acm_cert_helper-${acm_cert_helper_version}.tar.gz \
+    && echo "===> Cleaning up ..." \
+    && rm -rf /tmp/* /var/lib/apt/lists/* \
+    && echo "==Dependencies done=="
 
 COPY ./entrypoint.sh /
 

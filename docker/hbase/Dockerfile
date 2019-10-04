@@ -4,14 +4,14 @@ ARG HBASE_VERSION=1.4.9
 
 ENV PATH $PATH:/hbase/bin
 
-ENV JAVA_HOME=/usr/local/openjdk-8
+ENV JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 
 ENV HBASE_MANAGES_ZK=false
 
 WORKDIR /
 
 RUN apk update && \
-    apk add --no-cache procps wget && \
+    apk add --no-cache procps wget tar bash && \
     rm -rf /var/lib/apt/lists/*
 
 RUN url_archive="http://archive.apache.org/dist/hbase/$HBASE_VERSION/hbase-$HBASE_VERSION-bin.tar.gz" && \
