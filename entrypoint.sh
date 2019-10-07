@@ -3,10 +3,6 @@
 set -e
 
 # Create a user to run the process as instead of root
-
-: "${USER_NAME:=user}"
-: "${GROUP_NAME:=usergroup}"
-
 if ! getent passwd ${USER_NAME} > /dev/null
 then
     addgroup ${GROUP_NAME}

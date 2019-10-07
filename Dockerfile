@@ -37,6 +37,10 @@ FROM openjdk:8-alpine
 
 ARG http_proxy_full=""
 
+# Set user to run the process as in the docker contianer
+ENV USER_NAME=user
+ENV GROUP_NAME=usergroup
+
 # Set environment variables for apk
 ENV http_proxy=${http_proxy_full}
 ENV https_proxy=${http_proxy_full}
@@ -63,8 +67,6 @@ RUN echo "===> Installing Dependencies ..." \
     && apk add --no-cache g++ python3-dev libffi-dev openssl-dev gcc su-exec \
     && pip3 install --upgrade pip setuptools \
     && pip3 install https://github.com/dwp/acm-pca-cert-generator/releases/download/${acm_cert_helper_version}/acm_cert_helper-${acm_cert_helper_version}.tar.gz \
-    && echo "===> Cleaning up ..." \
-    && rm -rf /tmp/* /var/lib/apt/lists/* \
     && echo "==Dependencies done=="
 
 COPY ./entrypoint.sh /

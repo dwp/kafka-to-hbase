@@ -17,7 +17,6 @@ RUN $GRADLE build && $GRADLE test
 
 RUN apk update \
     && apk add su-exec \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
