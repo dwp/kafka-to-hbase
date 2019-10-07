@@ -16,7 +16,7 @@ COPY gradle.properties .
 RUN $GRADLE build && $GRADLE test
 
 RUN apk update \
-    && apk add su-exec \
+    && apk add su-exec
 
 COPY . .
 
