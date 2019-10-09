@@ -3,14 +3,14 @@ orbs:
   snyk: snyk/snyk@0.0.8
 
 jobs:
-#  scan:
-#    docker:
-#      - image: 'circleci/node:4.8.2'
-#
-#    steps:
-#      - checkout
-#      - run: npm install -q
-#      - snyk/scan
+  scan:
+    docker:
+      - image: 'circleci/node:4.8.2'
+
+    steps:
+      - checkout
+      - run: npm install -q
+      - snyk/scan
 
   build:
     docker:
@@ -91,7 +91,7 @@ workflows:
   version: 2.1
   "build & test":
     jobs:
-#      - scan
+      - scan
       - build
       - test
       - publish-github-release:
