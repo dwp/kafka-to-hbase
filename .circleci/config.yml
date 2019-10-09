@@ -1,5 +1,17 @@
-version: 2
+version: 2.1
+orbs:
+  snyk: snyk/snyk@0.0.8
+
 jobs:
+  scan:
+    docker:
+      - image: 'circleci/buildpack-deps:stretch'
+
+    steps:
+      - checkout
+      - run: npm install -q
+      - snyk/scan
+
   build:
     docker:
       - image: circleci/openjdk:8-jdk
@@ -76,9 +88,10 @@ jobs:
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
-  version: 2
+  version: 2.1
   "build & test":
     jobs:
+      - scan
       - build
       - test
       - publish-github-release:
