@@ -11,6 +11,7 @@ jobs:
       - checkout
       - snyk/scan:
           organization: benj-fletch
+          fail-on-issues: false
 
   build:
     docker:
