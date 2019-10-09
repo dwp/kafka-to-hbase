@@ -12,6 +12,9 @@ jobs:
       - snyk/scan:
           organization: benj-fletch
           fail-on-issues: false
+      - snyk/scan:
+          organization: benj-fletch
+          severity-threshold: high
 
   build:
     docker:
