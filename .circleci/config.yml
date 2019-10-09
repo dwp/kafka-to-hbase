@@ -9,7 +9,8 @@ jobs:
 
     steps:
       - checkout
-      - snyk/scan
+      - snyk/scan:
+          organization: benj-fletch
 
   build:
     docker:
