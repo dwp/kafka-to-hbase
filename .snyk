@@ -1,0 +1,21 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JAVA-COMGOOGLEPROTOBUF-173761:
+    - '*':
+        reason: testing the policy ignores
+        expires: 2019-11-09T08:41:55.234Z
+  SNYK-JAVA-COMMONSBEANUTILS-30077:
+    - '*':
+        reason: testing the policy ignores
+        expires: 2019-11-09T08:41:55.234Z
+  SNYK-JAVA-ORGAPACHEHADOOP-32047:
+    - '*':
+        reason: testing the policy ignores
+        expires: 2019-11-09T08:41:55.234Z
+  SNYK-JAVA-ORGAPACHEHADOOP-174573:
+    - '*':
+        reason: testing the policy ignores
+        expires: 2019-11-09T08:41:55.234Z
+patch: {}
