@@ -69,7 +69,7 @@ RUN echo "===> Installing Dependencies ..." \
     && apk update \
     && apk upgrade \
     && echo "==Update done==" \
-    && apk add --no-cache su-exec util-linux \
+    && apk add --no-cache util-linux \
     && echo "===> Installing acm_pca_cert_generator ..." \
     && apk add --no-cache g++ python3-dev libffi-dev openssl-dev gcc \
     && pip3 install --upgrade pip setuptools \
