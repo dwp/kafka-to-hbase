@@ -59,7 +59,6 @@ then
         echo "K2HB_KAFKA_CERT_MODE must be one of 'CERTGEN,RETRIEVE' but was ${K2HB_KAFKA_CERT_MODE}"
         exit 1
     fi
-    chown -R ${USER_NAME}:${GROUP_NAME} "${SSL_DIR}"
 else
     echo "Skipping cert generation for host ${HOSTNAME}"
 fi
