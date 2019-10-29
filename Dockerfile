@@ -40,8 +40,8 @@ FROM openjdk:8-alpine
 ARG http_proxy_full=""
 
 # Set user to run the process as in the docker contianer
-ENV USER_NAME=user
-ENV GROUP_NAME=usergroup
+ENV USER_NAME=k2hb
+ENV GROUP_NAME=k2hb
 
 # Create group and user to execute task
 RUN addgroup ${GROUP_NAME}
