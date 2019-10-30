@@ -80,12 +80,11 @@ workflows:
   "build & test":
     jobs:
       - build
-      - test
+      - test:
           requires:
             - build
       - publish-github-release:
           requires:
-            - build
             - test
           filters:
             branches:
