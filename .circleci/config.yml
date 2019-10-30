@@ -81,6 +81,8 @@ workflows:
     jobs:
       - build
       - test
+          requires:
+            - build
       - publish-github-release:
           requires:
             - build
