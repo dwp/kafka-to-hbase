@@ -18,4 +18,8 @@ ignore:
     - '*':
         reason: removed until ticket raised to remediate
         expires: 2019-12-09T08:41:55.234Z
+  SNYK-JAVA-ORGLZ4-473117:
+    - '*':
+        reason: removed until ticket raised to remediate
+        expires: 2019-12-09T08:41:55.234Z
 patch: {}

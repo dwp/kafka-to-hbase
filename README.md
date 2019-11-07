@@ -55,6 +55,21 @@ Ensure a JVM is installed and run the gradle wrapper.
 
     make build
 
+
+## Snyk
+We incorporate Snyk CLI scanning into the build pipeline to reveal
+vulnerabilities in the Kotlin code base. There are 2 scan steps added
+to the CircleCI build:
+1. Scan 1 - runs a full scan and adds a report for all vulnerabilities but
+does not fail the build
+2. Scan 2 - runs a scan and fails the build if there are any 'high'
+vulnerabilities found
+
+If a vulnerability is failing the build but you do not want to fix it at
+this point in time, the `.snyk` policy file can be updated to ignore it. You can
+either do this manually by retrieving the snyk ID of the vulnerability and
+enter it or use the Snyk CLI command `snyk ignore`. [See here for details](https://snyk.io/docs/cli-ignore/)
+
 ## Distribute
 
 If a standard zip file is required, just use the assembleDist command.
