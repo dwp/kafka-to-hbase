@@ -10,10 +10,10 @@ jobs:
     steps:
       - checkout
       - snyk/scan:
-          organization: DWP-DataWorks
+          organization: dwp-dataworks
           fail-on-issues: false
       - snyk/scan:
-          organization: DWP-DataWorks
+          organization: dwp-dataworks
           severity-threshold: high
 
   build:
