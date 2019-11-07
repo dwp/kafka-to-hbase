@@ -5,17 +5,17 @@ ignore:
   SNYK-JAVA-COMGOOGLEPROTOBUF-173761:
     - '*':
         reason: removed until ticket raised to remediate
-        expires: 2019-11-09T08:41:55.234Z
+        expires: 2019-12-09T08:41:55.234Z
   SNYK-JAVA-COMMONSBEANUTILS-30077:
     - '*':
         reason: removed until ticket raised to remediate
-        expires: 2019-11-09T08:41:55.234Z
+        expires: 2019-12-09T08:41:55.234Z
   SNYK-JAVA-ORGAPACHEHADOOP-32047:
     - '*':
         reason: removed until ticket raised to remediate
-        expires: 2019-11-09T08:41:55.234Z
+        expires: 2019-12-09T08:41:55.234Z
   SNYK-JAVA-ORGAPACHEHADOOP-174573:
     - '*':
         reason: removed until ticket raised to remediate
-        expires: 2019-11-09T08:41:55.234Z
+        expires: 2019-12-09T08:41:55.234Z
 patch: {}

@@ -10,10 +10,10 @@ jobs:
     steps:
       - checkout
       - snyk/scan:
-          organization: benj-fletch
+          organization: DWP-DataWorks
           fail-on-issues: false
       - snyk/scan:
-          organization: benj-fletch
+          organization: DWP-DataWorks
           severity-threshold: high
 
   build:
@@ -57,7 +57,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          # Attempt to enable DLC - if it's not enabled at an org level this will do nothing
+          # Attempt to disable DLC - if it's not enabled at an org level this will do nothing
           docker_layer_caching: false
 
         # Do not user the docker compose override to prevent invalid bind mounts
