@@ -1,4 +1,11 @@
 version: 2
+
+executors:
+  docker-publisher:
+    environment:
+      IMAGE_NAME: dwpdigital/squid-s3
+    docker:
+      - image: circleci/buildpack-deps:stretch
 jobs:
   build:
     docker:
