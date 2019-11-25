@@ -98,7 +98,7 @@ class Kafka2HBaseSpec: StringSpec(){
             producer.sendRecord(topic, "key3".toByteArray(), body, timestamp)
             val malformedRecord = MalformedRecord("key3", String(body), "Invalid json")
             val expected = Klaxon().toJsonString(malformedRecord)
-            Thread.sleep(60_000)
+            Thread.sleep(10_000)
             val s3Object =  s3Client.getObject("kafka2s3", "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key3").objectContent
             val actual = s3Object.bufferedReader().use(BufferedReader::readText)
             actual shouldBe expected
@@ -112,7 +112,7 @@ class Kafka2HBaseSpec: StringSpec(){
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             producer.sendRecord(topic, "key4".toByteArray(), body, timestamp)
-            Thread.sleep(60_000)
+            Thread.sleep(10_000)
             val s3Object = s3Client.getObject("kafka2s3", "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key4").objectContent
             val actual = s3Object.bufferedReader().use(BufferedReader::readText)
             val malformedRecord = MalformedRecord(
