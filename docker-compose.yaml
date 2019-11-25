@@ -48,11 +48,13 @@ services:
     image: dwpdigital/kafka-to-s3:latest
     depends_on:
       - kafka
+      - s3-provision
     environment:
       K2S3_KAFKA_INSECURE: "true"
       K2S3_DEAD_LETTER_QUEUE: "test-dlq-topic"
       K2S3_KAFKA_META_REFRESH_MS: "1000"
       K2S3_KAFKA_POLL_TIMEOUT: "PT10S"
+      AWS_S3_PREFIX_BASE: "prefix"
 
   aws-s3:
     image: localstack/localstack:latest
