@@ -147,6 +147,9 @@ workflows:
       - test:
           requires:
             - build
+      - snyk:
+          requires:
+            - build
       - publish-github-release:
           requires:
             - test
