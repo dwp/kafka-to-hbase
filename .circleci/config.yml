@@ -70,6 +70,8 @@ jobs:
     docker:
       - image: snyk/snyk-cli:1.256.0-gradle-2.8
     steps:
+      - run: mkdir -p ~/.ssh/
+      - run: chmod -R 0700 ~/.ssh/
       - run: echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       - checkout
       - setup_remote_docker:
