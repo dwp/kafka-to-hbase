@@ -70,6 +70,7 @@ jobs:
     docker:
       - image: snyk/snyk-cli:1.256.0-gradle-2.8
     steps:
+      - run: echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       - checkout
       - setup_remote_docker:
           # Attempt to enable DLC - if it's not enabled at an org level this will do nothing
