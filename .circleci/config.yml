@@ -68,43 +68,55 @@ jobs:
           path: test-results
           destination: test-results
 
-  snyk:
+  snyk-pr:
     docker:
       - image: circleci/openjdk:8-jdk
     environment:
       IMAGE_NAME: kafka-to-hbase
     steps:
       - checkout
-      # First snyk scan checks for all vulns in Kotlin code but won't fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          fail-on-issues: false
-          target-file: build.gradle.kts
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin-all'
-      # Second snyk scan only looks for sev:high and will fail if found
+      # First snyk scan only looks for sev:high and will fail if found
       - snyk/scan:
           organization: dwp-dataworks
           severity-threshold: high
           target-file: build.gradle.kts
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin-high-only'
+          project: '${CIRCLE_PROJECT_REPONAME}/pr-kotlin'
       - setup_remote_docker
       - run:
           command: 'docker build -t $IMAGE_NAME:latest .'
           name: Build Docker image
-      # Third snyk scan examines Docker container but won't fail on issues
-      - snyk/scan:
-          organization: dwp-dataworks
-          docker-image-name: '$IMAGE_NAME:latest'
-          fail-on-issues: false
-          target-file: Dockerfile
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-all'
-      # Fourth snyk scan examines Docker container for sev:high and will fail if found
+      # Second snyk scan examines Docker container for sev:high and will fail if found
       - snyk/scan:
           organization: dwp-dataworks
           docker-image-name: '$IMAGE_NAME:latest'
           severity-threshold: high
           target-file: Dockerfile
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-high-only'
+          project: '${CIRCLE_PROJECT_REPONAME}/pr-docker'
+
+  snyk-master:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      IMAGE_NAME: kafka-to-hbase
+    steps:
+      - checkout
+      # First snyk scan only looks for sev:high and will fail if found
+      - snyk/scan:
+          organization: dwp-dataworks
+          severity-threshold: high
+          target-file: build.gradle.kts
+          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin'
+      - setup_remote_docker
+      - run:
+          command: 'docker build -t $IMAGE_NAME:latest .'
+          name: Build Docker image
+      # Second snyk scan examines Docker container for sev:high and will fail if found
+      - snyk/scan:
+          organization: dwp-dataworks
+          docker-image-name: '$IMAGE_NAME:latest'
+          severity-threshold: high
+          target-file: Dockerfile
+          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker'
 
 
   publish-github-release:
@@ -176,9 +188,12 @@ workflows:
       - test:
           requires:
             - build
-      - snyk:
+      - snyk-pr:
           requires:
             - build
+          filters:
+            branches:
+              ignore: master
       - publish-github-release:
           requires:
             - test
