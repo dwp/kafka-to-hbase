@@ -72,7 +72,7 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk
     environment:
-      IMAGE_NAME: ${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}
+      IMAGE_NAME: kafka-to-hbase
     steps:
       - checkout
       # First snyk scan checks for all vulns in Kotlin code but won't fail if found
