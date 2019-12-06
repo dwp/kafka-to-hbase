@@ -195,6 +195,12 @@ workflows:
           filters:
             branches:
               ignore: master
+      - snyk-master:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
       - publish-github-release:
           requires:
             - test
