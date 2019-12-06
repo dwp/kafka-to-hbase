@@ -116,7 +116,7 @@ jobs:
       - setup_remote_docker
       # Build our Docker container and scan
       - run:
-          commmand: 'docker build -t $IMAGE_NAME:latest .'
+          command: 'docker build -t $IMAGE_NAME:latest .'
           name: Build Docker image
       # Seventh snyk scan examines a running instance of the Dockerfile-driven container but won't fail on issues
       - snyk/scan:
@@ -132,7 +132,7 @@ jobs:
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-high-only'
       # Build our Docker_integration container and scan
       - run:
-          commmand: 'docker build -t $IMAGE_NAME_INT:latest .'
+          command: 'docker build -t $IMAGE_NAME_INT:latest .'
           name: Build Docker image
       # Ninth snyk scan examines a running instance of the Dockerfile-driven container but won't fail on issues
       - snyk/scan:
