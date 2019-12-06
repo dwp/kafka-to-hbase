@@ -96,7 +96,6 @@ jobs:
           organization: dwp-dataworks
           docker-image-name: '$IMAGE_NAME:latest'
           fail-on-issues: false
-          monitor-on-build: true
           target-file: Dockerfile
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-all'
       # Fourth snyk scan examines Docker container for sev:high and will fail if found
@@ -104,7 +103,6 @@ jobs:
           organization: dwp-dataworks
           docker-image-name: '$IMAGE_NAME:latest'
           severity-threshold: high
-          monitor-on-build: true
           target-file: Dockerfile
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-high-only'
 
