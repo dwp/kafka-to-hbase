@@ -73,7 +73,6 @@ jobs:
       - image: circleci/openjdk:8-jdk
     environment:
       IMAGE_NAME: ${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}
-      IMAGE_NAME_INT: ${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-int
     steps:
       - checkout
       # First snyk scan checks for all vulns in Kotlin code but won't fail if found
@@ -88,64 +87,29 @@ jobs:
           severity-threshold: high
           target-file: build.gradle.kts
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin-high-only'
-      # Third snyk scan examines the Dockerfile but won't fail on issues
-      - snyk/scan:
-          organization: dwp-dataworks
-          fail-on-issues: false
-          target-file: Dockerfile
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-all'
-      # Fourth snyk scan examines the Dockerfile for sev:high and will fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          severity-threshold: high
-          target-file: Dockerfile
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-high-only'
-      # Fifth snyk scan examines the Dockerfile_integration but won't fail on issues
-      - snyk/scan:
-          organization: dwp-dataworks
-          fail-on-issues: false
-          target-file: Dockerfile_integration
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-int-all'
-      # Sixth snyk scan examines the Dockerfile_integration for sev:high and will fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          severity-threshold: high
-          target-file: Dockerfile_integration
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-int-high-only'
       # Setup environment
       - setup_remote_docker
       # Build our Docker container and scan
       - run:
           command: 'docker build -t $IMAGE_NAME:latest .'
           name: Build Docker image
-      # Seventh snyk scan examines a running instance of the Dockerfile-driven container but won't fail on issues
+      # Fifth snyk scan examines Docker container but won't fail on issues
       - snyk/scan:
+          organization: dwp-dataworks
           docker-image-name: '$IMAGE_NAME:latest'
           fail-on-issues: false
           monitor-on-build: true
+          target-file: Dockerfile
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-all'
-      # Eigth snyk scan examines a running instance of the Dockerfile-driven container for sev:high and will fail if found
+      # Sixth snyk scan examines Docker container for sev:high and will fail if found
       - snyk/scan:
+          organization: dwp-dataworks
           docker-image-name: '$IMAGE_NAME:latest'
           severity-threshold: high
           monitor-on-build: true
+          target-file: Dockerfile
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-container-high-only'
-      # Build our Docker_integration container and scan
-      - run:
-          command: 'docker build -t $IMAGE_NAME_INT:latest .'
-          name: Build Docker image
-      # Ninth snyk scan examines a running instance of the Dockerfile-driven container but won't fail on issues
-      - snyk/scan:
-          docker-image-name: '$IMAGE_NAME_INT:latest'
-          fail-on-issues: false
-          monitor-on-build: true
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-int-container-all'
-      # Tenth snyk scan examines a running instance of the Dockerfile-driven container for sev:high and will fail if found
-      - snyk/scan:
-          docker-image-name: '$IMAGE_NAME_INT:latest'
-          severity-threshold: high
-          monitor-on-build: true
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker-int-container-high-only'
+
 
   publish-github-release:
     docker:
