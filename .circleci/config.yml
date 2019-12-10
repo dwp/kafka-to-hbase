@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   snyk: snyk/snyk@0.0.8
+  docker: circleci/docker@0.5.19
 
 executors:
   docker-publisher:
@@ -118,6 +119,8 @@ jobs:
           severity-threshold: high
           target-file: Dockerfile
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker'
+  
+  
 
 
   publish-github-release:
@@ -186,6 +189,10 @@ workflows:
   "build & test":
     jobs:
       - build
+      - docker/hadolint:
+          dockerfile: Dockerfile
+          ignore-rules: 'DL3017,DL3018,DL3013'
+          trusted-registries: 'docker.io,quay.io'
       - test:
           requires:
             - build
