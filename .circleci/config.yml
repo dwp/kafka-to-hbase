@@ -185,14 +185,16 @@ jobs:
             docker push $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
 
 workflows:
-  version: 2
-  "build & test":
+  lint:
     jobs:
-      - build
       - docker/hadolint:
           dockerfile: Dockerfile
           ignore-rules: 'DL3017,DL3018,DL3013'
           trusted-registries: 'docker.io,quay.io'
+  version: 2
+  "build & test":
+    jobs:
+      - build
       - test:
           requires:
             - build
