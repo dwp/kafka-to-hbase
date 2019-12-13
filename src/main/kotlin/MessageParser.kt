@@ -1,3 +1,4 @@
+import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.JsonValue
 import java.util.logging.Logger
@@ -13,21 +14,22 @@ open class MessageParser {
     }
 
     fun getId(json: JsonObject): JsonObject? {
-        val message: JsonObject? = json.obj("message")
-        if (message != null) {
+        val message = json.get("message")
+        if (message != null && message is JsonObject) {
             val id = message.get("_id")
-            if (id != null && id is JsonValue) {
-                if (id.obj != null) {
-                    return id.obj
+
+            if (id != null) {
+                if (id is JsonObject) {
+                    return id
                 }
-                else if (id.string != null) {
+                else if (id is String) {
                     val idObject = JsonObject()
-                    idObject["id"] = id.string
+                    idObject["id"] = id
                     return idObject
                 }
-                else if (id.int != null) {
+                else if (id is Int) {
                     val idObject = JsonObject()
-                    idObject["id"] = "${id.int}"
+                    idObject["id"] = "${id}"
                     return idObject
                 }
                 else {
