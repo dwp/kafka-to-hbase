@@ -1,4 +1,5 @@
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.JsonValue
 import java.util.logging.Logger
 
 open class MessageParser {
@@ -12,11 +13,33 @@ open class MessageParser {
     }
 
     fun getId(json: JsonObject): JsonObject? {
-        try {
-            val message: JsonObject? = json.obj("message")
-            return if (message == null) null else message.obj("_id")
-        } catch (e: ClassCastException) {
-            log.warning("Record body does not contain valid json object at message._id")
+        val message: JsonObject? = json.obj("message")
+        if (message != null) {
+            val id = message.get("_id")
+            if (id != null && id is JsonValue) {
+                if (id.obj != null) {
+                    return id.obj
+                }
+                else if (id.string != null) {
+                    val idObject = JsonObject()
+                    idObject["id"] = id.string
+                    return idObject
+                }
+                else if (id.int != null) {
+                    val idObject = JsonObject()
+                    idObject["id"] = "${id.int}"
+                    return idObject
+                }
+                else {
+                    return null
+                }
+            }
+            else {
+                return null
+            }
+
+        }
+        else {
             return null
         }
     }
