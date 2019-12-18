@@ -1,7 +1,9 @@
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import sun.misc.Signal
+import java.security.Security
 
 suspend fun main() {
+    Security.setProperty("networkaddress.cache.ttl", (getEnv("K2HB_DNS_TTL") ?: "60"))
     // Connect to Hbase and create the topic tables
     val hbase = HbaseClient.connect()
     hbase.migrate()
