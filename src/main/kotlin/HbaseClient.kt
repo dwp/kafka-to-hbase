@@ -28,7 +28,7 @@ open class HbaseClient(
             Config.Hbase.topicQualifier.toByteArray()
         )
     }
-
+    @Throws(java.io.IOException::class)
     open fun putVersion(topic: ByteArray, key: ByteArray, body: ByteArray, version: Long) {
         connection.getTable(TableName.valueOf(dataTable)).use { table ->
             table.put(Put(key).apply {
