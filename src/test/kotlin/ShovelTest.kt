@@ -58,7 +58,7 @@ class ShovelTest : StringSpec() {
 
             shouldThrow<java.io.IOException> {
                 val job = shovelAsync(consumer, hbase, Duration.ofSeconds(10))
-                runBlocking { job.await() }
+                job.await()
             }
 
         }
