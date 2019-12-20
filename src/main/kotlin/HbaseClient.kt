@@ -28,8 +28,11 @@ open class HbaseClient(
             Config.Hbase.topicQualifier.toByteArray()
         )
     }
+
     @Throws(java.io.IOException::class)
     open fun putVersion(topic: ByteArray, key: ByteArray, body: ByteArray, version: Long) {
+        if(connection.isClosed) throw java.io.IOException("HBase connection is closed")
+
         connection.getTable(TableName.valueOf(dataTable)).use { table ->
             table.put(Put(key).apply {
                 this.addColumn(
