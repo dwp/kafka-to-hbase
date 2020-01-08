@@ -26,7 +26,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                     processor.processRecord(record, hbase, parser)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: java.io.IOException) {
                 log.error(e.message)
                 cancel(CancellationException("Cannot reconnect to Hbase", e))
             }
