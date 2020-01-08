@@ -88,7 +88,7 @@ services:
       context: ./
     depends_on:
       - kafka2hbase
-      - kafka2s3i
+      - kafka2s3
     command: "true"
     environment:
       USER_NAME: "user"
