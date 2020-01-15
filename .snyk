@@ -42,4 +42,28 @@ ignore:
     - '*':
         reason: Transient dependency brought in by json-schema validator with no direct upgrade or patch.
         expires: 2020-02-20T00:00:00.000Z
+  SNYK-JAVA-COMMONSHTTPCLIENT-30083:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-02-20T00:00:00.000Z
+  SNYK-JAVA-COMMONSHTTPCLIENT-31660:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-02-20T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHEHADOOP-174573:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-02-20T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHEHADOOP-32047:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-02-20T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHEHADOOP-461004:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-02-20T00:00:00.000Z
+  SNYK-JAVA-ORGCODEHAUSJACKSON-534878:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-02-20T00:00:00.000Z
 patch: {}
