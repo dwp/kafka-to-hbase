@@ -61,16 +61,17 @@ open class HbaseClient(val connection: Connection, val columnFamily: ByteArray, 
             try {
                 logger.info("Creating namespace '$namespace'.")
                 connection.admin.createNamespace(NamespaceDescriptor.create(namespace).build())
-                namespaces[namespace] = true
             }
             catch (e: NamespaceExistException) {
                 logger.info("'$namespace' already exists, probably created by another process")
+            }
+            finally {
+                namespaces[namespace] = true
             }
         }
 
         if (!tables.contains(tableName)) {
             logger.info("Creating table '$dataTableName'.")
-
             try {
                 connection.admin.createTable(HTableDescriptor(dataTableName).apply {
                     addFamily(
@@ -83,8 +84,9 @@ open class HbaseClient(val connection: Connection, val columnFamily: ByteArray, 
             } catch (e: TableExistsException) {
                 logger.info("'$tableName' already exists, probably created by another process")
             }
-
-            tables[tableName] = true
+            finally {
+                tables[tableName] = true
+            }
         }
     }
 
