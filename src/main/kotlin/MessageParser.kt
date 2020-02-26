@@ -10,9 +10,9 @@ open class MessageParser {
     }
 
     fun getId(json: JsonObject): JsonObject? {
-        val message = json.get("message")
+        val message = json["message"]
         if (message != null && message is JsonObject) {
-            val id = message.get("_id")
+            val id = message["_id"]
 
             if (id != null) {
                 if (id is JsonObject) {
@@ -25,7 +25,7 @@ open class MessageParser {
                 }
                 else if (id is Int) {
                     val idObject = JsonObject()
-                    idObject["id"] = "${id}"
+                    idObject["id"] = "$id"
                     return idObject
                 }
                 else {

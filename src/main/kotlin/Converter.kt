@@ -7,14 +7,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.CRC32
 
-open class Converter() {
+open class Converter {
 
     open fun convertToJson(body: ByteArray): JsonObject {
         try {
             val parser: Parser = Parser.default()
             val stringBuilder: StringBuilder = StringBuilder(String(body))
-            val json: JsonObject = parser.parse(stringBuilder) as JsonObject
-            return json
+            return parser.parse(stringBuilder) as JsonObject
         } catch (e: KlaxonException) {
             logger.warn("Error while parsing json", "cause", e.message?:"")
             throw IllegalArgumentException("Cannot parse invalid JSON")
@@ -22,7 +21,7 @@ open class Converter() {
     }
 
     fun sortJsonByKey(unsortedJson: JsonObject): String {
-        val sortedEntries = unsortedJson.toSortedMap(compareBy<String> { it })
+        val sortedEntries = unsortedJson.toSortedMap(compareBy { it })
         val json: JsonObject = JsonObject(sortedEntries)
         return json.toJsonString()
     }
@@ -33,20 +32,20 @@ open class Converter() {
 
         checksum.update(bytes, 0, bytes.size)
 
-        return ByteBuffer.allocate(4).putInt(checksum.getValue().toInt()).array();
+        return ByteBuffer.allocate(4).putInt(checksum.value.toInt()).array()
     }
 
     fun encodeToBase64(input: String): String {
-        return Base64.getEncoder().encodeToString(input.toByteArray());
+        return Base64.getEncoder().encodeToString(input.toByteArray())
     }
 
     fun decodeFromBase64(input: String): String {
-        val decodedBytes: ByteArray = Base64.getDecoder().decode(input);
-        return String(decodedBytes);
+        val decodedBytes: ByteArray = Base64.getDecoder().decode(input)
+        return String(decodedBytes)
     }
 
     open fun getTimestampAsLong(timeStampAsStr: String?, timeStampPattern: String = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ"): Long {
-        val df = SimpleDateFormat(timeStampPattern);
+        val df = SimpleDateFormat(timeStampPattern)
         return df.parse(timeStampAsStr).time
     }
 

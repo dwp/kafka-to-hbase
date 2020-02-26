@@ -5,7 +5,7 @@ import org.apache.hadoop.hbase.client.Get
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.TimeRange
 
-open class HbaseClient(val connection: Connection, val columnFamily: ByteArray, val columnQualifier: ByteArray) {
+open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray, private val columnQualifier: ByteArray) {
 
     companion object {
         fun connect() = HbaseClient(

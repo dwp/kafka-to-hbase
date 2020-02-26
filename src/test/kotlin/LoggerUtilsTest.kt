@@ -26,7 +26,7 @@ class LoggerUtilsTest {
         resetLoggerStaticFieldsForTests()
     }
 
-    fun catchMe1(): Throwable {
+    private fun catchMe1(): Throwable {
         try {
             MakeStacktrace1().callMe1()
         }
@@ -36,7 +36,7 @@ class LoggerUtilsTest {
         return RuntimeException("boom")
     }
 
-    fun catchMe2(): Throwable {
+    private fun catchMe2(): Throwable {
         try {
             MakeStacktrace2().callMe2()
         }
@@ -46,7 +46,7 @@ class LoggerUtilsTest {
         return RuntimeException("boom")
     }
 
-    fun catchMe3(): Throwable {
+    private fun catchMe3(): Throwable {
         try {
             MakeStacktrace3().callMe3()
         }
@@ -226,7 +226,7 @@ class LoggerUtilsTest {
 
     @Test
     fun testLoggerLayoutAppender_WillReturnSkinnyJson_WhenCalledWithEmptyEvent() {
-        val result = LoggerLayoutAppender().doLayout(mock<ILoggingEvent>())
+        val result = LoggerLayoutAppender().doLayout(mock())
         val expected = """{ "timestamp":"1970-01-01T00:00:00.000", "log_level":"null", "message":"null", "thread":"null", "logger":"null", "duration_in_milliseconds":"-9876543000", "hostname":"test-host", "environment":"test-env", "application":"my-app", "app_version":"v1", "component":"tests", "correlation_id":"test1", "data_family":"cf" }
 """
         assertEquals(expected, result)

@@ -17,7 +17,7 @@ fun String.toDuration(): Duration {
 
 object Config {
 
-    val metaDataRefreshKey = "metadata.max.age.ms"
+    const val metaDataRefreshKey = "metadata.max.age.ms"
 
     object Validator {
         val properties = Properties().apply {
@@ -84,7 +84,7 @@ object Config {
         var topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "db.*")
         var dlqTopic = getEnv("K2HB_KAFKA_DLQ_TOPIC") ?: "dead-letter-queue"
 
-        fun metadataRefresh() = consumerProps.getProperty(metaDataRefreshKey)
+        fun metadataRefresh(): String = consumerProps.getProperty(metaDataRefreshKey)
 
     }
 }
