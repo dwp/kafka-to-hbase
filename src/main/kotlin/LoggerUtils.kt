@@ -194,8 +194,6 @@ class LoggerLayoutAppender : LayoutBase<ILoggingEvent>() {
         builder.append(event.threadName)
         builder.append("\", \"logger\":\"")
         builder.append(event.loggerName)
-        builder.append("\", \"duration_in_milliseconds\":\"")
-        builder.append(getDurationInMilliseconds(event.timeStamp))
         builder.append("\", ")
         builder.append(staticData)
         builder.append(" }")

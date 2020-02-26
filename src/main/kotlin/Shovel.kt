@@ -12,7 +12,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
         val validator = Validator()
         val converter = Converter()
         val processor = RecordProcessor(validator, converter)
-
+        val offsets = mutableMapOf<String, Long>()
         while (isActive) {
             try {
                 validateHbaseConnection(hbase)
@@ -25,6 +25,11 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 logger.info("Processing records", "recordCount", records.count().toString())
                 for (record in records) {
                     processor.processRecord(record, hbase, parser)
+                    offsets[record.topic()] = record.offset()
+                }
+
+                offsets.forEach { topic, offset ->
+                    logger.info("Offset", "topic_name", topic, "offset", offset.toString())
                 }
 
             } catch (e: java.io.IOException) {
