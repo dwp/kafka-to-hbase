@@ -17,7 +17,6 @@ private var environment = System.getProperty("environment", UNSET_TEXT)
 private var application = System.getProperty("application", UNSET_TEXT)
 private var app_version = System.getProperty("app_version", UNSET_TEXT)
 private var component = System.getProperty("component", UNSET_TEXT)
-var correlation_id: String = System.getProperty("correlation_id", UNSET_TEXT)
 private var staticData = makeLoggerStaticDataTuples()
 
 class LogConfiguration {
@@ -39,7 +38,6 @@ fun makeLoggerStaticDataTuples(): String {
         "\"application\":\"$application\", " +
         "\"app_version\":\"$app_version\", " +
         "\"component\":\"$component\", " +
-        "\"correlation_id\":\"$correlation_id\", " +
         "\"column_family\":\"${Config.Hbase.columnFamily}\", " +
         "\"column_qualifier\":\"${Config.Hbase.columnQualifier}\""
 }
@@ -50,18 +48,16 @@ fun resetLoggerStaticFieldsForTests() {
     application = System.getProperty("application", UNSET_TEXT)
     app_version = System.getProperty("app_version", UNSET_TEXT)
     component = System.getProperty("component", UNSET_TEXT)
-    correlation_id = System.getProperty("correlation_id", UNSET_TEXT)
     staticData = makeLoggerStaticDataTuples()
 }
 
-fun overrideLoggerStaticFieldsForTests(host: String, env: String, app: String, version: String, comp: String, start_milliseconds: String, id: String) {
+fun overrideLoggerStaticFieldsForTests(host: String, env: String, app: String, version: String, comp: String, start_milliseconds: String) {
     hostname = host
     environment = env
     application = app
     app_version = version
     component = comp
     LogConfiguration.start_time_milliseconds = start_milliseconds.toLong()
-    correlation_id = id
     staticData = makeLoggerStaticDataTuples()
 }
 
