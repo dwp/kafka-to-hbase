@@ -70,7 +70,7 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
         }
 
         if (!tables.contains(tableName)) {
-            logger.info("Creating table", "dataTableName", "$dataTableName")
+            logger.info("Creating table", "table_name", "$dataTableName")
             try {
                 connection.admin.createTable(HTableDescriptor(dataTableName).apply {
                     addFamily(
@@ -82,7 +82,7 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
                 })
             } catch (e: TableExistsException) {
                 logger.info("Didn't create table, table already exists, probably created by another process",
-                    "tableName", tableName)
+                    "table_name", tableName)
             }
             finally {
                 tables[tableName] = true
