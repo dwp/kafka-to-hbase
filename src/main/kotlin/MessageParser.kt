@@ -1,12 +1,8 @@
-import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
-import com.beust.klaxon.JsonValue
-import java.util.logging.Logger
 
 open class MessageParser {
 
     private val converter = Converter()
-    private val log: Logger = Logger.getLogger("messageParser")
 
     open fun generateKeyFromRecordBody(body: JsonObject?): ByteArray {
         val id: JsonObject? = body?.let { getId(it) }
@@ -49,7 +45,6 @@ open class MessageParser {
     fun generateKey(json: JsonObject): ByteArray {
         val jsonOrdered = converter.sortJsonByKey(json)
         val checksumBytes: ByteArray = converter.generateFourByteChecksum(jsonOrdered)
-
         return checksumBytes.plus(jsonOrdered.toByteArray())
     }
 }
