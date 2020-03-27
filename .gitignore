@@ -7,3 +7,5 @@
 
 out/
 snyk*
+.gitsecret/keys/random_seed
+!*.secret

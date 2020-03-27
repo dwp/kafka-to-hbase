@@ -1,5 +1,4 @@
 import org.apache.hadoop.conf.Configuration
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import java.time.Duration
@@ -18,7 +17,7 @@ fun String.toDuration(): Duration {
 
 object Config {
 
-    val metaDataRefreshKey = "metadata.max.age.ms"
+    const val metaDataRefreshKey = "metadata.max.age.ms"
 
     object Validator {
         val properties = Properties().apply {
@@ -28,17 +27,15 @@ object Config {
 
     object Hbase {
         val config = Configuration().apply {
-            // See also https://hbase.apache.org/book.html#hbase_default_configurations
             set("zookeeper.znode.parent", getEnv("K2HB_HBASE_ZOOKEEPER_PARENT") ?: "/hbase")
             set("hbase.zookeeper.quorum", getEnv("K2HB_HBASE_ZOOKEEPER_QUORUM") ?: "zookeeper")
             setInt("hbase.zookeeper.port", getEnv("K2HB_HBASE_ZOOKEEPER_PORT")?.toIntOrNull() ?: 2181)
         }
 
-        val dataTable = getEnv("K2HB_HBASE_DATA_TABLE") ?: "k2hb:ingest"
-        val dataFamily = getEnv("K2HB_HBASE_DATA_FAMILY") ?: "topic"
-        val topicTable = getEnv("K2HB_HBASE_TOPIC_TABLE") ?: "k2hb:ingest-topic"
-        val topicFamily = getEnv("K2HB_HBASE_TOPIC_FAMILY") ?: "c"
-        val topicQualifier = getEnv("K2HB_HBASE_TOPIC_QUALIFIER") ?: "msg"
+        val columnFamily = getEnv("K2HB_HBASE_COLUMN_FAMILY") ?: "cf"
+        val columnQualifier = getEnv("K2HB_HBASE_COLUMN_QUALIFIER") ?: "record"
+        val retryMaxAttempts: Int = getEnv("K2HB_RETRY_MAX_ATTEMPS")?.toInt() ?: 3
+        val retryInitialBackoff: Long = getEnv("K2HB_RETRY_INITIAL_BACKOFF")?.toLong() ?: 10000
     }
 
     object Kafka {
@@ -84,13 +81,10 @@ object Config {
         }
 
         val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofHours(1)
-        var topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "test-topic.*")
+        var topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "db.*")
         var dlqTopic = getEnv("K2HB_KAFKA_DLQ_TOPIC") ?: "dead-letter-queue"
 
-        fun reportTopicSubscriptionDetails(): String {
-            return "Subscribing to topics ${topicRegex.pattern()} " +
-                "with poll timeout ${pollTimeout} " +
-                "and metadata refresh every ${consumerProps.getProperty(metaDataRefreshKey)} ms"
-        }
+        fun metadataRefresh(): String = consumerProps.getProperty(metaDataRefreshKey)
+
     }
 }

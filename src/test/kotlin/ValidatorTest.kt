@@ -27,7 +27,7 @@ class ValidatorTest : StringSpec({
         """.trimMargin())
     }
 
-    "Valid message altername date format passes validation." {
+    "Valid message alternate date format passes validation." {
         Validator().validate("""
             |{
             |   "message": {
@@ -36,6 +36,29 @@ class ValidatorTest : StringSpec({
             |           "declarationId": 1
             |       },
             |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104",
+            |       "collection" : "addresses",
+            |       "db": "core",
+            |       "dbObject": "asd",
+            |       "encryption": {
+            |           "keyEncryptionKeyId": "cloudhsm:7,14",
+            |           "initialisationVector": "iv",
+            |           "encryptedEncryptionKey": "=="
+            |       }
+            |   }
+            |}
+        """.trimMargin())
+    }
+
+    "Valid message alternate date format number two passes validation." {
+
+        Validator().validate("""
+            |{
+            |   "message": {
+            |       "@type": "hello",
+            |       "_id": {
+            |           "declarationId": 1
+            |       },
+            |       "_lastModifiedDateTime": "2017-06-19T23:00:10.875Z",
             |       "collection" : "addresses",
             |       "db": "core",
             |       "dbObject": "asd",
@@ -149,12 +172,57 @@ class ValidatorTest : StringSpec({
         exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
     }
 
-    "Missing '#/message/_id' field causes validation failure." {
-        val exception = shouldThrow<InvalidMessageException> {
+    "String '#/message/_id' field does not cause validation failure." {
             Validator().validate("""
             |{
             |   "message": {
             |       "@type": "hello",
+            |       "_id": "abcdefg",
+            |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104+0000",
+            |       "db": "abcd",
+            |       "collection" : "addresses",
+            |       "dbObject": "asd",
+            |       "encryption": {
+            |           "keyEncryptionKeyId": "cloudhsm:7,14",
+            |           "initialisationVector": "iv",
+            |           "encryptedEncryptionKey": "=="
+            |       }
+            |   }
+            |}
+            """.trimMargin()
+            )
+    }
+
+    "Integer '#/message/_id' field does not cause validation failure." {
+        Validator().validate("""
+            |{
+            |   "message": {
+            |       "@type": "hello",
+            |       "_id": 12345,
+            |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104+0000",
+            |       "db": "abcd",
+            |       "collection" : "addresses",
+            |       "dbObject": "asd",
+            |       "encryption": {
+            |           "keyEncryptionKeyId": "cloudhsm:7,14",
+            |           "initialisationVector": "iv",
+            |           "encryptedEncryptionKey": "=="
+            |       }
+            |   }
+            |}
+            """.trimMargin()
+        )
+    }
+
+
+    "Empty string '#/message/_id' field causes validation failure." {
+        val exception = shouldThrow<InvalidMessageException> {
+            Validator().validate(
+                """
+            |{
+            |   "message": {
+            |       "@type": "hello",
+            |       "_id": "",
             |       "_lastModifiedDateTime": "2019-07-04T07:27:35.104+0000",
             |       "db": "abcd",
             |       "collection" : "addresses",
@@ -169,7 +237,8 @@ class ValidatorTest : StringSpec({
             """.trimMargin()
             )
         }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [_id] not found'."
+
+        exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
     }
 
     "Incorrect '#/message/_id' type causes validation failure." {
@@ -193,7 +262,7 @@ class ValidatorTest : StringSpec({
             """.trimMargin()
             )
         }
-        exception.message shouldBe "Message failed schema validation: '#/message/_id: expected type: JSONObject, found: JSONArray'."
+        exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
     }
 
     "Empty '#/message/_id' type causes validation failure." {
@@ -217,7 +286,7 @@ class ValidatorTest : StringSpec({
             """.trimMargin()
             )
         }
-        exception.message shouldBe "Message failed schema validation: '#/message/_id: minimum size: [1], found: [0]'."
+        exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
     }
 
     "Missing '#/message/_lastModifiedDateTime' causes validation failure." {
@@ -288,7 +357,7 @@ class ValidatorTest : StringSpec({
             """.trimMargin()
             )
         }
-        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: string [2019-07-04] does not match pattern ^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}(\\+\\d{4})?\$'."
+        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: string [2019-07-04] does not match pattern ^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}(\\+\\d{4}|Z)?\$'."
     }
 
     "Missing '#/message/db' field causes validation failure." {

@@ -1,81 +1,114 @@
-import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client.*
+import org.apache.hadoop.hbase.*
+import org.apache.hadoop.hbase.client.Connection
+import org.apache.hadoop.hbase.client.ConnectionFactory
+import org.apache.hadoop.hbase.client.Get
+import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.TimeRange
-import org.apache.hadoop.hbase.util.Bytes
 
-open class HbaseClient(
-    val connection: Connection,
-    val dataTable: String,
-    val dataFamily: ByteArray,
-    val topicTable: String,
-    val topicFamily: ByteArray,
-    val topicQualifier: ByteArray
-) {
+open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray, private val columnQualifier: ByteArray) {
+
     companion object {
         fun connect() = HbaseClient(
             ConnectionFactory.createConnection(HBaseConfiguration.create(Config.Hbase.config)),
-            Config.Hbase.dataTable,
-            Config.Hbase.dataFamily.toByteArray(),
-            Config.Hbase.topicTable,
-            Config.Hbase.topicFamily.toByteArray(),
-            Config.Hbase.topicQualifier.toByteArray()
-        )
+            Config.Hbase.columnFamily.toByteArray(),
+            Config.Hbase.columnQualifier.toByteArray())
+
+        val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(HbaseClient::class.toString())
     }
 
-    open fun putVersion(topic: ByteArray, key: ByteArray, body: ByteArray, version: Long) {
-        connection.getTable(TableName.valueOf(dataTable)).use { table ->
+    @Throws(java.io.IOException::class)
+    open fun putVersion(tableName: String, key: ByteArray, body: ByteArray, version: Long) {
+
+        if (connection.isClosed) {
+            throw java.io.IOException("HBase connection is closed")
+        }
+
+        ensureTable(tableName)
+
+        connection.getTable(TableName.valueOf(tableName)).use { table ->
             table.put(Put(key).apply {
-                this.addColumn(
-                    dataFamily,
-                    topic,
-                    version,
-                    body
-                )
-            })
-        }
-
-        connection.getTable(TableName.valueOf(topicTable)).use { table ->
-            table.increment(Increment(topic).apply {
-                addColumn(
-                    topicFamily,
-                    topicQualifier,
-                    1
-                )
+                this.addColumn(columnFamily, columnQualifier, version, body)
             })
         }
     }
 
-    fun getCellAfterTimestamp(topic: ByteArray, key: ByteArray, timestamp: Long): ByteArray? {
-        connection.getTable(TableName.valueOf(dataTable)).use { table ->
+    fun getCellAfterTimestamp(tableName: String, key: ByteArray, timestamp: Long): ByteArray? {
+        connection.getTable(TableName.valueOf(tableName)).use { table ->
             val result = table.get(Get(key).apply {
                 setTimeRange(timestamp, TimeRange.INITIAL_MAX_TIMESTAMP)
             })
-
-            return result.getValue(dataFamily, topic)
+            return result.getValue(columnFamily, columnQualifier)
         }
-
     }
 
-    fun getCellBeforeTimestamp(topic: ByteArray, key: ByteArray, timestamp: Long): ByteArray? {
-        connection.getTable(TableName.valueOf(dataTable)).use { table ->
+    fun getCellBeforeTimestamp(tableName: String, key: ByteArray, timestamp: Long): ByteArray? {
+        connection.getTable(TableName.valueOf(tableName)).use { table ->
             val result = table.get(Get(key).apply {
                 setTimeRange(0, timestamp)
             })
 
-            return result.getValue(dataFamily, topic)
+            return result.getValue(columnFamily, columnQualifier)
         }
     }
 
-    fun getCount(key: ByteArray): Long {
-        connection.getTable(TableName.valueOf(topicTable)).use { table ->
-            val result = table.get(Get(key).apply {
-                addColumn(topicFamily, topicQualifier)
-            })
+    @Synchronized
+    fun ensureTable(tableName: String) {
+        val dataTableName = TableName.valueOf(tableName)
+        val namespace = dataTableName.namespaceAsString
 
-            val bytes = result?.getValue(topicFamily, topicQualifier) ?: ByteArray(8)
-            return Bytes.toLong(bytes)
+        if (!namespaces.contains(namespace)) {
+            try {
+                logger.info("Creating namespace", "namespace", namespace)
+                connection.admin.createNamespace(NamespaceDescriptor.create(namespace).build())
+            }
+            catch (e: NamespaceExistException) {
+                logger.info("Namespace already exists, probably created by another process", "namespace", namespace)
+            }
+            finally {
+                namespaces[namespace] = true
+            }
         }
+
+        if (!tables.contains(tableName)) {
+            logger.info("Creating table", "table_name", "$dataTableName")
+            try {
+                connection.admin.createTable(HTableDescriptor(dataTableName).apply {
+                    addFamily(
+                        HColumnDescriptor(columnFamily)
+                            .apply {
+                                maxVersions = Int.MAX_VALUE
+                                minVersions = 1
+                            })
+                })
+            } catch (e: TableExistsException) {
+                logger.info("Didn't create table, table already exists, probably created by another process",
+                    "table_name", tableName)
+            }
+            finally {
+                tables[tableName] = true
+            }
+        }
+    }
+
+    private val namespaces by lazy {
+        val extantNamespaces = mutableMapOf<String, Boolean>()
+
+        connection.admin.listNamespaceDescriptors()
+            .forEach {
+                extantNamespaces[it.name] = true
+            }
+
+        extantNamespaces
+    }
+
+    private val tables by lazy {
+        val names = mutableMapOf<String, Boolean>()
+
+        connection.admin.listTableNames().forEach {
+            names[it.nameAsString] = true
+        }
+
+        names
     }
 
     fun close() = connection.close()

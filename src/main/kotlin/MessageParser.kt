@@ -1,10 +1,8 @@
 import com.beust.klaxon.JsonObject
-import java.util.logging.Logger
 
 open class MessageParser {
 
     private val converter = Converter()
-    private val log: Logger = Logger.getLogger("messageParser")
 
     open fun generateKeyFromRecordBody(body: JsonObject?): ByteArray {
         val id: JsonObject? = body?.let { getId(it) }
@@ -12,11 +10,34 @@ open class MessageParser {
     }
 
     fun getId(json: JsonObject): JsonObject? {
-        try {
-            val message: JsonObject? = json.obj("message")
-            return if (message == null) null else message.obj("_id")
-        } catch (e: ClassCastException) {
-            log.warning("Record body does not contain valid json object at message._id")
+        val message = json["message"]
+        if (message != null && message is JsonObject) {
+            val id = message["_id"]
+
+            if (id != null) {
+                if (id is JsonObject) {
+                    return id
+                }
+                else if (id is String) {
+                    val idObject = JsonObject()
+                    idObject["id"] = id
+                    return idObject
+                }
+                else if (id is Int) {
+                    val idObject = JsonObject()
+                    idObject["id"] = "$id"
+                    return idObject
+                }
+                else {
+                    return null
+                }
+            }
+            else {
+                return null
+            }
+
+        }
+        else {
             return null
         }
     }
@@ -24,7 +45,6 @@ open class MessageParser {
     fun generateKey(json: JsonObject): ByteArray {
         val jsonOrdered = converter.sortJsonByKey(json)
         val checksumBytes: ByteArray = converter.generateFourByteChecksum(jsonOrdered)
-
         return checksumBytes.plus(jsonOrdered.toByteArray())
     }
 }

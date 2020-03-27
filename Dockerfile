@@ -35,7 +35,7 @@ RUN $GRADLE wrapper \
     && $GRADLE distTar
 
 # Second build stage starts here
-FROM openjdk:8-alpine
+FROM openjdk:14-alpine
 
 ARG http_proxy_full=""
 
@@ -87,6 +87,7 @@ RUN tar -xf $DIST_FILE --strip-components=1
 RUN chown ${USER_NAME}:${GROUP_NAME} . -R
 
 USER $USER_NAME
+ENV APPLICATION=kafka2hbase
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/kafka2hbase"]

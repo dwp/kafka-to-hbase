@@ -1,7 +1,14 @@
-version: 2.1
+version: 2.
+
 orbs:
   snyk: snyk/snyk@0.0.8
 
+executors:
+  docker-publisher:
+    environment:
+      IMAGE_NAME: dwpdigital/kafka-to-hbase
+    docker:
+      - image: circleci/buildpack-deps:stretch
 jobs:
   scan:
     docker:
@@ -57,21 +64,80 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          # Attempt to disable DLC - if it's not enabled at an org level this will do nothing
           docker_layer_caching: false
 
-        # Do not user the docker compose override to prevent invalid bind mounts
-      - run: sudo pip3 install docker-compose
-      - run: docker-compose -f docker-compose.yaml up --build -d
-      - run: docker-compose -f docker-compose.yaml run --name integration-test integration-test ./gradlew --no-daemon integration
-
-        # Store the test results from inside the container
-      - run: docker cp integration-test:/kafka2hbase/build/test-results .
+      - run:
+          name: "Run the integration test"
+          command: |
+            sudo pip3 install docker-compose
+            docker build --tag dwp-java:latest --file ./docker/java/Dockerfile .
+            docker build --tag dwp-python-preinstall:latest --file ./docker/python/Dockerfile .
+            docker-compose -f docker-compose.yaml up --build -d zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
+            S3_READY_REGEX=^Ready\.$
+            while ! docker logs aws-s3 2> /dev/null | grep -q $S3_READY_REGEX; do
+                echo Waiting for aws-s3.
+                sleep 2
+            done
+            docker-compose -f docker-compose.yaml up --build s3-provision
+            docker-compose -f docker-compose.yaml run --name integration-test integration-test ./gradlew --no-daemon integration
+            docker cp integration-test:/kafka2hbase/build/test-results .
       - store_test_results:
           path: test-results
       - store_artifacts:
           path: test-results
           destination: test-results
+
+  snyk-pr:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      IMAGE_NAME: kafka-to-hbase
+    steps:
+      - checkout
+      # First snyk scan only looks for sev:high and will fail if found
+      - snyk/scan:
+          organization: dwp-dataworks
+          severity-threshold: high
+          target-file: build.gradle.kts
+          project: '${CIRCLE_PROJECT_REPONAME}/pr-kotlin'
+      - setup_remote_docker
+      - run:
+          command: 'docker build -t $IMAGE_NAME:latest .'
+          name: Build Docker image
+      # Second snyk scan examines Docker container for sev:high and will fail if found
+      - snyk/scan:
+          organization: dwp-dataworks
+          docker-image-name: '$IMAGE_NAME:latest'
+          severity-threshold: high
+          target-file: Dockerfile
+          monitor-on-build: false
+          project: '${CIRCLE_PROJECT_REPONAME}/pr-docker'
+
+  snyk-master:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    environment:
+      IMAGE_NAME: kafka-to-hbase
+    steps:
+      - checkout
+      # First snyk scan only looks for sev:high and will fail if found
+      - snyk/scan:
+          organization: dwp-dataworks
+          severity-threshold: high
+          target-file: build.gradle.kts
+          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin'
+      - setup_remote_docker
+      - run:
+          command: 'docker build -t $IMAGE_NAME:latest .'
+          name: Build Docker image
+      # Second snyk scan examines Docker container for sev:high and will fail if found
+      - snyk/scan:
+          organization: dwp-dataworks
+          docker-image-name: '$IMAGE_NAME:latest'
+          severity-threshold: high
+          target-file: Dockerfile
+          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker'
+
 
   publish-github-release:
     docker:
@@ -91,6 +157,49 @@ jobs:
             echo "ghr -t GITHUB_TOKEN -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/"
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
+  docker-build:
+    executor: docker-publisher
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $IMAGE_NAME:latest .
+      - run:
+          name: Archive Docker image
+          command: docker save -o image.tar $IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+
+  docker-publish:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            set -u
+            set +o pipefail
+            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+            set -o pipefail
+            read MAJOR MINOR PATCH \<<< $( echo $LATEST_VERSION | awk -F '[ .]' '{maj = $1+0; min = $2+0; patch = $3+0; print maj, min, patch}' )
+            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR
+            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR.$MINOR
+            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $IMAGE_NAME:latest
+            docker push $IMAGE_NAME:$MAJOR
+            docker push $IMAGE_NAME:$MAJOR.$MINOR
+            docker push $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
+
 workflows:
   version: 2.1
   "build & test":
@@ -100,9 +209,34 @@ workflows:
       - test:
           requires:
             - build
+      - snyk-pr:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: master
+      - snyk-master:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
       - publish-github-release:
           requires:
             - test
           filters:
             branches:
               only: master
+      - docker-build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      - docker-publish:
+          requires:
+            - docker-build
+          filters:
+            branches:
+              only: master
+
