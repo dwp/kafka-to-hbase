@@ -1,4 +1,5 @@
 import org.apache.hadoop.conf.Configuration
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import java.time.Duration
@@ -36,6 +37,7 @@ object Config {
         val columnQualifier = getEnv("K2HB_HBASE_COLUMN_QUALIFIER") ?: "record"
         val retryMaxAttempts: Int = getEnv("K2HB_RETRY_MAX_ATTEMPS")?.toInt() ?: 3
         val retryInitialBackoff: Long = getEnv("K2HB_RETRY_INITIAL_BACKOFF")?.toLong() ?: 10000
+        val retryBackoffMultiplier: Long = getEnv("K2HB_RETRY_BACKOFF_MULTIPLIER")?.toLong() ?: 2
     }
 
     object Kafka {
@@ -59,6 +61,7 @@ object Config {
 
             put("auto.offset.reset", "earliest")
             put(metaDataRefreshKey, getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
+            put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
         }
 
         val producerProps = Properties().apply {

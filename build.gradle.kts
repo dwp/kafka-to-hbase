@@ -79,6 +79,10 @@ tasks.register<Test>("unit") {
     testClassesDirs = sourceSets["unit"].output.classesDirs
     classpath = sourceSets["unit"].runtimeClasspath
 
+    environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
+    environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
+    environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
+
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL
         events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
