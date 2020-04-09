@@ -62,6 +62,7 @@ object Config {
             put("auto.offset.reset", "earliest")
             put(metaDataRefreshKey, getEnv("K2HB_KAFKA_META_REFRESH_MS") ?: "10000")
             put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
+            put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, getEnv("K2HB_KAFKA_MAX_POLL_RECORDS") ?: 500)
         }
 
         val producerProps = Properties().apply {
