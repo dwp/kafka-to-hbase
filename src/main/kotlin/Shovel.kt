@@ -18,18 +18,22 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
             try {
                 validateHbaseConnection(hbase)
 
-                logger.info("Subscribing", "topic_regex", Config.Kafka.topicRegex.pattern(),
+                logger.debug("Subscribing", "topic_regex", Config.Kafka.topicRegex.pattern(),
                     "metadataRefresh", Config.Kafka.metadataRefresh())
                 consumer.subscribe(Config.Kafka.topicRegex)
 
-                logger.info("Polling", "poll_timeout", pollTimeout.toString())
+                logger.info("Polling", "poll_timeout", pollTimeout.toString(), "topic_regex", Config.Kafka.topicRegex.pattern())
                 val records = consumer.poll(pollTimeout)
-                logger.info("Processing records", "record_count", records.count().toString())
-                for (record in records) {
-                    processor.processRecord(record, hbase, parser)
-                    offsets[record.topic()] = record.offset()
+
+                if (records.count() > 0) {
+                    logger.info("Processing records", "record_count", records.count().toString())
+                    for (record in records) {
+                        processor.processRecord(record, hbase, parser)
+                        offsets[record.topic()] = record.offset()
+                    }
+                    logger.info("Commiting offset")
+                    consumer.commitSync()
                 }
-                consumer.commitSync()
 
                 if (batchCount++ % 50 == 0) {
                     offsets.forEach { topic, offset ->
