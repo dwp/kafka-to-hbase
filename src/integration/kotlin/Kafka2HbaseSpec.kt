@@ -49,7 +49,6 @@ class Kafka2HBaseSpec: StringSpec(){
                 val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
                 summaries1.size shouldBe 0
             }
-
         }
 
         "Messages with previously received identifiers are written as new versions to hbase but not to dlq" {
