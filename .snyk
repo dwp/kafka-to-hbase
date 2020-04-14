@@ -69,10 +69,10 @@ ignore:
   SNYK-JAVA-IONETTY-559515:
     - '*':
         reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
-        expires: 2020-02-20T00:00:00.000Z
+        expires: 2020-05-20T00:00:00.000Z
   SNYK-JAVA-IONETTY-559516:
     - '*':
         reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
-        expires: 2020-02-20T00:00:00.000Z
+        expires: 2020-05-20T00:00:00.000Z
 patch: {}
 
