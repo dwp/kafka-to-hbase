@@ -309,46 +309,52 @@ class ValidatorTest : StringSpec({
         )
     }
 
-    "Incorrect '#/message/_lastModifiedDateTime' type does not cause validation failure." {
-        Validator().validate("""
-        |{
-        |   "message": {
-        |       "@type": "hello",
-        |       "_id": { part: 1},
-        |       "_lastModifiedDateTime": 12,
-        |       "db": "abcd",
-        |       "collection" : "addresses",
-        |       "dbObject": "asd",
-        |       "encryption": {
-        |           "keyEncryptionKeyId": "cloudhsm:7,14",
-        |           "initialisationVector": "iv",
-        |           "encryptedEncryptionKey": "=="
-        |       }
-        |   }
-        |}
-        """.trimMargin()
-        )
+    "Incorrect '#/message/_lastModifiedDateTime' type causes validation failure." {
+        val exception = shouldThrow<InvalidMessageException> {
+            Validator().validate("""
+            |{
+            |   "message": {
+            |       "@type": "hello",
+            |       "_id": { part: 1},
+            |       "_lastModifiedDateTime": 12,
+            |       "db": "abcd",
+            |       "collection" : "addresses",
+            |       "dbObject": "asd",
+            |       "encryption": {
+            |           "keyEncryptionKeyId": "cloudhsm:7,14",
+            |           "initialisationVector": "iv",
+            |           "encryptedEncryptionKey": "=="
+            |       }
+            |   }
+            |}
+            """.trimMargin()
+            )
+        }
+        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: expected type: String, found: Integer'."
     }
 
     "Incorrect '#/message/_lastModifiedDateTime' format causes validation failure." {
-        Validator().validate("""
-        |{
-        |   "message": {
-        |       "@type": "hello",
-        |       "_id": { part: 1},
-        |       "_lastModifiedDateTime": "2019-07-04",
-        |       "db": "abcd",
-        |       "collection" : "addresses",
-        |       "dbObject": "asd",
-        |       "encryption": {
-        |           "keyEncryptionKeyId": "cloudhsm:7,14",
-        |           "initialisationVector": "iv",
-        |           "encryptedEncryptionKey": "=="
-        |       }
-        |   }
-        |}
-        """.trimMargin()
-        )
+        val exception = shouldThrow<InvalidMessageException> {
+            Validator().validate("""
+            |{
+            |   "message": {
+            |       "@type": "hello",
+            |       "_id": { part: 1},
+            |       "_lastModifiedDateTime": "2019-07-04",
+            |       "db": "abcd",
+            |       "collection" : "addresses",
+            |       "dbObject": "asd",
+            |       "encryption": {
+            |           "keyEncryptionKeyId": "cloudhsm:7,14",
+            |           "initialisationVector": "iv",
+            |           "encryptedEncryptionKey": "=="
+            |       }
+            |   }
+            |}
+            """.trimMargin()
+            )
+        }
+        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: string [2019-07-04] does not match pattern ^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}(\\+\\d{4}|Z)?\$'."
     }
 
     "Missing '#/message/db' field causes validation failure." {
