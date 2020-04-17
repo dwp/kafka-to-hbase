@@ -213,14 +213,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-<<<<<<< Updated upstream
         val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
-        timestamp shouldBe "1980-01-01T00:00:00.000Z"
+        timestamp shouldBe "1980-01-01T00:00:00.000+0000"
         fieldName shouldBe "epoch"
-=======
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "1980-01-01T00:00:00.000+0000"
->>>>>>> Stashed changes
     }
 
     "Empty last modified date time and created date time returns epoch" {
@@ -232,14 +227,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-<<<<<<< Updated upstream
         val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
-        timestamp shouldBe "1980-01-01T00:00:00.000Z"
+        timestamp shouldBe "1980-01-01T00:00:00.000+0000"
         fieldName shouldBe "epoch"
-=======
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "1980-01-01T00:00:00.000+0000"
->>>>>>> Stashed changes
     }
 
     "Null last modified date time and created date time returns epoch" {
@@ -251,13 +241,8 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-<<<<<<< Updated upstream
         val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
-        timestamp shouldBe "1980-01-01T00:00:00.000Z"
+        timestamp shouldBe "1980-01-01T00:00:00.000+0000"
         fieldName shouldBe "epoch"
-=======
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "1980-01-01T00:00:00.000+0000"
->>>>>>> Stashed changes
     }
 })
