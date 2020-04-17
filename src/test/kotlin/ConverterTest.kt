@@ -7,8 +7,6 @@ import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class ConverterTest : StringSpec({

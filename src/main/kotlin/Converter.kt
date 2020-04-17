@@ -21,7 +21,7 @@ open class Converter {
 
     fun sortJsonByKey(unsortedJson: JsonObject): String {
         val sortedEntries = unsortedJson.toSortedMap(compareBy { it })
-        val json: JsonObject = JsonObject(sortedEntries)
+        val json = JsonObject(sortedEntries)
         return json.toJsonString()
     }
 

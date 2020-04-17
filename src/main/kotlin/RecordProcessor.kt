@@ -45,8 +45,8 @@ open class RecordProcessor(private val validator: Validator, private val convert
                 logger.debug("Written record to hbase", "record", getDataStringForRecord(record),
                     "formattedKey", String(formattedKey))
                 
-                val record_body_json = json.toJsonString()
-                hbase.put(qualifiedTableName, formattedKey, record_body_json.toByteArray(), lastModifiedTimestampLong)
+                val recordBodyJson = json.toJsonString()
+                hbase.put(qualifiedTableName, formattedKey, recordBodyJson.toByteArray(), lastModifiedTimestampLong)
             }
             else {
                 logger.error("Could not derive table name from topic", "topic", record.topic())
@@ -62,7 +62,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
         try {
             val malformedRecord = MalformedRecord(String(record.key()), String(body), reason)
             val jsonString = Klaxon().toJsonString(malformedRecord)
-            val producerRecord = ProducerRecord<ByteArray, ByteArray>(
+            val producerRecord = ProducerRecord(
                 dlqTopic,
                 null,
                 null,
