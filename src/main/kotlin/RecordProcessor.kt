@@ -34,7 +34,8 @@ open class RecordProcessor(private val validator: Validator, private val convert
 
         try {
             val (lastModifiedTimestampStr, fieldTimestampCreatedFrom) = converter.getLastModifiedTimestamp(json)
-            json["timestamp_created_from"] = fieldTimestampCreatedFrom
+            val message = json["message"] as JsonObject
+            message["timestamp_created_from"] = fieldTimestampCreatedFrom
             
             val lastModifiedTimestampLong = converter.getTimestampAsLong(lastModifiedTimestampStr)
             val matcher = textUtils.topicNameTableMatcher(record.topic())
