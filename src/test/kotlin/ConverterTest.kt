@@ -129,10 +129,11 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val timestamp = converter.getLastModifiedTimestamp(json)
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
         val timeStampAsLong = converter.getTimestampAsLong(timestamp)
         timestamp shouldBe "2018-12-14T15:01:02.000+0000"
         timeStampAsLong shouldBe 1544799662000
+        fieldName shouldBe "_lastModifiedDateTime"
     }
 
     "Invalid timestamp format in the message throws Exception" {
@@ -143,7 +144,7 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val timestamp = converter.getLastModifiedTimestamp(json)
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
         timestamp shouldBe "2018-12-14"
         shouldThrow<ParseException> {
             converter.getTimestampAsLong(timestamp)
@@ -159,8 +160,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "2018-12-14T15:01:02.000+0000"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2018-12-14T15:01:02.000+0000"
+        fieldName shouldBe "_lastModifiedDateTime"
     }
 
     "Missing last modified date time returns created date time" {
@@ -171,8 +173,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "2019-11-13T14:02:03.001+0000"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2019-11-13T14:02:03.001+0000"
+        fieldName shouldBe "createdDateTime"
     }
 
     "Empty last modified date time returns created date time" {
@@ -184,8 +187,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "2019-11-13T14:02:03.001+0000"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2019-11-13T14:02:03.001+0000"
+        fieldName shouldBe "createdDateTime"
     }
 
     "Null last modified date time returns created date time" {
@@ -197,8 +201,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "2019-11-13T14:02:03.001+0000"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2019-11-13T14:02:03.001+0000"
+        fieldName shouldBe "createdDateTime"
     }
 
     "Missing last modified date time and created date time returns epoch" {
@@ -210,8 +215,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "1980-01-01T00:00:00.000Z"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "1980-01-01T00:00:00.000Z"
+        fieldName shouldBe "epoch"
     }
 
     "Empty last modified date time and created date time returns epoch" {
@@ -223,8 +229,9 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "1980-01-01T00:00:00.000Z"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "1980-01-01T00:00:00.000Z"
+        fieldName shouldBe "epoch"
     }
 
     "Null last modified date time and created date time returns epoch" {
@@ -236,7 +243,8 @@ class ConverterTest : StringSpec({
             "    }"
 
         val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
-        val lastModifiedTimestamp = converter.getLastModifiedTimestamp(json)
-        lastModifiedTimestamp shouldBe "1980-01-01T00:00:00.000Z"
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "1980-01-01T00:00:00.000Z"
+        fieldName shouldBe "epoch"
     }
 })

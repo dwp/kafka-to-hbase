@@ -48,20 +48,20 @@ open class Converter {
         return df.parse(timeStampAsStr).time
     }
 
-    open fun getLastModifiedTimestamp(json: JsonObject?): String? {
+    open fun getLastModifiedTimestamp(json: JsonObject?): Pair<String, String>? {
         val epoch = "1980-01-01T00:00:00.000Z"
         
         val lastModifiedTimestampStr = json?.lookup<String?>("message._lastModifiedDateTime")?.get(0)
         if (!lastModifiedTimestampStr.isNullOrBlank()) {
-            return lastModifiedTimestampStr
+            return Pair(lastModifiedTimestampStr, "_lastModifiedDateTime")
         }
         
         val createdTimestampStr = json?.lookup<String?>("message.createdDateTime")?.get(0)
         if (!createdTimestampStr.isNullOrBlank()) {
-            return createdTimestampStr
+            return Pair(createdTimestampStr, "createdDateTime")
         }
 
-        return epoch
+        return Pair(epoch, "epoch")
     }
 
     companion object {
