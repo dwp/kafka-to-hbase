@@ -45,7 +45,6 @@ open class RecordProcessor(private val validator: Validator, private val convert
                 val qualifiedTableName = "$namespace:$tableName".replace("-", "_")
                 logger.debug("Written record to hbase", "record", getDataStringForRecord(record),
                     "formattedKey", String(formattedKey))
-                
                 val recordBodyJson = json.toJsonString()
                 hbase.put(qualifiedTableName, formattedKey, recordBodyJson.toByteArray(), lastModifiedTimestampLong)
             }

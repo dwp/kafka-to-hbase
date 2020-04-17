@@ -18,7 +18,6 @@ import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class Kafka2HBaseSpec: StringSpec(){
 
     private val log = Logger.getLogger(Kafka2HBaseSpec::class.toString())
