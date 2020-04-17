@@ -48,7 +48,7 @@ open class Converter {
         return df.parse(timeStampAsStr).time
     }
 
-    open fun getLastModifiedTimestamp(json: JsonObject?): Pair<String, String>? {
+    open fun getLastModifiedTimestamp(json: JsonObject?): Pair<String, String> {
         val epoch = "1980-01-01T00:00:00.000Z"
         
         val lastModifiedTimestampStr = json?.lookup<String?>("message._lastModifiedDateTime")?.get(0)
