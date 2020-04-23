@@ -60,7 +60,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
     open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>, reason: String) {
         val body = record.value()
         logger.warn("Error processing record, sending to dlq",
-            "reason", reason, "key", String(metadata?.key()))
+            "reason", reason, "key", String(record.key()))
         try {
             val malformedRecord = MalformedRecord(String(record.key()), String(body), reason)
             val jsonString = Klaxon().toJsonString(malformedRecord)
