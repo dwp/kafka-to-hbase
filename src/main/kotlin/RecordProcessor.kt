@@ -74,7 +74,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
             )
             val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
             logger.info("Sending message to dlq",
-                "key", String(record.key()), "topic", metadata?.topic(), "offset",  "${metadata?.offset()}")
+                "key", String(record.key()), "topic", metadata?.topic().toString(), "offset",  "${metadata?.offset()}")
         } catch (e: Exception) {
             logger.error("Error sending message to dlq",
                 "key", String(record.key()), "topic", record.topic(), "offset",  "${record.offset()}")
