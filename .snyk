@@ -74,5 +74,9 @@ ignore:
     - '*':
         reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
         expires: 2020-05-20T00:00:00.000Z
+  SNYK-JAVA-COMGOOGLEPROTOBUF-173761:
+    - '*':
+        reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
+        expires: 2020-05-20T00:00:00.000Z
 patch: {}
 
