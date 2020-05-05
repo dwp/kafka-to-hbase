@@ -24,7 +24,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
         }
     }
 
-    fun convertAndValidateJsonRecord(record: ConsumerRecord<ByteArray, ByteArray>): JsonObject? = try {
+    private fun convertAndValidateJsonRecord(record: ConsumerRecord<ByteArray, ByteArray>): JsonObject? = try {
         converter.convertToJson(record.value()).let { json ->
             validator.validate(json.toJsonString())
             json
@@ -39,7 +39,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
         null
     }
 
-    fun writeRecordToHbase(
+    private fun writeRecordToHbase(
         json: JsonObject,
         record: ConsumerRecord<ByteArray, ByteArray>,
         hbase: HbaseClient,
