@@ -53,7 +53,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
             }
         } catch (e: Exception) {
             logger.error("Error writing record to HBase", e, "record", getDataStringForRecord(record))
-            throw e
+            throw HbaseReadException("Error writing record to HBase: $e")
         }
     }
 
