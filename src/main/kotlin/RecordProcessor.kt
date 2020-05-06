@@ -12,7 +12,12 @@ open class RecordProcessor(private val validator: Validator, private val convert
 
     open fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, parser: MessageParser) {
 
-        convertAndValidateJsonRecord(record)?.let { json ->
+        convertAndValidateJsonRecord(record).let { json ->
+
+            if (json == null) {
+                return
+            }
+
             val formattedKey = parser.generateKeyFromRecordBody(json)
 
             if (formattedKey.isEmpty()) {
@@ -24,27 +29,24 @@ open class RecordProcessor(private val validator: Validator, private val convert
         }
     }
 
-    private fun convertAndValidateJsonRecord(record: ConsumerRecord<ByteArray, ByteArray>): JsonObject? = try {
-        converter.convertToJson(record.value()).let { json ->
-            validator.validate(json.toJsonString())
-            json
+    fun convertAndValidateJsonRecord(record: ConsumerRecord<ByteArray, ByteArray>): JsonObject? {
+        try {
+            converter.convertToJson(record.value()).let { json ->
+                validator.validate(json.toJsonString())
+                return json
+            }
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Could not parse message body", "record", getDataStringForRecord(record))
+            sendMessageToDlq(record, "Invalid json")
+            return null
+        } catch (e: InvalidMessageException) {
+            logger.warn("Schema validation error", "record", getDataStringForRecord(record), "message", "${e.message}")
+            sendMessageToDlq(record, "Invalid schema for ${getDataStringForRecord(record)}: ${e.message}")
+            return null
         }
-    } catch (e: IllegalArgumentException) {
-        logger.warn("Could not parse message body", "record", getDataStringForRecord(record))
-        sendMessageToDlq(record, "Invalid json")
-        null
-    } catch (e: InvalidMessageException) {
-        logger.warn("Schema validation error", "record", getDataStringForRecord(record), "message", "${e.message}")
-        sendMessageToDlq(record, "Invalid schema for ${getDataStringForRecord(record)}: ${e.message}")
-        null
     }
 
-    private fun writeRecordToHbase(
-        json: JsonObject,
-        record: ConsumerRecord<ByteArray, ByteArray>,
-        hbase: HbaseClient,
-        formattedKey: ByteArray
-    ) {
+    private fun writeRecordToHbase(json: JsonObject, record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient, formattedKey: ByteArray) {
         try {
             val (lastModifiedTimestampStr, fieldTimestampCreatedFrom) = converter.getLastModifiedTimestamp(json)
             val message = json["message"] as JsonObject
@@ -91,7 +93,12 @@ open class RecordProcessor(private val validator: Validator, private val convert
             val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
             logger.info(
                 "Sending message to dlq",
-                "key", String(record.key()), "topic", metadata?.topic().toString(), "offset", "${metadata?.offset()}"
+                "key",
+                String(record.key()),
+                "topic",
+                metadata?.topic().toString(),
+                "offset",
+                "${metadata?.offset()}"
             )
         } catch (e: Exception) {
             logger.error(
@@ -113,7 +120,6 @@ open class RecordProcessor(private val validator: Validator, private val convert
     companion object {
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(RecordProcessor::class.toString())
     }
-
 }
 
 fun getDataStringForRecord(record: ConsumerRecord<ByteArray, ByteArray>): String {

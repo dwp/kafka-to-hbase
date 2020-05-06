@@ -1,7 +1,6 @@
 import kotlinx.coroutines.*
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.log4j.Logger
 import java.time.Duration
 
 val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger("ShovelKt")
@@ -59,8 +58,6 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
     }
 
 fun validateHbaseConnection(hbase: HbaseClient) {
-    val logger = Logger.getLogger("shovel")
-
     val maxAttempts = Config.Hbase.retryMaxAttempts
     val initialBackoffMillis = Config.Hbase.retryInitialBackoff
 
@@ -74,7 +71,12 @@ fun validateHbaseConnection(hbase: HbaseClient) {
         } catch (e: Exception) {
             val delay: Long = if (attempts == 0) initialBackoffMillis
             else (initialBackoffMillis * attempts * 2)
-            logger.warn("Failed to connect to Hbase on attempt ${attempts + 1}/$maxAttempts, will retry in $delay ms, if ${attempts + 1} still < $maxAttempts: ${e.message}")
+            logger.warn(
+                "Failed to connect to Hbase after multiple attempts",
+                "attempt", (attempts + 1).toString(),
+                "max_attempts", maxAttempts.toString(),
+                "retry_delay", delay.toString()
+            )
             Thread.sleep(delay)
         } finally {
             attempts++
@@ -87,15 +89,18 @@ fun validateHbaseConnection(hbase: HbaseClient) {
 }
 
 fun printLogs(batchCount: Int, offsets: MutableMap<String, Long>, usedPartitions: MutableMap<String, MutableSet<Int>>) {
-    if (batchCountIsMultipleOfReportFrequency(batchCount)) {
+    val bool = batchCountIsMultipleOfReportFrequency(batchCount)
+
+    if (bool) {
         logger.info("Total number of topics", "number_of_topics", offsets.size.toString())
         offsets.forEach { (topic, offset) ->
             logger.info("Offset", "topic_name", topic, "offset", offset.toString())
         }
         usedPartitions.forEach { (topic, ps) ->
             logger.info(
-                "Partitions read from for topic", "topic_name", topic, "partitions",
-                ps.sorted().joinToString(", ")
+                "Partitions read from for topic",
+                "topic_name", topic,
+                "partitions", ps.sorted().joinToString(", ")
             )
         }
     }
