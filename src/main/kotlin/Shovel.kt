@@ -45,7 +45,9 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                     consumer.commitSync()
                 }
 
-                printLogs(batchCount++, offsets, usedPartitions)
+                if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
+                    printLogs(offsets, usedPartitions)
+                }
 
             } catch (e: HbaseReadException) {
                 logger.error("Error writing to Hbase", e)
@@ -88,21 +90,17 @@ fun validateHbaseConnection(hbase: HbaseClient) {
     }
 }
 
-fun printLogs(batchCount: Int, offsets: MutableMap<String, Long>, usedPartitions: MutableMap<String, MutableSet<Int>>) {
-    val bool = batchCountIsMultipleOfReportFrequency(batchCount)
-
-    if (bool) {
-        logger.info("Total number of topics", "number_of_topics", offsets.size.toString())
-        offsets.forEach { (topic, offset) ->
-            logger.info("Offset", "topic_name", topic, "offset", offset.toString())
-        }
-        usedPartitions.forEach { (topic, ps) ->
-            logger.info(
-                "Partitions read from for topic",
-                "topic_name", topic,
-                "partitions", ps.sorted().joinToString(", ")
-            )
-        }
+fun printLogs(offsets: MutableMap<String, Long>, usedPartitions: MutableMap<String, MutableSet<Int>>) {
+    logger.info("Total number of topics", "number_of_topics", offsets.size.toString())
+    offsets.forEach { (topic, offset) ->
+        logger.info("Offset", "topic_name", topic, "offset", offset.toString())
+    }
+    usedPartitions.forEach { (topic, ps) ->
+        logger.info(
+            "Partitions read from for topic",
+            "topic_name", topic,
+            "partitions", ps.sorted().joinToString(", ")
+        )
     }
 }
 
