@@ -26,19 +26,23 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 logger.info("Polling", "poll_timeout", pollTimeout.toString(), "topic_regex", Config.Kafka.topicRegex.pattern())
                 val records = consumer.poll(pollTimeout)
 
+
                 if (records.count() > 0) {
                     logger.info("Processing records", "record_count", records.count().toString())
                     for (record in records) {
                         processor.processRecord(record, hbase, parser)
                         offsets[record.topic()] = record.offset()
+
                         val set =
                             if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
                         set?.add(record.partition())
                         usedPartitions[record.topic()] = set!!
                     }
-                    logger.info("Commiting offset")
+
+
                     consumer.commitSync()
                 }
+
 
                 if (batchCount++ % Config.Shovel.reportFrequency == 0) {
                     logger.info("Total number of topics", "number_of_topics", offsets.size.toString())
@@ -51,6 +55,12 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                             ps.sorted().joinToString(", ")
                         )
                     }
+
+                    consumer.metrics().filter { it.key.group() == "consumer-fetch-manager-metrics" }
+                        .filter { it.key.name() == "records-lag-max" }
+                        .map { it.value }
+                        .forEach { logger.info("Max record lag", "lag", it.metricValue().toString()) }
+
                 }
             } catch (e: Exception) {
                 logger.error("Error reading from Kafka or writing to Hbase", e)
