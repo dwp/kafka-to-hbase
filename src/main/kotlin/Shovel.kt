@@ -32,7 +32,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 )
 
                 consumer.listTopics().forEach { (topic, _) ->
-                    logger.info("Found topic", "topic_name", topic)
+                    logger.info("Subscribed to topic", "topic_name", topic)
                 }
 
                 val records = consumer.poll(pollTimeout)
