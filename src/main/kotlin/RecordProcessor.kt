@@ -56,7 +56,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
                     "formattedKey", String(formattedKey)
                 )
                 val recordBodyJson = json.toJsonString()
-                hbase.put(qualifiedTableName, formattedKey, recordBodyJson.toByteArray(), lastModifiedTimestampLong)
+                hbase.put(qualifiedTableName!!, formattedKey, recordBodyJson.toByteArray(), lastModifiedTimestampLong)
             } else {
                 logger.error("Could not derive table name from topic", "topic", record.topic())
             }
@@ -67,7 +67,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
     }
 
     private fun targetTable(namespace: String, tableName: String) =
-        "$namespace:${textUtils.coalescedName(tableName)}".replace("-", "_")
+        textUtils.coalescedName("$namespace:$tableName")?.replace("-", "_")
 
 
     open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>, reason: String) {

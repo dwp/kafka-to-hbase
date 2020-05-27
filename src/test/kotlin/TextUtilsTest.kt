@@ -4,19 +4,20 @@ import io.kotlintest.specs.StringSpec
 class TextUtilsTest : StringSpec({
 
 
-    "agentToDoArchive is coalesced." {
-        val actual = TextUtils().coalescedName("agentToDoArchive")
-        actual shouldBe "agentToDo"
+    "agent_core:agentToDoArchive is coalesced." {
+        val actual = TextUtils().coalescedName("agent_core:agentToDoArchive")
+        actual shouldBe "agent_core:agentToDo"
     }
 
-    "Other archive is not coalesced." {
-        val actual = TextUtils().coalescedName("someOtherArchive")
-        actual shouldBe "someOtherArchive"
+    "other_db:agentToDoArchive is not coalesced." {
+        val actual = TextUtils().coalescedName("other_db:agentToDoArchive")
+        actual shouldBe "other_db:agentToDoArchive"
     }
+
 
     "Not agentToDoArchive is not coalesced." {
-        val actual = TextUtils().coalescedName("calculationParts")
-        actual shouldBe "calculationParts"
+        val actual = TextUtils().coalescedName("core:calculationParts")
+        actual shouldBe "core:calculationParts"
     }
 
 })
