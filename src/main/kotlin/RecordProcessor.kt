@@ -50,7 +50,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
             if (matcher != null) {
                 val namespace = matcher.groupValues[1]
                 val tableName = matcher.groupValues[2]
-                val qualifiedTableName = "$namespace:$tableName".replace("-", "_")
+                val qualifiedTableName = targetTable(namespace, tableName)
                 logger.debug(
                     "Written record to hbase", "record", getDataStringForRecord(record),
                     "formattedKey", String(formattedKey)
@@ -65,6 +65,10 @@ open class RecordProcessor(private val validator: Validator, private val convert
             throw HbaseReadException("Error writing record to HBase: $e")
         }
     }
+
+    private fun targetTable(namespace: String, tableName: String) =
+        "$namespace:${textUtils.coalescedName(tableName)}".replace("-", "_")
+
 
     open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>, reason: String) {
         val body = record.value()
