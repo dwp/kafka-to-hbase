@@ -10,6 +10,8 @@ import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.client.Table
 import java.io.IOException
 import java.nio.ByteBuffer
+import org.apache.hadoop.hbase.HColumnDescriptor
+import org.apache.hadoop.hbase.HTableDescriptor
 
 
 class HbaseClientTest : StringSpec({
@@ -190,4 +192,4 @@ class HbaseClientTest : StringSpec({
 
         verify(adm, times(1)).createTable(tableDescriptor)
     }
-}
+})
