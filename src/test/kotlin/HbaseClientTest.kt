@@ -16,6 +16,7 @@ class HbaseClientTest : StringSpec({
     val columnFamily = "cf".toByteArray()
     val columnQualifier = "record".toByteArray()
     val tableQualifier = "table"
+    val regionReplication = 3
     val namespace = "ns"
     val key = "key".toByteArray()
     val body = "body".toByteArray()
@@ -39,7 +40,7 @@ class HbaseClientTest : StringSpec({
             on { getTable(TableName.valueOf(qualifiedTableName)) } doReturn table
         }
 
-        with (HbaseClient(connection, columnFamily, columnQualifier)) {
+        with (HbaseClient(connection, columnFamily, columnQualifier, regionReplication)) {
             put(qualifiedTableName, key, body, version)
         }
 
@@ -58,7 +59,7 @@ class HbaseClientTest : StringSpec({
             on { getTable(TableName.valueOf(qualifiedTableName)) } doReturn table
         }
 
-        with (HbaseClient(connection, columnFamily, columnQualifier)) {
+        with (HbaseClient(connection, columnFamily, columnQualifier, regionReplication)) {
             put(qualifiedTableName, key, body, version)
         }
 
@@ -76,7 +77,7 @@ class HbaseClientTest : StringSpec({
         }
 
         val exception = shouldThrow<IOException> {
-            with (HbaseClient(connection, columnFamily, columnQualifier)) {
+            with (HbaseClient(connection, columnFamily, columnQualifier, regionReplication)) {
                 put(qualifiedTableName, key, body, version)
             }
         }
