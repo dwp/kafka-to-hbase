@@ -5,7 +5,7 @@ import org.apache.hadoop.hbase.client.Get
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.io.TimeRange
 
-open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray, private val columnQualifier: ByteArray, private val regionReplication: Int) {
+open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray, private val columnQualifier: ByteArray, private val hbaseRegionReplication: Int) {
 
     companion object {
         fun connect() = HbaseClient(
@@ -110,7 +110,7 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
                                 maxVersions = Int.MAX_VALUE
                                 minVersions = 1
                             })
-                     setRegionReplication(regionReplication)
+                     setRegionReplication(hbaseRegionReplication)
                 })
             } catch (e: TableExistsException) {
                 logger.info("Didn't create table, table already exists, probably created by another process",
