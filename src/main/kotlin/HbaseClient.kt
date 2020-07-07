@@ -130,8 +130,8 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
                             .apply {
                                 maxVersions = Int.MAX_VALUE
                                 minVersions = 1
-                                compressionType = Compression.Algorithm.GZ
-                                compactionCompressionType = Compression.Algorithm.GZ
+                                compressionType = Algorithm.GZ
+                                compactionCompressionType = Algorithm.GZ
                             })
                      setRegionReplication(hbaseRegionReplication)
                 })
