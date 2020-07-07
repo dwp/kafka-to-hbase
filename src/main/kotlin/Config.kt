@@ -35,6 +35,10 @@ object Config {
             set("zookeeper.znode.parent", getEnv("K2HB_HBASE_ZOOKEEPER_PARENT") ?: "/hbase")
             set("hbase.zookeeper.quorum", getEnv("K2HB_HBASE_ZOOKEEPER_QUORUM") ?: "zookeeper")
             setInt("hbase.zookeeper.port", getEnv("K2HB_HBASE_ZOOKEEPER_PORT")?.toIntOrNull() ?: 2181)
+            set("hbase.rpc.timeout", getEnv("K2HB_HBASE_RPC_TIMEOUT_MILLISECONDS") ?: "1200000")
+            set("hbase.client.operation.timeout", getEnv("K2HB_HBASE_OPERATION_TIMEOUT_MILLISECONDS") ?: "1800000")
+            set("hbase.client.pause", getEnv("K2HB_HBASE_PAUSE_MILLISECONDS") ?: "50")
+            set("hbase.client.retries.number", getEnv("K2HB_HBASE_RETRIES") ?: "50")
         }
 
         val columnFamily = getEnv("K2HB_HBASE_COLUMN_FAMILY") ?: "cf"
@@ -44,6 +48,8 @@ object Config {
         val retryBackoffMultiplier: Long = getEnv("K2HB_RETRY_BACKOFF_MULTIPLIER")?.toLong() ?: 2
         val regionReplication: Int = getEnv("K2HB_HBASE_REGION_REPLICATION")?.toInt() ?: 3
         val logKeys: Boolean = getEnv("K2HB_HBASE_LOG_KEYS")?.toBoolean() ?: true
+        val cleanExit: Boolean = getEnv("K2HB_HBASE_CLEAN_EXIT")?.toBoolean() ?: true
+
     }
 
     object Kafka {
