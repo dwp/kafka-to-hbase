@@ -86,6 +86,15 @@ services:
         - AWS_SECRET_ACCESS_KEY=aws-secret-access-key
         - S3_BUCKET=kafka2s3
 
+  metadatastore:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: aurora
+      MYSQL_DATABASE: metadatastore
+      MYSQL_USER: aurora
+      MYSQL_PASSWORD: aurora
+
   integration-test:
     image: kafka2hbase-integration:latest
     build:

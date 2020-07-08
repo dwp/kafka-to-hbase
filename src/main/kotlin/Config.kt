@@ -49,7 +49,6 @@ object Config {
         val regionReplication: Int = getEnv("K2HB_HBASE_REGION_REPLICATION")?.toInt() ?: 3
         val logKeys: Boolean = getEnv("K2HB_HBASE_LOG_KEYS")?.toBoolean() ?: true
         val cleanExit: Boolean = getEnv("K2HB_HBASE_CLEAN_EXIT")?.toBoolean() ?: true
-
     }
 
     object Kafka {
@@ -105,6 +104,21 @@ object Config {
         var dlqTopic = getEnv("K2HB_KAFKA_DLQ_TOPIC") ?: "test-dlq-topic"
 
         fun metadataRefresh(): String = consumerProps.getProperty(metaDataRefreshKey)
+    }
 
+    object MetadataStore {
+        val properties = Properties().apply {
+            put("rds.username", getEnv("K2HB_RDS_USERNAME"))
+            put("rds.password.secret.name", getEnv("K2HB_RDS_PASSWORD_SECRET_NAME"))
+            put("rds.database.name", getEnv("K2HB_RDS_DATABASE_NAME"))
+            put("rds.endpoint", getEnv("K2HB_RDS_ENDPOINT") ?: "127.0.0.1")
+            put("rds.port", getEnv("K2HB_RDS_PORT") ?: "3306")
+        }
+    }
+
+    object SecretManager {
+        val properties = Properties().apply {
+            put("region", getEnv("SECRET_MANAGER_REGION") ?: "eu-west-2")
+        }
     }
 }

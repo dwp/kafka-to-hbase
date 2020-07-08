@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.21"
+    kotlin("plugin.serialization") version "1.3.70"
     application
 }
 
@@ -25,7 +26,9 @@ dependencies {
     implementation("com.github.everit-org.json-schema", "org.everit.json.schema", "1.12.0")
     implementation("ch.qos.logback", "logback-classic", "1.2.3")
     implementation("org.apache.commons", "commons-text", "1.8")
+    implementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.316")
 
+    testImplementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.316")
     testImplementation("com.amazonaws:aws-java-sdk-s3:1.11.701")
     testImplementation("com.amazonaws:aws-java-sdk-core:1.11.701")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")

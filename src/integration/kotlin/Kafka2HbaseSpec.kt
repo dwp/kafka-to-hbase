@@ -103,7 +103,7 @@ class Kafka2HBaseSpec: StringSpec(){
             val kafkaTimestamp2 = converter.getTimestampAsLong(getISO8601Timestamp())
             producer.sendRecord(topic.toByteArray(), "key2".toByteArray(), body2, kafkaTimestamp2)
 
-           val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
+            val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
 
             val matcher = TextUtils().topicNameTableMatcher(topic)
@@ -154,6 +154,10 @@ class Kafka2HBaseSpec: StringSpec(){
             )
             val expected = Klaxon().toJsonString(malformedRecord)
             actual shouldBe expected
+        }
+
+        "connects to mysql database" {
+            val metadataStoreClient = MetadataStoreClient.connect()
         }
     }
 
