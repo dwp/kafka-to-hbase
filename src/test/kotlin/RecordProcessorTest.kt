@@ -52,7 +52,6 @@ class RecordProcessorTest : StringSpec() {
     }
 
     init {
-
         "valid record is sent to hbase successfully" {
             reset()
             val messageBody = """{

@@ -69,6 +69,9 @@ class HbaseClientTest : StringSpec({
     }
 
     "Fails after max tries" {
+
+        val expectedRetryMaxAttempts = Config.Hbase.retryMaxAttempts
+
         val table = mock<Table> {
             on { put(any<Put>()) } doThrow IOException(errorMessage)
         }
@@ -85,7 +88,7 @@ class HbaseClientTest : StringSpec({
         }
 
         exception.message shouldBe errorMessage
-        verify(table, times(System.getenv("K2HB_RETRY_MAX_ATTEMPTS").toInt())).put(any<Put>())
+        verify(table, times(expectedRetryMaxAttempts)).put(any<Put>())
     }
 
     "Table not created" {

@@ -6,7 +6,7 @@ open class MetadataStoreClient(var connection: Connection) {
 
     companion object {
 
-        private val secretManagerClient = SecretManagerClient()
+        private val secretManagerClient = AWSSecretHelper()
 
         fun connect(): MetadataStoreClient {
 

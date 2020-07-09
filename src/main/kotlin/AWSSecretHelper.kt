@@ -2,10 +2,10 @@ import com.amazonaws.services.secretsmanager.*
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 
-class SecretManagerClient {
+class AWSSecretHelper {
 
     companion object {
-        val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(SecretManagerClient::class.toString())
+        val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(AWSSecretHelper::class.toString())
     }
 
     fun getSecret(secretName: String): String? {

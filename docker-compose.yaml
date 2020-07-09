@@ -90,10 +90,10 @@ services:
     image: mysql:5.7
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: aurora
-      MYSQL_DATABASE: metadatastore
-      MYSQL_USER: aurora
-      MYSQL_PASSWORD: aurora
+      MYSQL_ROOT_PASSWORD: password1
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password2
 
   integration-test:
     image: kafka2hbase-integration:latest
