@@ -116,7 +116,7 @@ object Config {
             put("use.aws.secrets", getEnv("K2HB_USE_AWS_SECRETS") ?: "true")
         }
 
-        val useAwsSecrets = properties.getProperty("use.aws.secrets").toLowerCase() == "false"
+        val useAwsSecrets = properties.getProperty("use.aws.secrets").toLowerCase() == "true"
     }
 
     object SecretManager {

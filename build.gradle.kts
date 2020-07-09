@@ -27,6 +27,7 @@ dependencies {
     implementation("ch.qos.logback", "logback-classic", "1.2.3")
     implementation("org.apache.commons", "commons-text", "1.8")
     implementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.316")
+    implementation("mysql", "mysql-connector-java", "8.0.20")
 
     testImplementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.316")
     testImplementation("com.amazonaws:aws-java-sdk-s3:1.11.701")
@@ -36,6 +37,7 @@ dependencies {
     testImplementation("com.nhaarman.mockitokotlin2", "mockito-kotlin", "2.2.0")
     testImplementation("org.mockito", "mockito-core", "2.8.9")
     testImplementation("io.mockk", "mockk", "1.9.3")
+    testImplementation("mysql", "mysql-connector-java", "8.0.20")
 }
 
 configurations.all {

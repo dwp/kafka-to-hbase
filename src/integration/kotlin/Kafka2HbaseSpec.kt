@@ -25,7 +25,7 @@ class Kafka2HBaseSpec : StringSpec() {
     init {
         "Messages with new identifiers are written to hbase but not to dlq" {
             val hbase = HbaseClient.connect()
-            val metadataStore = MetadataStoreClient.connect()
+//            val metadataStore = MetadataStoreClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             val parser = MessageParser()
             val converter = Converter()
