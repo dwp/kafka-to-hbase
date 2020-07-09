@@ -113,6 +113,7 @@ object Config {
             put("rds.database.name", getEnv("K2HB_RDS_DATABASE_NAME") ?: "database")
             put("rds.endpoint", getEnv("K2HB_RDS_ENDPOINT") ?: "127.0.0.1")
             put("rds.port", getEnv("K2HB_RDS_PORT") ?: "3306")
+            put("use.aws.secrets", getEnv("K2HB_USE_AWS_SECRETS") ?: "true")
         }
     }
 
