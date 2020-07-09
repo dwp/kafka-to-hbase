@@ -6,8 +6,8 @@ open class MetadataStoreClient(var connection: Connection) {
 
     companion object {
 
-        private val awsSecretHelper = AWSSecretHelper()
-        private val dummySecretHelper = DummySecretHelper()
+        private val useAwsSecrets = Config.MetadataStore.useAwsSecrets
+        private val secretHelper: SecretHelperInterface =  if (useAwsSecrets) AWSSecretHelper() else DummySecretHelper()
 
         fun connect(): MetadataStoreClient {
 
@@ -20,8 +20,7 @@ open class MetadataStoreClient(var connection: Connection) {
 
             val propertiesWithPassword: Properties = Config.MetadataStore.properties.clone() as Properties
 
-            val useAwsSecrets = Config.MetadataStore.properties.getProperty("use.aws.secrets").toLowerCase().equals("false")
-            propertiesWithPassword["password"] = if (useAwsSecrets) dummySecretHelper.getSecret(secretName) else awsSecretHelper.getSecret(secretName)
+            propertiesWithPassword["password"] = secretHelper.getSecret(secretName)
 
             return MetadataStoreClient(DriverManager.getConnection(jdbcUrl, propertiesWithPassword))
         }

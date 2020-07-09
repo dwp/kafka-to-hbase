@@ -49,11 +49,12 @@ services:
       K2HB_KAFKA_POLL_TIMEOUT: "PT10S"
       K2HB_KAFKA_DLQ_TOPIC: "test-dlq-topic"
       K2HB_RDS_USERNAME: "user"
-      K2HB_RDS_PASSWORD_SECRET_NAME: "password1"
+      K2HB_RDS_PASSWORD_SECRET_NAME: "metastore_password"
       K2HB_RDS_DATABASE_NAME: "database"
       K2HB_RDS_ENDPOINT: "127.0.0.1"
       K2HB_RDS_PORT: "3306"
       K2HB_USE_AWS_SECRETS: "false"
+      DUMMY_SECRET_METASTORE_PASSWORD: "password1"
 
   kafka2s3:
     image: dwpdigital/kafka-to-s3:latest

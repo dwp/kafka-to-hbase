@@ -109,17 +109,20 @@ object Config {
     object MetadataStore {
         val properties = Properties().apply {
             put("rds.username", getEnv("K2HB_RDS_USERNAME") ?: "user")
-            put("rds.password.secret.name", getEnv("K2HB_RDS_PASSWORD_SECRET_NAME") ?: "password1")
+            put("rds.password.secret.name", getEnv("K2HB_RDS_PASSWORD_SECRET_NAME") ?: "metastore_password")
             put("rds.database.name", getEnv("K2HB_RDS_DATABASE_NAME") ?: "database")
             put("rds.endpoint", getEnv("K2HB_RDS_ENDPOINT") ?: "127.0.0.1")
             put("rds.port", getEnv("K2HB_RDS_PORT") ?: "3306")
             put("use.aws.secrets", getEnv("K2HB_USE_AWS_SECRETS") ?: "true")
         }
+
+        val useAwsSecrets = properties.getProperty("use.aws.secrets").toLowerCase() == "false"
     }
 
     object SecretManager {
         val properties = Properties().apply {
             put("region", getEnv("SECRET_MANAGER_REGION") ?: "eu-west-2")
         }
+
     }
 }

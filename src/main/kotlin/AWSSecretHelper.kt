@@ -2,15 +2,15 @@ import com.amazonaws.services.secretsmanager.*
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 
-class AWSSecretHelper {
+class AWSSecretHelper: SecretHelperInterface {
 
     companion object {
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(AWSSecretHelper::class.toString())
     }
 
-    fun getSecret(secretName: String): String? {
+    override fun getSecret(secretName: String): String? {
 
-        logger.info("Getting value from secret manager", "secret_name", secretName)
+        logger.info("Getting value from aws secret manager", "secret_name", secretName)
 
         try {
             val region = Config.SecretManager.properties["region"].toString()
@@ -24,7 +24,7 @@ class AWSSecretHelper {
             val map = ObjectMapper().readValue(secretString, Map::class.java) as Map<String, String>
             return map["password"]
         } catch (e: Exception) {
-            logger.error("Failed to get secret manager result", e, "secret_name", secretName)
+            logger.error("Failed to get aws secret manager result", e, "secret_name", secretName)
             throw e
         }
     }
