@@ -108,9 +108,9 @@ object Config {
 
     object MetadataStore {
         val properties = Properties().apply {
-            put("rds.username", getEnv("K2HB_RDS_USERNAME") ?: "user")
+            put("user", getEnv("K2HB_RDS_USERNAME") ?: "user")
             put("rds.password.secret.name", getEnv("K2HB_RDS_PASSWORD_SECRET_NAME") ?: "metastore_password")
-            put("rds.database.name", getEnv("K2HB_RDS_DATABASE_NAME") ?: "database")
+            put("database", getEnv("K2HB_RDS_DATABASE_NAME") ?: "database")
             put("rds.endpoint", getEnv("K2HB_RDS_ENDPOINT") ?: "127.0.0.1")
             put("rds.port", getEnv("K2HB_RDS_PORT") ?: "3306")
             put("use.aws.secrets", getEnv("K2HB_USE_AWS_SECRETS") ?: "true")
