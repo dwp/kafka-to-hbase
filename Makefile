@@ -21,19 +21,17 @@ git-hooks: ## Set up hooks in .git/hooks
 		done \
 	}
 
-.PHONY: build-base-images
-build-base-images: ## Build base images to avoid rebuilding frequently
-	docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file Dockerfile_java_gradle_base .
-
-.PHONY: build
-build: ## Build Kafka2Hbase
+local-build: ## Build Kafka2Hbase with gradle
 	gradle :unit build -x test
 
-.PHONY: dist
-dist: ## Assemble distribution files in build/dist
+local-dist: ## Assemble distribution files in build/dist with gradle
 	gradle assembleDist
 
-.PHONY: services
+local-test: ## Run the unit tests with gradle
+	gradle --rerun-tasks unit
+
+local-all: local-build local-test local-dist ## Build and test with gradle
+
 services: ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose up -d zookeeper kafka hbase aws-s3
 	@{ \
@@ -45,43 +43,34 @@ services: ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose up s3-provision
 	docker-compose up -d kafka2s3
 
-.PHONY: up
 up: ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose up --build -d
 
-.PHONY: restart
 restart: ## Restart Kafka2Hbase and all supporting services
 	docker-compose restart
 
-.PHONY: down
 down: ## Bring down the Kafka2Hbase Docker container and support services
 	docker-compose down
 
-.PHONY: destroy
 destroy: down ## Bring down the Kafka2Hbase Docker container and services then delete all volumes
 	docker network prune -f
 	docker volume prune -f
 
-.PHONY: integration
-integration: build-base-images ## Run the integration tests in a Docker container
+integration: ## Run the integration tests in a Docker container
 	docker-compose run --rm integration-test gradle --rerun-tasks integration
 
-.PHONY: integration-all ## Build and Run all the tests in containers from a clean start
-integration-all: down destroy build-base build dist up test integration
+integration-all: down destroy build-base up integration ## Build and Run all the integration tests in containers from a clean start
 
-.PHONY: hbase-shell
 hbase-shell: ## Open an Hbase shell onto the running Hbase container
 	docker-compose run --rm hbase shell
 
-.PHONY: test
-test: ## Run the unit tests
-	gradle --rerun-tasks unit
-
-.PHONY: build-base
 build-base: ## build the base images which certain images extend.
 	@{ \
 		pushd docker; \
 		docker build --tag dwp-java:latest --file .java/Dockerfile . ; \
 		docker build --tag dwp-python-preinstall:latest --file ./python/Dockerfile . ; \
+		cp ../settings.gradle.kts ../gradle.properties .
+		docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./gradle/Dockerfile . ; \
+		rm -rf settings.gradle.kts gradle.properties
 		popd; \
     }
