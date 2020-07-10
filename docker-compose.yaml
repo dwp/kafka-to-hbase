@@ -57,6 +57,8 @@ services:
       DUMMY_SECRET_METASTORE_PASSWORD: "user_password"
       AWS_ACCESS_KEY_ID: "aws-access-key"
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
+      environment: "local-dev"
+      app_version: "latest"
 
   kafka2s3:
     image: dwpdigital/kafka-to-s3:latest
@@ -99,6 +101,7 @@ services:
   metadatastore:
     image: mysql:5.7
     restart: always
+    container_name: metadatastore
     environment:
       MYSQL_ROOT_PASSWORD: "root_password"
       MYSQL_DATABASE: "dummy_database"
