@@ -59,6 +59,7 @@ jobs:
             sudo pip3 install docker-compose
             docker build --tag dwp-java:latest --file ./docker/java/Dockerfile .
             docker build --tag dwp-python-preinstall:latest --file ./docker/python/Dockerfile .
+            docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
             docker-compose -f docker-compose.yaml up --build -d zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
             S3_READY_REGEX=^Ready\.$
             while ! docker logs aws-s3 2> /dev/null | grep -q $S3_READY_REGEX; do
