@@ -69,8 +69,8 @@ build-base: ## build the base images which certain images extend.
 		pushd docker; \
 		docker build --tag dwp-java:latest --file .java/Dockerfile . ; \
 		docker build --tag dwp-python-preinstall:latest --file ./python/Dockerfile . ; \
-		cp ../settings.gradle.kts ../gradle.properties .
+		cp ../settings.gradle.kts ../gradle.properties . ; \
 		docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./gradle/Dockerfile . ; \
-		rm -rf settings.gradle.kts gradle.properties
+		rm -rf settings.gradle.kts gradle.properties ; \
 		popd; \
 	}
