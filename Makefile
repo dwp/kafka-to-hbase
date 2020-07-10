@@ -36,9 +36,9 @@ services: ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose up -d zookeeper kafka hbase aws-s3
 	@{ \
 		while ! docker logs aws-s3 2> /dev/null | grep -q $(S3_READY_REGEX); do \
-        	echo Waiting for s3.; \
-            sleep 2; \
-        done; \
+			echo Waiting for s3.; \
+			sleep 2; \
+		done; \
 	}
 	docker-compose up s3-provision
 	docker-compose up -d kafka2s3
@@ -73,4 +73,4 @@ build-base: ## build the base images which certain images extend.
 		docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./gradle/Dockerfile . ; \
 		rm -rf settings.gradle.kts gradle.properties
 		popd; \
-    }
+	}
