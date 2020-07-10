@@ -43,8 +43,8 @@ services: ## Bring up supporting services in docker
 	docker-compose up --build s3-provision
 	docker-compose up --build -d kafka2s3
 
-up: ## Bring up Kafka2Hbase in Docker with supporting services
-	docker-compose up --build -d
+up: services ## Bring up Kafka2Hbase in Docker with supporting services
+	docker-compose -f docker-compose.yaml up --build -d kafka2hbase
 
 restart: ## Restart Kafka2Hbase and all supporting services
 	docker-compose restart
@@ -56,12 +56,10 @@ destroy: down ## Bring down the Kafka2Hbase Docker container and services then d
 	docker network prune -f
 	docker volume prune -f
 
-integration: ## Run the integration tests in a Docker container
-	docker-compose run --rm integration-test gradle --rerun-tasks integration
-
-integration-all: destroy build-base services ## Build and Run all the integration tests in containers from a clean start
-	docker-compose -f docker-compose.yaml up --build -d kafka2hbase
+integration-tests: ## Run the integration tests in a Docker container
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon :integration -x test
+
+integration-all: destroy build-base up integration-tests ## Build and Run all the integration tests in containers from a clean start
 
 hbase-shell: ## Open an Hbase shell onto the running Hbase container
 	docker-compose run --rm hbase shell
