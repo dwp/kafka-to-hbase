@@ -21,6 +21,10 @@ git-hooks: ## Set up hooks in .git/hooks
 		done \
 	}
 
+.PHONY: build-base-images
+build-base-images: ## Build base images to avoid rebuilding frequently
+	docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file Dockerfile_java_gradle_base .
+
 .PHONY: build
 build: ## Build Kafka2Hbase
 	./gradlew :unit build -x test

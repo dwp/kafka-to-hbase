@@ -83,18 +83,18 @@ services:
       - DATA_DIR=/opt/s3/data
 
   s3-provision:
-      image: s3-bucket-provision
-      build: ./docker/s3
-      container_name: s3-provision
-      depends_on:
-        - aws-s3
-      environment:
-        - S3_SERVICE_ENDPOINT=http://aws-s3:4572
-        - AWS_REGION=eu-west-2
-        - AWS_DEFAULT_REGION=eu-west-2
-        - AWS_ACCESS_KEY_ID=aws-access-key
-        - AWS_SECRET_ACCESS_KEY=aws-secret-access-key
-        - S3_BUCKET=kafka2s3
+    image: s3-bucket-provision
+    build: ./docker/s3
+    container_name: s3-provision
+    depends_on:
+      - aws-s3
+    environment:
+      - S3_SERVICE_ENDPOINT=http://aws-s3:4572
+      - AWS_REGION=eu-west-2
+      - AWS_DEFAULT_REGION=eu-west-2
+      - AWS_ACCESS_KEY_ID=aws-access-key
+      - AWS_SECRET_ACCESS_KEY=aws-secret-access-key
+      - S3_BUCKET=kafka2s3
 
   metadatastore:
     image: mysql:5.7
@@ -124,3 +124,12 @@ services:
       K2HB_RETRY_INITIAL_BACKOFF: "1"
       K2HB_RETRY_BACKOFF_MULTIPLIER: "1"
       K2HB_KAFKA_DLQ_TOPIC: "test-dlq-topic"
+      K2HB_RDS_USERNAME: "dummy_user"
+      K2HB_RDS_PASSWORD_SECRET_NAME: "metastore_password"
+      K2HB_RDS_DATABASE_NAME: "dummy_database"
+      K2HB_RDS_ENDPOINT: "metadatastore"
+      K2HB_RDS_PORT: "3306"
+      K2HB_USE_AWS_SECRETS: "false"
+      DUMMY_SECRET_METASTORE_PASSWORD: "user_password"
+      AWS_ACCESS_KEY_ID: "aws-access-key"
+      AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"

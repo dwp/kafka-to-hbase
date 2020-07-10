@@ -16,7 +16,6 @@ RUN echo "ENV gradle: ${GRADLE_OPTS}" \
 
 ENV GRADLE "/kafka2hbase/gradlew"
 
-
 # Copy the gradle wrapper
 COPY gradlew .
 COPY gradle/ ./gradle
@@ -29,7 +28,7 @@ COPY gradle.properties .
 # Copy the source
 COPY src/ ./src
 
-# Generate Wrapper, install dependencies and Create DistTar
+# Create DistTar
 RUN $GRADLE :unit build -x test \
     && $GRADLE distTar
 

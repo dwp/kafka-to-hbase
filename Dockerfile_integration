@@ -1,8 +1,11 @@
-FROM zenika/kotlin:1.3-jdk8-alpine as build
+FROM zenika/kotlin:1.3-jdk8-alpine as build_integration
+
+RUN apk update apk add su-exec
 
 WORKDIR /kafka2hbase
 
 ENV GRADLE "/kafka2hbase/gradlew --no-daemon"
+ENTRYPOINT ["./entrypoint.sh"]
 
 # Copy and generate the gradle wrapper
 COPY gradlew .
@@ -12,10 +15,8 @@ COPY gradle/ ./gradle
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 COPY gradle.properties .
+
+# Now build tests
 RUN $GRADLE :unit build -x test
 
-RUN apk update apk add su-exec
-
 COPY . .
-
-ENTRYPOINT ["./entrypoint.sh"]
