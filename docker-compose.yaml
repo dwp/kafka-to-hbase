@@ -57,8 +57,8 @@ services:
       DUMMY_SECRET_METASTORE_PASSWORD: "user_password"
       AWS_ACCESS_KEY_ID: "aws-access-key"
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
-      environment: "local-dev"
-      app_version: "latest"
+      K2HB_ENVIRONMENT: "local-dev"
+      K2HB_IMAGE_DIGEST: "latest"
 
   kafka2s3:
     image: dwpdigital/kafka-to-s3:latest
