@@ -67,6 +67,8 @@ services:
       - kafka
       - s3-provision
     environment:
+      K2S3_ENVIRONMENT: "local-dev"
+      K2S3_IMAGE_DIGEST: "latest"
       K2S3_KAFKA_INSECURE: "true"
       K2S3_DEAD_LETTER_QUEUE: "test-dlq-topic"
       K2S3_KAFKA_META_REFRESH_MS: "1000"
