@@ -41,10 +41,10 @@ RUN adduser --system --ingroup ${GROUP_NAME} ${USER_NAME}
 
 # Add Aurora cert
 RUN mkdir -p /certs
-COPY ./rds-ca-2019-2015-root.pem /certs/
+COPY ./AmazonRootCA1.pem /certs/
 RUN chown -R ${GROUP_NAME}:${USER_NAME} /certs
 RUN chmod -R a+rx /certs
-RUN chmod 600 /certs/rds-ca-2019-2015-root.pem
+RUN chmod 600 /certs/AmazonRootCA1.pem
 RUN ls -la /certs
 
 # Set environment variables for apk

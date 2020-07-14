@@ -122,7 +122,7 @@ object Config {
             put("use.tls.for.aurora", getEnv("K2HB_USE_TLS_FOR_AURORA") ?: "false")
 
             if (getProperty("use.tls.for.aurora").toLowerCase() == "true") {
-                put("ssl_ca_path", getEnv("K2HB_RDS_CA_CERT_PATH") ?: "/certs/rds-ca-2019-2015-root.pem")
+                put("ssl_ca_path", getEnv("K2HB_RDS_CA_CERT_PATH") ?: "/certs/AmazonRootCA1.pem")
                 put("ssl_ca", readFile(getProperty("ssl_ca_path")))
                 put("ssl_verify_cert", true)
             }

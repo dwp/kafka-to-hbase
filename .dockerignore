@@ -9,4 +9,4 @@
 !gradle
 !entrypoint.sh
 !set-proxy.sh
-!rds-ca-2019-2015-root.pem
+!AmazonRootCA1.pem
