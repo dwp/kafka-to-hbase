@@ -37,6 +37,14 @@ ENV GROUP_NAME=k2hb
 RUN addgroup ${GROUP_NAME}
 RUN adduser --system --ingroup ${GROUP_NAME} ${USER_NAME}
 
+# Add Aurora cert
+RUN mkdir -p /certs
+COPY ./rds-ca-2019-2015-root.pem /certs/
+RUN chown -R ${GROUP_NAME}:${USER_NAME} /certs
+RUN chmod -R a+rx /certs
+RUN chmod 600 /certs/rds-ca-2019-2015-root.pem
+RUN ls -la /certs
+
 # Set environment variables for apk
 ENV http_proxy=${http_proxy_full}
 ENV https_proxy=${http_proxy_full}
