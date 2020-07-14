@@ -64,6 +64,9 @@ integration-all: destroy build-base up integration-tests ## Build and Run all th
 hbase-shell: ## Open an Hbase shell onto the running Hbase container
 	docker-compose run --rm hbase shell
 
+build: build-base ## build main images
+	docker-compose build
+
 build-base: ## build the base images which certain images extend.
 	@{ \
 		pushd docker; \

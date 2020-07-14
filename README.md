@@ -74,6 +74,27 @@ This produces a zip and a tarball of the latest version.
    make local-dist
    ```
 
+## Build full local stack
+
+You can build all the local images with
+   ```
+   make build
+   ```
+
+## Push local images into AWs DEV account
+
+You will need to know your AWS account number, have relevant permssions and create a ECR in advance, i.e. "k2hb-test"
+
+Then you can push to dev like this;
+   ```
+   export AWS_DEV_ACCOUNT=12345678
+   export TEMP_IMAGE_NAME=k2hb-test
+   export AWS_DEFAULT_REGION=aaaa
+   aws ecr get-login-password --region ${AWS_DEFAULT_REGION} --profile dataworks-development | docker login --username AWS --password-stdin ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+   docker tag kafka2hbase ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}
+   docker push ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}
+   ```
+
 ## Run full local stack
 
 A full local stack can be run using the provided Dockerfile and Docker
