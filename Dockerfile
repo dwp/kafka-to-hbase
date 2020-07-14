@@ -19,6 +19,8 @@ RUN cp build/distributions/*.* /k2hb_builds/
 # Second build stage starts here
 FROM openjdk:14-alpine
 
+MAINTAINER DWP
+
 COPY ./entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/kafka2hbase"]
