@@ -87,9 +87,14 @@ You will need to know your AWS account number, have relevant permssions and crea
 
 Then you can push to dev like this;
    ```
+   make push-local-to-ecr aws_dev_account=12345678 temp_image_name=k2hb-test aws_default_region=eu-middle-3
+   ```
+
+Which does the following steps for you
+   ```
    export AWS_DEV_ACCOUNT=12345678
    export TEMP_IMAGE_NAME=k2hb-test
-   export AWS_DEFAULT_REGION=aaaa
+   export AWS_DEFAULT_REGION=eu-middle-3
    aws ecr get-login-password --region ${AWS_DEFAULT_REGION} --profile dataworks-development | docker login --username AWS --password-stdin ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
    docker tag kafka2hbase ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}
    docker push ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}
