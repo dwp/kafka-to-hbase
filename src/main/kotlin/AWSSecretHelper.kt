@@ -26,7 +26,7 @@ class AWSSecretHelper: SecretHelperInterface {
             @Suppress("UNCHECKED_CAST")
             val map = ObjectMapper().readValue(secretString, Map::class.java) as Map<String, String>
 
-            logger.debug("Aws secret manager secret value", "secret_name", secretName, "secret_value", secretString, "map_password", map["password"])
+            logger.debug("Aws secret manager secret value", "secret_name", secretName, "secret_value", secretString, "map_password", map["password"] ?: "NOT_SET")
 
             return map["password"]
         } catch (e: Exception) {
