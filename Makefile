@@ -1,4 +1,7 @@
 S3_READY_REGEX=^Ready\.$
+aws_dev_account=NOT_SET
+temp_image_name=NOT_SET
+aws_default_region=NOT_SET
 
 .PHONY: help
 help:
@@ -76,4 +79,14 @@ build-base: ## build the base images which certain images extend.
 		docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./gradle/Dockerfile . ; \
 		rm -rf settings.gradle.kts gradle.properties ; \
 		popd; \
+	}
+
+push-local-to-ecr: #Push a temp version of k2hb to AWS DEV ECR
+	@{ \
+		export AWS_DEV_ACCOUNT=$(aws_dev_account); \
+		export TEMP_IMAGE_NAME=$(temp_image_name); \
+		export AWS_DEFAULT_REGION=$(aws_default_region); \
+		aws ecr get-login-password --region ${AWS_DEFAULT_REGION} --profile dataworks-development | docker login --username AWS --password-stdin ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com; \
+		docker tag kafka2hbase ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}; \
+		docker push ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}; \
 	}
