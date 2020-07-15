@@ -19,9 +19,15 @@ class AWSSecretHelper: SecretHelperInterface {
 
             val getSecretValueResult = client.getSecretValue(getSecretValueRequest)
 
+            logger.debug("Successfully got value from aws secret manager", "secret_name", secretName)
+
             val secretString = getSecretValueResult.secretString
+
             @Suppress("UNCHECKED_CAST")
             val map = ObjectMapper().readValue(secretString, Map::class.java) as Map<String, String>
+
+            logger.debug("Aws secret manager secret value", "secret_name", secretName, "secret_value", secretString, "map_password", map["password"])
+
             return map["password"]
         } catch (e: Exception) {
             logger.error("Failed to get aws secret manager result", e, "secret_name", secretName)
