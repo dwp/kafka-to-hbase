@@ -25,7 +25,8 @@ class Kafka2HBaseSpec : StringSpec() {
     init {
         "Messages with new identifiers are written to hbase but not to dlq" {
             val hbase = HbaseClient.connect()
-            val metadataStore = MetadataStoreClient.connect()
+            // For future implementations
+            // val metadataStore = MetadataStoreClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             val parser = MessageParser()
             val converter = Converter()
@@ -56,7 +57,8 @@ class Kafka2HBaseSpec : StringSpec() {
 
         "Messages on the agentToDoArchive topic are written to agentToDo" {
             val hbase = HbaseClient.connect()
-            val metadataStore = MetadataStoreClient.connect()
+            // For future implementations
+            // val metadataStore = MetadataStoreClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             val parser = MessageParser()
             val converter = Converter()
@@ -80,7 +82,8 @@ class Kafka2HBaseSpec : StringSpec() {
             summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
 
             val hbase = HbaseClient.connect()
-            val metadataStore = MetadataStoreClient.connect()
+            // For future implementations
+            // val metadataStore = MetadataStoreClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
 
             val parser = MessageParser()
@@ -168,10 +171,6 @@ class Kafka2HBaseSpec : StringSpec() {
             )
             val expected = Klaxon().toJsonString(malformedRecord)
             actual shouldBe expected
-        }
-
-        "Metadata Store connects without error" {
-            val metadataStore = MetadataStoreClient.connect()
         }
     }
 
