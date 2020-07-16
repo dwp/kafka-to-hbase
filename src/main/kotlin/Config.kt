@@ -112,7 +112,7 @@ object Config {
 
     object MetadataStore {
 
-        val useAwsSecrets = getEnv("K2HB_USE_AWS_SECRETS") == "true"
+        val isUsingAWS = getEnv("K2HB_USE_AWS_SECRETS") == "true"
 
         val properties = Properties().apply {
             put("user", getEnv("K2HB_RDS_USERNAME") ?: "user")
@@ -122,7 +122,7 @@ object Config {
             put("rds.port", getEnv("K2HB_RDS_PORT") ?: "3306")
             put("use.aws.secrets", getEnv("K2HB_USE_AWS_SECRETS") ?: "true")
 
-            if (useAwsSecrets == "true") {
+            if (isUsingAWS) {
                 put("ssl_ca_path", getEnv("K2HB_RDS_CA_CERT_PATH") ?: "/certs/AmazonRootCA1.pem")
                 put("ssl_ca", readFile(getProperty("ssl_ca_path")))
                 put("ssl_verify_cert", true)
