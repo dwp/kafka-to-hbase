@@ -57,6 +57,8 @@ jobs:
           name: "Run the integration test"
           command: |
             sudo pip3 install docker-compose
+            docker-compose -f docker-compose.yaml down
+            docker-compose -f docker-compose.yaml destroy
             docker build --tag dwp-java:latest --file ./docker/java/Dockerfile .
             docker build --tag dwp-python-preinstall:latest --file ./docker/python/Dockerfile .
             docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
