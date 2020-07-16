@@ -70,7 +70,7 @@ jobs:
             docker-compose -f docker-compose.yaml up -d s3-provision
             docker-compose -f docker-compose.yaml build kafka2hbase
             docker-compose -f docker-compose.yaml up -d kafka2hbase
-            docker-compose -f docker-compose.yaml run --name integration-test gradle --no-daemon :integration -x test
+            docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon :integration -x test
             docker cp integration-test:/kafka2hbase/build/test-results .
       - store_test_results:
           path: test-results
