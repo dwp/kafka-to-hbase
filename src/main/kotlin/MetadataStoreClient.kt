@@ -6,8 +6,8 @@ open class MetadataStoreClient(var connection: Connection) {
 
     companion object {
 
-        private val useAwsSecrets = Config.MetadataStore.useAwsSecrets
-        private val secretHelper: SecretHelperInterface =  if (useAwsSecrets) AWSSecretHelper() else DummySecretHelper()
+        private val isUsingAWS = Config.MetadataStore.isUsingAWS
+        private val secretHelper: SecretHelperInterface =  if (isUsingAWS) AWSSecretHelper() else DummySecretHelper()
 
         fun connect(): MetadataStoreClient {
 
