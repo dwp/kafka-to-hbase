@@ -91,7 +91,7 @@ jobs:
           project: '${CIRCLE_PROJECT_REPONAME}/pr-kotlin'
       - setup_remote_docker
       - run:
-          command: 'docker build -t $IMAGE_NAME:latest .'
+          command: 'docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile . && docker build -t $IMAGE_NAME:latest .'
           name: Build Docker image
       # Second snyk scan examines Docker container for sev:high and will fail if found
       - snyk/scan:
