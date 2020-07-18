@@ -3,6 +3,8 @@
 /.gradle
 /.kotlintest
 
+gradle/wrapper/*
+
 .DS_Store
 
 out/
