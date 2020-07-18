@@ -4,6 +4,8 @@
 /.kotlintest
 
 gradle/wrapper/*
+gradlew
+gradlew.bat
 
 .DS_Store
 
