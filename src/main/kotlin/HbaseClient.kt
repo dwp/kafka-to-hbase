@@ -61,7 +61,9 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
         }
 
         connection.getTable(TableName.valueOf(tableName)).use { table ->
-            logger.info("Autoflush enabled", "table", tableName, "autoflush", "${(table as HTable).isAutoFlush}")
+            if (table is HTable) {
+                logger.info("Autoflush enabled", "table", tableName, "autoflush", "${table.isAutoFlush}")
+            }
             table.put(Put(key).apply {
                 this.addColumn(columnFamily, columnQualifier, version, body)
             })
