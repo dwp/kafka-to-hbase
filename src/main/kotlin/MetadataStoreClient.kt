@@ -2,7 +2,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
 
-open class MetadataStoreClient(var connection: Connection) {
+open class MetadataStoreClient(private var connection: Connection) {
 
     companion object {
 

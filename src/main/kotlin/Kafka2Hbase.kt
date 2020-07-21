@@ -12,14 +12,9 @@ suspend fun main() {
             Signal.handle(Signal("TERM")) { job.cancel() }
             job.await()
         } finally {
-            if (Config.Hbase.cleanExit) {
-                logger.info("Closing hbase connections")
-                hbase.close()
-                logger.info("Closed hbase connection")
-            }
-            else {
-                logger.info("Not closing hbase connection")
-            }
+            logger.info("Closing hbase connections")
+            hbase.close()
+            logger.info("Closed hbase connection")
             logger.info("Closing metadata store connections")
             metadataStore.close()
             logger.info("Closed metadata store connection")
