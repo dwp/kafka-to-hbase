@@ -1,7 +1,7 @@
 version: 2.1
 
-orbs:
-  snyk: snyk/snyk@0.0.8
+#orbs:
+#  snyk: snyk/snyk@0.0.8
 
 executors:
   docker-publisher:
@@ -9,6 +9,18 @@ executors:
       IMAGE_NAME: dwpdigital/kafka-to-hbase
     docker:
       - image: circleci/buildpack-deps:stretch
+
+commands:
+  setversion:
+    description: "Fetch the latest version from github"
+    steps:
+      - run: |
+          LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          [ -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
+          VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+          sed -i s/version=.*/version=$VERSION/ gradle.properties
+          echo VERSION: \'$VERSION\'
+
 jobs:
   build:
     docker:
@@ -18,15 +30,11 @@ jobs:
       - checkout
       - restore_cache:
           key: kafka-to-hbase-{{ checksum "build.gradle.kts" }}
-
+      - setversion
       - run:
           name: "Build distribution"
           command: |
-            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            set -o pipefail
-            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
-            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            sed -i s/version=.*/version=$VERSION/ gradle.properties
+            echo $VERSION
             ./gradlew :unit build -x test
             mkdir artifacts
             cp -v README.md artifacts
@@ -60,7 +68,6 @@ jobs:
             LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
             [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
             VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            echo VERSION: \'$VERSION\'
             sed -i s/version=.*/version=$VERSION/ gradle.properties
             docker-compose -f docker-compose.yaml build --build-arg VERSION=$VERSION zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
             docker-compose -f docker-compose.yaml up -d zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
@@ -78,68 +85,68 @@ jobs:
           path: test-results
           destination: test-results
 
-  snyk-pr:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    environment:
-      IMAGE_NAME: kafka-to-hbase
-    steps:
-      - checkout
-      # First snyk scan only looks for sev:high and will fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          severity-threshold: high
-          target-file: build.gradle.kts
-          project: '${CIRCLE_PROJECT_REPONAME}/pr-kotlin'
-      - setup_remote_docker
-      - run:
-          name: Build Docker image
-          command: |
-            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
-            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            echo VERSION: \'$VERSION\'
-            sed -i s/version=.*/version=$VERSION/ gradle.properties
-            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
-      # Second snyk scan examines Docker container for sev:high and will fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          docker-image-name: '$IMAGE_NAME:latest'
-          severity-threshold: high
-          target-file: Dockerfile
-          monitor-on-build: false
-          project: '${CIRCLE_PROJECT_REPONAME}/pr-docker'
-
-  snyk-master:
-    docker:
-      - image: circleci/openjdk:8-jdk
-    environment:
-      IMAGE_NAME: kafka-to-hbase
-    steps:
-      - checkout
-      # First snyk scan only looks for sev:high and will fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          severity-threshold: high
-          target-file: build.gradle.kts
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin'
-      - setup_remote_docker
-      - run:
-          name: Build Docker image
-          command: |
-            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
-            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            echo VERSION: \'$VERSION\'
-            sed -i s/version=.*/version=$VERSION/ gradle.properties
-            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
-      # Second snyk scan examines Docker container for sev:high and will fail if found
-      - snyk/scan:
-          organization: dwp-dataworks
-          docker-image-name: '$IMAGE_NAME:latest'
-          severity-threshold: high
-          target-file: Dockerfile
-          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker'
+#  snyk-pr:
+#    docker:
+#      - image: circleci/openjdk:8-jdk
+#    environment:
+#      IMAGE_NAME: kafka-to-hbase
+#    steps:
+#      - checkout
+#      # First snyk scan only looks for sev:high and will fail if found
+#      - snyk/scan:
+#          organization: dwp-dataworks
+#          severity-threshold: high
+#          target-file: build.gradle.kts
+#          project: '${CIRCLE_PROJECT_REPONAME}/pr-kotlin'
+#      - setup_remote_docker
+#      - run:
+#          name: Build Docker image
+#          command: |
+#            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+#            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
+#            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+#            echo VERSION: \'$VERSION\'
+#            sed -i s/version=.*/version=$VERSION/ gradle.properties
+#            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
+#      # Second snyk scan examines Docker container for sev:high and will fail if found
+#      - snyk/scan:
+#          organization: dwp-dataworks
+#          docker-image-name: '$IMAGE_NAME:latest'
+#          severity-threshold: high
+#          target-file: Dockerfile
+#          monitor-on-build: false
+#          project: '${CIRCLE_PROJECT_REPONAME}/pr-docker'
+#
+#  snyk-master:
+#    docker:
+#      - image: circleci/openjdk:8-jdk
+#    environment:
+#      IMAGE_NAME: kafka-to-hbase
+#    steps:
+#      - checkout
+#      # First snyk scan only looks for sev:high and will fail if found
+#      - snyk/scan:
+#          organization: dwp-dataworks
+#          severity-threshold: high
+#          target-file: build.gradle.kts
+#          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-kotlin'
+#      - setup_remote_docker
+#      - run:
+#          name: Build Docker image
+#          command: |
+#            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+#            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
+#            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+#            echo VERSION: \'$VERSION\'
+#            sed -i s/version=.*/version=$VERSION/ gradle.properties
+#            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
+#      # Second snyk scan examines Docker container for sev:high and will fail if found
+#      - snyk/scan:
+#          organization: dwp-dataworks
+#          docker-image-name: '$IMAGE_NAME:latest'
+#          severity-threshold: high
+#          target-file: Dockerfile
+#          project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker'
 
 
   publish-github-release:
@@ -159,53 +166,53 @@ jobs:
             VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
-  docker-build:
-    executor: docker-publisher
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Build Docker image
-          command: |
-            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
-            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            echo VERSION: \'$VERSION\'
-            sed -i s/version=.*/version=$VERSION/ gradle.properties
-            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
-      - run:
-          name: Archive Docker image
-          command: docker save -o image.tar $IMAGE_NAME
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./image.tar
-
-  docker-publish:
-    executor: docker-publisher
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - setup_remote_docker
-      - run:
-          name: Load archived Docker image
-          command: docker load -i /tmp/workspace/image.tar
-      - run:
-          name: Publish Docker Image to Docker Hub
-          command: |
-            set -u
-            set +o pipefail
-            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            set -o pipefail
-            read MAJOR MINOR PATCH \<<< $( echo $LATEST_VERSION | awk -F '[ .]' '{maj = $1+0; min = $2+0; patch = $3+0; print maj, min, patch}' )
-            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR
-            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR.$MINOR
-            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push $IMAGE_NAME:latest
-            docker push $IMAGE_NAME:$MAJOR
-            docker push $IMAGE_NAME:$MAJOR.$MINOR
-            docker push $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
+#  docker-build:
+#    executor: docker-publisher
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          name: Build Docker image
+#          command: |
+#            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+#            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
+#            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+#            echo VERSION: \'$VERSION\'
+#            sed -i s/version=.*/version=$VERSION/ gradle.properties
+#            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
+#      - run:
+#          name: Archive Docker image
+#          command: docker save -o image.tar $IMAGE_NAME
+#      - persist_to_workspace:
+#          root: .
+#          paths:
+#            - ./image.tar
+#
+#  docker-publish:
+#    executor: docker-publisher
+#    steps:
+#      - attach_workspace:
+#          at: /tmp/workspace
+#      - setup_remote_docker
+#      - run:
+#          name: Load archived Docker image
+#          command: docker load -i /tmp/workspace/image.tar
+#      - run:
+#          name: Publish Docker Image to Docker Hub
+#          command: |
+#            set -u
+#            set +o pipefail
+#            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+#            set -o pipefail
+#            read MAJOR MINOR PATCH \<<< $( echo $LATEST_VERSION | awk -F '[ .]' '{maj = $1+0; min = $2+0; patch = $3+0; print maj, min, patch}' )
+#            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR
+#            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR.$MINOR
+#            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
+#            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+#            docker push $IMAGE_NAME:latest
+#            docker push $IMAGE_NAME:$MAJOR
+#            docker push $IMAGE_NAME:$MAJOR.$MINOR
+#            docker push $IMAGE_NAME:$MAJOR.$MINOR.$PATCH
 
 workflows:
   version: 2
@@ -215,34 +222,34 @@ workflows:
       - test:
           requires:
             - build
-      - snyk-pr:
-          requires:
-            - build
-          filters:
-            branches:
-              ignore: master
-      - snyk-master:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
+#      - snyk-pr:
+#          requires:
+#            - build
+#          filters:
+#            branches:
+#              ignore: master
+#      - snyk-master:
+#          requires:
+#            - build
+#          filters:
+#            branches:
+#              only: master
       - publish-github-release:
           requires:
             - test
           filters:
             branches:
               only: master
-      - docker-build:
-          requires:
-            - test
-          filters:
-            branches:
-              only: master
-      - docker-publish:
-          requires:
-            - docker-build
-          filters:
-            branches:
-              only: master
+#      - docker-build:
+#          requires:
+#            - test
+#          filters:
+#            branches:
+#              only: master
+#      - docker-publish:
+#          requires:
+#            - docker-build
+#          filters:
+#            branches:
+#              only: master
 
