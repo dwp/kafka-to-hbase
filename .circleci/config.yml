@@ -36,9 +36,6 @@ jobs:
           path: build/distributions
           destination: distributions
 
-      - run: |
-          ls
-
       - run:
           name: prepare release
           command: |
@@ -51,6 +48,10 @@ jobs:
            paths:
             - README.md
             - build/distributions/*
+
+      - run: |
+          ls
+          find artifacts
 
 #  test:
 #    docker:
