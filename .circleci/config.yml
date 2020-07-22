@@ -29,6 +29,8 @@ jobs:
       - run: |
           ./gradlew distTar
           gzip -9 build/distributions/*.tar
+          ls
+          find .
 
       - store_artifacts:
           path: build/distributions
