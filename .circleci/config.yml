@@ -58,8 +58,11 @@ jobs:
             sudo pip3 install docker-compose
             docker build --tag dwp-java:latest --file ./docker/java/Dockerfile .
             docker build --tag dwp-python-preinstall:latest --file ./docker/python/Dockerfile .
-            VERSION=$(cat version.txt)
+            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
+            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
             echo VERSION: \'$VERSION\'
+            sed -i s/version=.*/version=$VERSION/ gradle.properties
             docker-compose -f docker-compose.yaml --build-arg VERSION=$VERSION build kafka2hbase integration-test
             docker-compose -f docker-compose.yaml up --build -d zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
             S3_READY_REGEX=^Ready\.$
