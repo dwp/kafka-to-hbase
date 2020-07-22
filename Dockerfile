@@ -52,7 +52,7 @@ ENV https_proxy=${http_proxy_full}
 ENV HTTP_PROXY=${http_proxy_full}
 ENV HTTPS_PROXY=${http_proxy_full}
 
-ARG VERSION=1.0-SNAPSHOT
+ARG VERSION
 ARG DIST=kafka2hbase-$VERSION
 ARG DIST_FILE=$DIST.tar
 
