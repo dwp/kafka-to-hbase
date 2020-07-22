@@ -20,8 +20,8 @@ commands:
             LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
             [ -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
             VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            sed -i s/version=.*/version=$VERSION/ gradle.properties
             echo VERSION: \'$VERSION\'
+            sed -i s/version=.*/version=$VERSION/ gradle.properties
 
 jobs:
   build:
@@ -36,7 +36,8 @@ jobs:
       - run:
           name: "Build distribution"
           command: |
-            echo VERSION: \'$VERSION\'
+            VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
+            echo VERSION: \'$VERSION\'.
             ./gradlew :unit build -x test
             mkdir artifacts
             cp -v README.md artifacts
@@ -60,17 +61,14 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: false
-
+      - setversion
       - run:
           name: "Run the integration test"
           command: |
             sudo pip3 install docker-compose
             docker build --tag dwp-java:latest --file ./docker/java/Dockerfile .
             docker build --tag dwp-python-preinstall:latest --file ./docker/python/Dockerfile .
-            LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            [  -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
-            VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            sed -i s/version=.*/version=$VERSION/ gradle.properties
+            VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
             docker-compose -f docker-compose.yaml build --build-arg VERSION=$VERSION zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
             docker-compose -f docker-compose.yaml up -d zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
             S3_READY_REGEX=^Ready\.$
