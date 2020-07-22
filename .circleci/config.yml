@@ -38,13 +38,13 @@ jobs:
 
       - run: |
           ls
-          ls distributions
 
       - run:
           name: prepare release
           command: |
             mkdir artifacts
             cp README.md artifacts
+            ls
 
       - persist_to_workspace:
            root: artifacts
