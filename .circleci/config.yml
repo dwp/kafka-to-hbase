@@ -137,6 +137,8 @@ jobs:
             VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
             find .
             ls -l artifacts
+            mv artifacts/kafka2hbase.tar.gz artifacts/kafka2hbase-${VERSION}.tar.gz
+            ls -l artifacts
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 #  docker-build:
