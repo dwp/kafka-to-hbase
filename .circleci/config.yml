@@ -46,10 +46,10 @@ jobs:
             cp README.md build/distributions/* artifacts
             ls artifacts
 
-#      - persist_to_workspace:
-#           root: artifacts
-#           paths:
-#            - README.md
+      - persist_to_workspace:
+           root: artifacts
+           paths:
+            - *
 
 #  test:
 #    docker:
