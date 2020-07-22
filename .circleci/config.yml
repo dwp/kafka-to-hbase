@@ -19,33 +19,25 @@ jobs:
       - restore_cache:
           key: kafka-to-hbase-{{ checksum "build.gradle.kts" }}
 
-      - run: ./gradlew :unit build -x test
+      - run: |
+          ./gradlew :unit build -x test
+          gzip build/distributions/*.tar
+          mkdir artifacts
+          cp -v README.md artifacts
+          cp -v build/distributions/*.tar.gz artifacts/kafka2hbase.tar.gz
+          ls artifacts
 
       - save_cache:
           key: kafka-to-hbase-{{ checksum "build.gradle.kts" }}
           paths:
             - .gradle
 
-      - run: |
-          ./gradlew distTar
-          gzip -9 build/distributions/*.tar
-
-      - run:
-          name: prepare release
-          command: |
-            mkdir artifacts
-            cp README.md build/distributions/* artifacts
-            ls artifacts
-
       - persist_to_workspace:
            root: artifacts
            paths:
             - README.md
-            - ./kafka2hbase*
+            - kafka2hbase.tar.gz
 
-      - run: |
-          ls
-          find artifacts
 
 #  test:
 #    docker:
