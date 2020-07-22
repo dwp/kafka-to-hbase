@@ -14,7 +14,9 @@ commands:
   setversion:
     description: "Fetch the latest version from github"
     steps:
-      - run: |
+      - run:
+        name: "Fetch the version from github"
+        command: |
           LATEST_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
           [ -z "$LATEST_VERSION" ] && LATEST_VERSION="0.0.0"
           VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
@@ -34,7 +36,7 @@ jobs:
       - run:
           name: "Build distribution"
           command: |
-            echo $VERSION
+            echo VERSION: \'$VERSION\'
             ./gradlew :unit build -x test
             mkdir artifacts
             cp -v README.md artifacts
