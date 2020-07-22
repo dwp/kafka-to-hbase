@@ -62,8 +62,7 @@ jobs:
             VERSION=$(echo $LATEST_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
             echo VERSION: \'$VERSION\'
             sed -i s/version=.*/version=$VERSION/ gradle.properties
-            docker-compose -f docker-compose.yaml up --build --build-arg VERSION=$VERSION -d \
-              zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
+            docker-compose -f docker-compose.yaml up --build --build-arg VERSION=$VERSION -d zookeeper kafka hbase kafka2hbase kafka2s3 aws-s3 integration-test
             S3_READY_REGEX=^Ready\.$
             while ! docker logs aws-s3 2> /dev/null | grep -q $S3_READY_REGEX; do
                 echo Waiting for aws-s3.
