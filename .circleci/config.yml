@@ -29,12 +29,6 @@ jobs:
       - run: |
           ./gradlew distTar
           gzip -9 build/distributions/*.tar
-          ls
-          ls build/distributions
-
-#      - store_artifacts:
-#          path: build/distributions
-#          destination: distributions
 
       - run:
           name: prepare release
@@ -47,7 +41,7 @@ jobs:
            root: artifacts
            paths:
             - README.md
-            - kafka2hbase-1.0-SNAPSHOT.tar.gz
+            - ./kafka2hbase*
 
       - run: |
           ls
