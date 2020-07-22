@@ -43,13 +43,13 @@ jobs:
           name: prepare release
           command: |
             mkdir artifacts
-            cp README.md artifacts
-            ls
+            cp README.md build/distributions/* artifacts
+            ls artifacts
 
-      - persist_to_workspace:
-           root: artifacts
-           paths:
-            - README.md
+#      - persist_to_workspace:
+#           root: artifacts
+#           paths:
+#            - README.md
 
 #  test:
 #    docker:
