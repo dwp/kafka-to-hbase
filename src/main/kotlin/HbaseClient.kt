@@ -61,15 +61,17 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
             logger.info("Putting record", "key", printableKey, "table", tableName, "version", "$version")
         }
 
-        connection.getTable(TableName.valueOf(tableName)).use { table ->
-            table.put(Put(key).apply {
-                this.addColumn(columnFamily, columnQualifier, version, body)
-            })
-        }
+        throw Exception("Blew up in putVersion")
 
-        if (Config.Hbase.logKeys) {
-            logger.info("Put record", "key", printableKey, "table", tableName, "version", "$version")
-        }
+//        connection.getTable(TableName.valueOf(tableName)).use { table ->
+//            table.put(Put(key).apply {
+//                this.addColumn(columnFamily, columnQualifier, version, body)
+//            })
+//        }
+//
+//        if (Config.Hbase.logKeys) {
+//            logger.info("Put record", "key", printableKey, "table", tableName, "version", "$version")
+//        }
     }
 
     private fun printableKey(key: ByteArray) =

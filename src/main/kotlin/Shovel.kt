@@ -24,7 +24,6 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 )
                 consumer.subscribe(Config.Kafka.topicRegex)
 
-
                 logger.info(
                     "Polling",
                     "poll_timeout", pollTimeout.toString(),
@@ -54,9 +53,12 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                     printLogs(consumer, offsets, usedPartitions)
                 }
 
-            } catch (e: HbaseReadException) {
-                logger.error("Error writing to Hbase", e)
+            } catch (e: HbaseConnectionException) {
+                logger.error("Error connecting to Hbase", e)
                 cancel(CancellationException("Error writing to Hbase ${e.message}", e))
+            } catch (e: HbaseWriteException) {
+                logger.error("Error writing to Hbase", e)
+                // cancel(CancellationException("Error writing to Hbase ${e.message}", e))
             } catch (e: Exception) {
                 logger.error("Error reading from Kafka", e)
                 cancel(CancellationException("Error reading from Kafka ${e.message}", e))
@@ -91,7 +93,7 @@ fun validateHbaseConnection(hbase: HbaseClient) {
     }
 
     if (!success) {
-        throw HbaseReadException("Unable to reconnect to Hbase after $attempts attempts")
+        throw HbaseConnectionException("Unable to reconnect to Hbase after $attempts attempts")
     }
 }
 

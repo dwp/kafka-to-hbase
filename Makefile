@@ -23,7 +23,7 @@ git-hooks: ## Set up hooks in .git/hooks
 
 .PHONY: build
 build: ## Build Kafka2Hbase
-	./gradlew :unit build -x test
+	./gradlew build -x test
 
 .PHONY: dist
 dist: ## Assemble distribution files in build/dist
@@ -60,7 +60,7 @@ destroy: down ## Bring down the Kafka2Hbase Docker container and services then d
 
 .PHONY: integration
 integration: ## Run the integration tests in a Docker container
-	docker-compose run --rm integration-test ./gradlew --rerun-tasks integration
+	docker-compose run --rm integration-test ./gradlew --rerun-tasks integration -x test
 
 .PHONY: integration-all ## Build and Run all the tests in containers from a clean start
 integration-all: down destroy build-base build dist up test integration
@@ -71,7 +71,7 @@ hbase-shell: ## Open an Hbase shell onto the running Hbase container
 
 .PHONY: test
 test: ## Run the unit tests
-	./gradlew --rerun-tasks unit
+# 	./gradlew --rerun-tasks unit
 
 .PHONY: build-base
 build-base: ## build the base images which certain images extend.
