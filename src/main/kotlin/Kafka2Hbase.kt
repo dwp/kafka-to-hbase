@@ -30,7 +30,6 @@ suspend fun main() {
             logger.info("Closing metadata store connections")
             metadataStore.close()
             logger.info("Closed metadata store connection")
-            job.await()
         }
     }
 }
