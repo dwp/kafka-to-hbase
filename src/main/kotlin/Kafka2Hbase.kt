@@ -8,7 +8,7 @@ suspend fun main() {
     val metadataStore = MetadataStoreClient.connect()
     KafkaConsumer<ByteArray, ByteArray>(Config.Kafka.consumerProps).use { kafka ->
         try {
-            val job = shovelAsync(kafka, hbase, Config.Kafka.pollTimeout)
+            val job = shovelAsync(kafka, hbase, metadataStore, Config.Kafka.pollTimeout)
 
             Signal.handle(Signal("INT")) {
                 logger.info("Int signal, cancelling job", "signal", "$it")
@@ -20,9 +20,6 @@ suspend fun main() {
                 job.cancel()
             }
 
-            val job = shovelAsync(kafka, hbase, metadataStore, Config.Kafka.pollTimeout)
-            Signal.handle(Signal("INT")) { job.cancel() }
-            Signal.handle(Signal("TERM")) { job.cancel() }
             job.await()
         } finally {
             logger.info("Closing hbase connection")
