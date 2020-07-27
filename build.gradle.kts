@@ -9,7 +9,6 @@ plugins {
 }
 
 group = "uk.gov.dwp.dataworks"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -22,7 +21,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.2")
     implementation("org.apache.kafka", "kafka-clients", "2.3.0")
     implementation("com.beust", "klaxon", "4.0.2")
-    implementation("com.github.everit-org.json-schema", "org.everit.json.schema", "1.12.0")
+    implementation("com.github.everit-org.json-schema", "org.everit.json.schema", "1.12.1")
     implementation("ch.qos.logback", "logback-classic", "1.2.3")
     implementation("org.apache.commons", "commons-text", "1.8")
     implementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.819") //1.11.316

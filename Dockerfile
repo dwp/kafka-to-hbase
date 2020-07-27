@@ -25,7 +25,7 @@ COPY ./entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/kafka2hbase"]
 
-ARG VERSION=1.0-SNAPSHOT
+ARG VERSION=0.0.1
 ARG DIST=kafka2hbase-$VERSION
 ARG DIST_FILE=$DIST.tar
 ARG http_proxy_full=""
