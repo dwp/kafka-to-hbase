@@ -118,11 +118,9 @@ jobs:
       - setup_remote_docker
       - setversion
       - run:
+          name: "Build docker image"
           command: |
             docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
-            docker build -t $IMAGE_NAME:latest .
-          name: Build Docker image
-          command: |
             VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
             docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
       # Second snyk scan examines Docker container for sev:high and will fail if found
@@ -150,11 +148,9 @@ jobs:
       - setup_remote_docker
       - setversion
       - run:
+          name: "Build docker image"
           command: |
             docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
-            docker build -t $IMAGE_NAME:latest .
-          name: Build Docker image
-          command: |
             VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
             docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
       # Second snyk scan examines Docker container for sev:high and will fail if found
@@ -188,6 +184,7 @@ jobs:
       - run:
           name: Build Docker image
           command: |
+            docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
             VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
             docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
       - run:

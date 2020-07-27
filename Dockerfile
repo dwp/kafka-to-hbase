@@ -57,7 +57,8 @@ RUN echo "ENV http: ${http_proxy}" \
     && echo "ENV https: ${https_proxy}" \
     && echo "ENV HTTP: ${HTTP_PROXY}" \
     && echo "ENV HTTPS: ${HTTPS_PROXY}" \
-    && echo "ARG full: ${http_proxy_full}"
+    && echo "ARG full: ${http_proxy_full}" \
+    && echo DIST_FILE: \'$DIST_FILE\'.
 
 ENV acm_cert_helper_version 0.8.0
 RUN echo "===> Installing Dependencies ..." \
