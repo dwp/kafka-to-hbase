@@ -71,7 +71,7 @@ sourceSets {
     }
 }
 
-tasks.register<Test>("integration") {
+tasks.register<Test>("integration-test") {
     description = "Runs the integration tests"
     group = "verification"
     testClassesDirs = sourceSets["integration"].output.classesDirs
