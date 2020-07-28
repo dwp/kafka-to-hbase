@@ -53,6 +53,12 @@ sourceSets {
         compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
         runtimeClasspath += output + compileClasspath
     }
+    create("integration-load") {
+        java.srcDir(file("src/integration-load/groovy"))
+        java.srcDir(file("src/integration-load/kotlin"))
+        compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
+        runtimeClasspath += output + compileClasspath
+    }
     create("unit") {
         java.srcDir(file("src/test/kotlin"))
         compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
@@ -65,6 +71,22 @@ tasks.register<Test>("integration") {
     group = "verification"
     testClassesDirs = sourceSets["integration"].output.classesDirs
     classpath = sourceSets["integration"].runtimeClasspath
+
+    environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
+    environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
+    environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
+
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT)
+    }
+}
+
+tasks.register<Test>("integration-load-test") {
+    description = "Runs the integration load tests"
+    group = "verification"
+    testClassesDirs = sourceSets["integration-load"].output.classesDirs
+    classpath = sourceSets["integration-load"].runtimeClasspath
 
     environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
