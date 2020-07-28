@@ -57,12 +57,6 @@ sourceSets {
         compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
         runtimeClasspath += output + compileClasspath
     }
-    create("integration-load") {
-        java.srcDir(file("src/integration-load/groovy"))
-        java.srcDir(file("src/integration-load/kotlin"))
-        compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
-        runtimeClasspath += output + compileClasspath
-    }
     create("unit") {
         java.srcDir(file("src/test/kotlin"))
         compileClasspath += sourceSets.getByName("main").output + configurations.testRuntimeClasspath
