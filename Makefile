@@ -63,11 +63,11 @@ integration-test: ## Run the integration tests in a Docker container
 	docker-compose run --rm integration-test ./gradlew --rerun-tasks integration -x test -x integration-load-test
 
 .PHONY: integration-load-test
-integration-load-test: ## Run the integration tests in a Docker container
+integration-load-test: ## Run the integration load tests in a Docker container
 	docker-compose run --rm integration-test ./gradlew --rerun-tasks integration-load-test -x test -x integration
 
 .PHONY: integration-all ## Build and Run all the tests in containers from a clean start
-integration-all: down destroy build-base build dist up test integration-test
+integration-all: down destroy build dist up test integration-test
 
 .PHONY: hbase-shell
 hbase-shell: ## Open an Hbase shell onto the running Hbase container
@@ -75,7 +75,7 @@ hbase-shell: ## Open an Hbase shell onto the running Hbase container
 
 .PHONY: test
 test: ## Run the unit tests
-# 	./gradlew --rerun-tasks unit
+	./gradlew --rerun-tasks unit
 
 .PHONY: build-base
 build-base: ## build the base images which certain images extend.
