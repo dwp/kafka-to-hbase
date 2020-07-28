@@ -21,11 +21,9 @@ suspend fun main() {
 
             job.await()
         } finally {
-            if (Config.Hbase.cleanExit) {
-                logger.info("Closing hbase connections")
-                hbase.close()
-                logger.info("Closed hbase connection")
-            }
+            logger.info("Closing hbase connections")
+            hbase.close()
+            logger.info("Closed hbase connection")
 
             logger.info("Closing metadata store connections")
             metadataStore.close()
