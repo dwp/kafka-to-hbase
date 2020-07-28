@@ -60,11 +60,21 @@ destroy: down ## Bring down the Kafka2Hbase Docker container and services then d
 	docker volume prune -f
 
 integration-test: ## Run the integration tests in a Docker container
-	set +e && docker stop integration-test && docker rm integration-test && set -e
+	@{ \
+		set +e ;\
+		docker stop integration-test ;\
+		docker rm integration-test ;\
+ 		set -e ;\
+ 	}
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test -x test -x integration-load-test
 
 integration-load-test: ## Run the integration load tests in a Docker container
-	set +e docker stop integration-load-test && docker rm integration-load-test && set -e
+	@{ \
+		set +e ;\
+		docker stop integration-load-test ;\
+		docker rm integration-load-test ;\
+ 		set -e ;\
+ 	}
 	docker-compose -f docker-compose.yaml run --name integration-load-test integration-test gradle --no-daemon --rerun-tasks integration-load-test -x test -x integration-test
 
 .PHONY: integration-all ## Build and Run all the tests in containers from a clean start

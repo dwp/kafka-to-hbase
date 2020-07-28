@@ -77,6 +77,8 @@ tasks.register<Test>("integration-test") {
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
 
     testLogging {
+        outputs.upToDateWhen {false}
+        showStandardStreams = true
         exceptionFormat = TestExceptionFormat.FULL
         events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT)
     }
@@ -97,6 +99,8 @@ tasks.register<Test>("integration-load-test") {
     environment("K2HB_USE_AWS_SECRETS", "false")
 
     testLogging {
+        outputs.upToDateWhen {false}
+        showStandardStreams = true
         exceptionFormat = TestExceptionFormat.FULL
         events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.STANDARD_OUT)
     }
@@ -114,6 +118,8 @@ tasks.register<Test>("unit") {
     environment("K2HB_USE_AWS_SECRETS", "false")
 
     testLogging {
+        outputs.upToDateWhen {false}
+        showStandardStreams = true
         exceptionFormat = TestExceptionFormat.FULL
         events = setOf(TestLogEvent.SKIPPED, TestLogEvent.PASSED, TestLogEvent.FAILED)
     }
