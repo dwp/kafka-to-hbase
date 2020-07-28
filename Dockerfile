@@ -10,11 +10,18 @@ COPY build.gradle.kts .
 # Copy the source
 COPY src/ ./src
 
+<<<<<<< HEAD
 # Create DistTar
 RUN gradle :unit build -x test \
     && gradle distTar
 
 RUN cp build/distributions/*.* /k2hb_builds/
+=======
+# Generate Wrapper, install dependencies and Create DistTar
+RUN $GRADLE build -x test \
+    && $GRADLE distTar
+RUN ls -la /kafka2hbase/build/distributions/
+>>>>>>> origin
 
 # Second build stage starts here
 FROM openjdk:14-alpine
