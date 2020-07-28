@@ -12,7 +12,7 @@ group = "uk.gov.dwp.dataworks"
 repositories {
     mavenCentral()
     jcenter()
-    maven(url="https://jitpack.io")
+    maven(url = "https://jitpack.io")
 }
 
 dependencies {
@@ -35,7 +35,7 @@ dependencies {
 }
 
 configurations.all {
-    exclude(group="org.slf4j", module="slf4j-log4j12")
+    exclude(group = "org.slf4j", module = "slf4j-log4j12")
 }
 
 application {
@@ -71,7 +71,9 @@ tasks.register<Test>("integration") {
     group = "verification"
     testClassesDirs = sourceSets["integration"].output.classesDirs
     classpath = sourceSets["integration"].runtimeClasspath
-
+    filter {
+        includeTestsMatching("*IntegrationSpec*")
+    }
     environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
@@ -85,8 +87,11 @@ tasks.register<Test>("integration") {
 tasks.register<Test>("integration-load-test") {
     description = "Runs the integration load tests"
     group = "verification"
-    testClassesDirs = sourceSets["integration-load"].output.classesDirs
-    classpath = sourceSets["integration-load"].runtimeClasspath
+    testClassesDirs = sourceSets["integration"].output.classesDirs
+    classpath = sourceSets["integration"].runtimeClasspath
+    filter {
+        includeTestsMatching("*IntegrationLoadSpec*")
+    }
 
     environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")

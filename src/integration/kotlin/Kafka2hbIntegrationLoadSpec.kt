@@ -4,15 +4,14 @@ import lib.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.Logger
 
-class Kafka2HBIntegrationLoadSpec: StringSpec(){
+class Kafka2hbIntegrationLoadSpec: StringSpec(){
 
-    private val log = Logger.getLogger(Kafka2HBIntegrationLoadSpec::class.toString())
-    private val maxRecords = 100
+    private val log = Logger.getLogger(Kafka2hbIntegrationLoadSpec::class.toString())
+    private val maxRecords = 1000
     init {
         "Send many messages for a load test" {
             val hbase = HbaseClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
-            val parser = MessageParser()
             val converter = Converter()
             val topic = "db.load.test-data"
             val matcher = TextUtils().topicNameTableMatcher(topic)

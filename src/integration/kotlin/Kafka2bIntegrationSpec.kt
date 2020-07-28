@@ -18,9 +18,9 @@ import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Kafka2HBaseIntegrationSpec: StringSpec(){
+class Kafka2bIntegrationSpec: StringSpec(){
 
-    private val log = Logger.getLogger(Kafka2HBaseIntegrationSpec::class.toString())
+    private val log = Logger.getLogger(Kafka2bIntegrationSpec::class.toString())
 
     init {
         "Messages with new identifiers are written to hbase but not to dlq" {
