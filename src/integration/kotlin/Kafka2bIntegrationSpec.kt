@@ -18,7 +18,7 @@ import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Kafka2bIntegrationSpec: StringSpec(){
+class Kafka2bIntegrationSpec : StringSpec() {
 
     private val log = Logger.getLogger(Kafka2bIntegrationSpec::class.toString())
 
@@ -41,14 +41,15 @@ class Kafka2bIntegrationSpec: StringSpec(){
                 val s3Client = getS3Client()
                 val summaries = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
                 summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
-                val body = wellformedValidPayload()
+                val body = wellFormedValidPayload()
                 val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
                 val hbaseKey = parser.generateKey(converter.convertToJson(getId().toByteArray()))
                 log.info("Sending well-formed record to kafka topic '$topic'.")
                 producer.sendRecord(topic.toByteArray(), "key1".toByteArray(), body, timestamp)
                 log.info("Sent well-formed record to kafka topic '$topic'.")
                 val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-                val storedValue = waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
+                val storedValue =
+                    waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
                 String(storedValue!!) shouldBe Gson().fromJson(String(body), JsonObject::class.java).toString()
                 val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
                 summaries1.size shouldBe 0
@@ -65,7 +66,7 @@ class Kafka2bIntegrationSpec: StringSpec(){
             val topic = "db.agent_core.agentToDoArchive"
             val qualifiedTableName = "agent_core:agentToDo"
             hbase.ensureTable(qualifiedTableName)
-            val body = wellformedValidPayload()
+            val body = wellFormedValidPayload()
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
             log.info("Sending well-formed record to kafka topic '$topic'.")
@@ -92,7 +93,7 @@ class Kafka2bIntegrationSpec: StringSpec(){
             val matcher1 = TextUtils().topicNameTableMatcher(topic)
             matcher1 shouldNotBe null
             val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
-            val body1 = wellformedValidPayload()
+            val body1 = wellFormedValidPayload()
             if (matcher1 != null) {
                 val namespace = matcher1.groupValues[1]
                 val tableName = matcher1.groupValues[2]
@@ -105,7 +106,7 @@ class Kafka2bIntegrationSpec: StringSpec(){
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             Thread.sleep(1000)
 
-            val body2 = wellformedValidPayload()
+            val body2 = wellFormedValidPayload()
             val kafkaTimestamp2 = converter.getTimestampAsLong(getISO8601Timestamp())
             producer.sendRecord(topic.toByteArray(), "key2".toByteArray(), body2, kafkaTimestamp2)
 
