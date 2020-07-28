@@ -37,7 +37,7 @@ jobs:
           name: "Build distribution"
           command: |
             gradle :unit build -x test
-            mkdir artifacts
+            mkdir -p artifacts
             cp -v README.md artifacts
             cp -v build/distributions/*.tar artifacts/
             gzip artifacts/*.tar
