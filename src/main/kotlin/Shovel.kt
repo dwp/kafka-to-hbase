@@ -1,4 +1,5 @@
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.consumesAll
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
@@ -31,6 +32,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 )
 
                 val records = consumer.poll(pollTimeout)
+                //consumer.pause(consumer.assignment())
 
                 if (records.count() > 0) {
                     logger.info("Processing records", "record_count", records.count().toString())
@@ -47,6 +49,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                     }
                     logger.info("Committing offset")
                     consumer.commitSync()
+                    //consumer.resume(consumer.assignment())
                 }
 
                 if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
@@ -55,11 +58,10 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
 
             } catch (e: HbaseConnectionException) {
                 logger.error("Error connecting to Hbase", e)
-                cancel(CancellationException("Error writing to Hbase ${e.message}", e))
+                cancel(CancellationException("Error connecting to Hbase ${e.message}", e))
             } catch (e: HbaseWriteException) {
                 logger.error("Error writing to Hbase", e)
-                // cancel(CancellationException("Error writing to Hbase ${e.message}", e))
-                //TODO: cancel current poll or release current offsets, and go round again
+                cancel(CancellationException("Error writing to Hbase ${e.message}", e))
             } catch (e: Exception) {
                 logger.error("Error reading from Kafka", e)
                 cancel(CancellationException("Error reading from Kafka ${e.message}", e))
