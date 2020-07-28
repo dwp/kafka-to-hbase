@@ -59,6 +59,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
             } catch (e: HbaseWriteException) {
                 logger.error("Error writing to Hbase", e)
                 // cancel(CancellationException("Error writing to Hbase ${e.message}", e))
+                //TODO: cancel current poll or release current offsets, and go round again
             } catch (e: Exception) {
                 logger.error("Error reading from Kafka", e)
                 cancel(CancellationException("Error reading from Kafka ${e.message}", e))
