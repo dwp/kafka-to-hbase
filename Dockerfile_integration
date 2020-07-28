@@ -3,3 +3,5 @@ FROM dwp-kotlin-slim-gradle-k2hb:latest
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 COPY src/ ./src
+
+RUN gradle build integrationClasses integrationLoadClasses -x test

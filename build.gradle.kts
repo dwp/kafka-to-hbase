@@ -28,7 +28,6 @@ dependencies {
     implementation("mysql", "mysql-connector-java", "6.0.6")
     implementation("org.apache.hbase", "hbase-client", "1.4.9")
 
-    //testImplementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.819") //1.11.316
     testImplementation("com.amazonaws:aws-java-sdk-s3:1.11.701")
     testImplementation("com.amazonaws:aws-java-sdk-core:1.11.701")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
