@@ -30,4 +30,8 @@ ignore:
     - '*':
         reason: Transient dependency brought in by hbase-client with no direct upgrade or patch.
         expires: 2020-08-20T00:00:00.000Z
+  SNYK-JAVA-MYSQL-451464:
+    - '*':
+        reason: Transient dependency brought in by mysql:mysql-connector-java@6.0.6
+        expires: 2020-08-20T00:00:00.000Z
 patch: {}
