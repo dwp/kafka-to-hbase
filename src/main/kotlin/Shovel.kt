@@ -32,7 +32,6 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 )
 
                 val records = consumer.poll(pollTimeout)
-                //consumer.pause(consumer.assignment())
 
                 if (records.count() > 0) {
                     logger.info("Processing records", "record_count", records.count().toString())
@@ -49,7 +48,6 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                     }
                     logger.info("Committing offset")
                     consumer.commitSync()
-                    //consumer.resume(consumer.assignment())
                 }
 
                 if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
