@@ -76,8 +76,8 @@ RUN echo "===> Installing Dependencies ..." \
 
 WORKDIR /kafka2hbase
 
-# Output folder
-RUN mkdir -p /k2hb_builds
+RUN ls -la /k2hb_builds/
+RUN echo $DIST_FILE
 
 COPY --from=build /k2hb_builds/$DIST_FILE .
 
