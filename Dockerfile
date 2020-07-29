@@ -15,6 +15,7 @@ RUN gradle :unit build -x test \
     && gradle distTar
 
 RUN cp build/distributions/*.* /k2hb_builds/
+RUN ls -la /k2hb_builds/
 
 # Second build stage starts here
 FROM openjdk:14-alpine
@@ -75,7 +76,7 @@ RUN echo "===> Installing Dependencies ..." \
 
 WORKDIR /kafka2hbase
 
-RUN ls
+RUN ls -la /
 
 COPY --from=build /k2hb_builds/$DIST_FILE .
 
