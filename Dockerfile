@@ -76,9 +76,9 @@ RUN echo "===> Installing Dependencies ..." \
 
 WORKDIR /kafka2hbase
 
-RUN ls -la /
+RUN ls -la /kafka2hbase
 
-COPY --from=build /k2hb_builds/$DIST_FILE .
+COPY --from=build /kafka2hbase/k2hb_builds/$DIST_FILE .
 
 RUN tar -xf $DIST_FILE --strip-components=1
 RUN chown ${USER_NAME}:${GROUP_NAME} . -R
