@@ -74,7 +74,11 @@ RUN echo "===> Installing Dependencies ..." \
     && pip3 install https://github.com/dwp/acm-pca-cert-generator/releases/download/${acm_cert_helper_version}/acm_cert_helper-${acm_cert_helper_version}.tar.gz \
     && echo "==Dependencies done=="
 
-COPY --from=build /k2hb_builds/$DIST_FILE .
+WORKDIR /kafka2hbase
+
+RUN ls -la /kafka2hbase
+
+COPY --from=build /kafka2hbase/k2hb_builds/$DIST_FILE .
 
 RUN tar -xf $DIST_FILE --strip-components=1
 RUN chown ${USER_NAME}:${GROUP_NAME} . -R
