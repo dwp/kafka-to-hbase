@@ -76,6 +76,9 @@ RUN echo "===> Installing Dependencies ..." \
 
 WORKDIR /kafka2hbase
 
+# Output folder
+RUN mkdir -p /k2hb_builds
+
 COPY --from=build /k2hb_builds/$DIST_FILE .
 
 RUN tar -xf $DIST_FILE --strip-components=1
