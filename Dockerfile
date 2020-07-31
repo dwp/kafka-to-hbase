@@ -26,9 +26,7 @@ COPY ./entrypoint.sh /
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/kafka2hbase"]
 
-ARG VERSION=0.0.1
-ARG DIST=kafka2hbase-$VERSION
-ARG DIST_FILE=$DIST.tar
+ARG DIST_FILE=kafka2hbase-*.tar
 ARG http_proxy_full=""
 
 ENV APPLICATION=kafka2hbase
@@ -59,7 +57,7 @@ RUN echo "ENV http: ${http_proxy}" \
     && echo "ENV HTTP: ${HTTP_PROXY}" \
     && echo "ENV HTTPS: ${HTTPS_PROXY}" \
     && echo "ARG full: ${http_proxy_full}" \
-    && echo DIST_FILE: \'$DIST_FILE\'.
+    && echo "DIST FILE: ${DIST_FILE}."
 
 ENV acm_cert_helper_version 0.8.0
 RUN echo "===> Installing Dependencies ..." \
@@ -76,9 +74,7 @@ RUN echo "===> Installing Dependencies ..." \
 
 WORKDIR /kafka2hbase
 
-RUN ls -la /kafka2hbase
-
-COPY --from=build /kafka2hbase/k2hb_builds/$DIST_FILE .
+COPY --from=build /k2hb_builds/$DIST_FILE .
 
 RUN tar -xf $DIST_FILE --strip-components=1
 RUN chown ${USER_NAME}:${GROUP_NAME} . -R
