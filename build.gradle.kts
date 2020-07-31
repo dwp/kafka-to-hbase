@@ -18,7 +18,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.2")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.8")
+    implementation("org.jetbrains.kotlin", "kotlin-reflect", "1.3.72")
     implementation("org.apache.kafka", "kafka-clients", "2.3.0")
     implementation("com.beust", "klaxon", "4.0.2")
     implementation("com.github.everit-org.json-schema", "org.everit.json.schema", "1.12.1")
