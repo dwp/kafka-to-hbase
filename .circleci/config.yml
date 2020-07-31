@@ -88,7 +88,7 @@ jobs:
             docker-compose -f docker-compose.yaml build kafka2hbase
             docker-compose -f docker-compose.yaml up -d kafka2hbase
             docker-compose -f docker-compose.yaml rm integration-test
-            docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon :integration -x test
+            docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon :integration-test -x test
             docker cp integration-test:/home/gradle/build/test-results .
       - store_test_results:
           path: test-results
