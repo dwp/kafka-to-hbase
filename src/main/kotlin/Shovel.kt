@@ -3,6 +3,8 @@ import kotlinx.coroutines.channels.consumesAll
 import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
+import java.util.*
+import kotlin.time.toDuration
 
 val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger("ShovelKt")
 
@@ -34,6 +36,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                 val records = consumer.poll(pollTimeout)
 
                 if (records.count() > 0) {
+                    val then = Date().time
                     logger.info("Processing records", "record_count", records.count().toString())
                     for (record in records) {
                         //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
@@ -49,6 +52,8 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                     }
                     logger.info("Committing offset")
                     consumer.commitSync()
+                    val now = Date().time
+                    logger.info("Processed batch", "size", "${records.count()}", "duration_ms", "${now - then}")
                 }
 
                 if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
