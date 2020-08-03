@@ -37,23 +37,26 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
 
                 if (records.count() > 0) {
                     val then = Date().time
-                    logger.info("Processing records", "record_count", records.count().toString())
-                    for (record in records) {
-                        //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
-                        processor.processRecord(record, hbase, parser)
-                        offsets[record.topic()] = mutableMapOf(
-                            "offset" to "${record.offset()}",
-                            "partition" to "${record.partition()}"
-                        )
-                        val set =
-                            if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
-                        set?.add(record.partition())
-                        usedPartitions[record.topic()] = set!!
+                    try {
+                        logger.info("Processing records", "record_count", records.count().toString())
+                        for (record in records) {
+                            //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
+                            processor.processRecord(record, hbase, parser)
+                            offsets[record.topic()] = mutableMapOf(
+                                "offset" to "${record.offset()}",
+                                "partition" to "${record.partition()}"
+                            )
+                            val set =
+                                if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
+                            set?.add(record.partition())
+                            usedPartitions[record.topic()] = set!!
+                        }
+                        logger.info("Committing offset")
+                        consumer.commitSync()
+                    } finally {
+                        val now = Date().time
+                        logger.info("Processed batch", "size", "${records.count()}", "duration_ms", "${now - then}")
                     }
-                    logger.info("Committing offset")
-                    consumer.commitSync()
-                    val now = Date().time
-                    logger.info("Processed batch", "size", "${records.count()}", "duration_ms", "${now - then}")
                 }
 
                 if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
