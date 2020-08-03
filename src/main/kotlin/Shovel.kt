@@ -37,6 +37,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
 
                 if (records.count() > 0) {
                     val then = Date().time
+                    var succeeded = false
                     try {
                         logger.info("Processing records", "record_count", records.count().toString())
                         for (record in records) {
@@ -53,9 +54,10 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, hbase: HbaseClien
                         }
                         logger.info("Committing offset")
                         consumer.commitSync()
+                        succeeded = true
                     } finally {
                         val now = Date().time
-                        logger.info("Processed batch", "size", "${records.count()}", "duration_ms", "${now - then}")
+                        logger.info("Processed batch", "succeeded", "$succeeded", "size", "${records.count()}", "duration_ms", "${now - then}")
                     }
                 }
 
