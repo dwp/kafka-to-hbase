@@ -1,8 +1,9 @@
+import arrow.core.success
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.StringSpec
 
 class TextUtilsTest : StringSpec({
-
 
     "agent_core:agentToDoArchive is coalesced." {
         val actual = TextUtils().coalescedName("agent_core:agentToDoArchive")
@@ -14,10 +15,36 @@ class TextUtilsTest : StringSpec({
         actual shouldBe "other_db:agentToDoArchive"
     }
 
-
     "Not agentToDoArchive is not coalesced." {
         val actual = TextUtils().coalescedName("core:calculationParts")
         actual shouldBe "core:calculationParts"
     }
 
+    "Test topic name table matcher will use ucfs data feed regex to match against valid table name" {
+
+        val tableName = "db.ucfs.data"
+
+        System.setProperty("K2HB_QUALIFIED_TABLE_PATTERN", """^\w+\.([-\w]+)\.([-\w]+)$""")
+
+        val result = TextUtils().topicNameTableMatcher(tableName)
+
+        result shouldNotBe null
+
+        assert(result!!.groupValues[1] == "ucfs")
+        assert(result.groupValues[2] == "data")
+    }
+
+    "Test topic name table matcher will use data equalities regex to match against valid table name" {
+
+        val tableName = "data.equalities"
+
+        Config.Hbase.qualifiedTablePattern = """([-\w]+)\.([-\w]+)"""
+
+        val result: MatchResult? = TextUtils().topicNameTableMatcher(tableName)
+
+        result shouldNotBe null
+
+        assert(result!!.groupValues[1] == "data")
+        assert(result.groupValues[2] == "equalities")
+    }
 })
