@@ -1,4 +1,3 @@
-import arrow.core.success
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.StringSpec
