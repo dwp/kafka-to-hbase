@@ -24,7 +24,7 @@ class TextUtilsTest : StringSpec({
 
         val tableName = "db.ucfs.data"
 
-        System.setProperty("K2HB_QUALIFIED_TABLE_PATTERN", """^\w+\.([-\w]+)\.([-\w]+)$""")
+        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
 
         val result = TextUtils().topicNameTableMatcher(tableName)
 
