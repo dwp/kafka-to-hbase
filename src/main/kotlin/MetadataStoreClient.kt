@@ -1,8 +1,35 @@
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.Timestamp
 import java.util.*
 
-open class MetadataStoreClient(var connection: Connection) {
+open class MetadataStoreClient(private val connection: Connection) {
+
+    fun recordProcessingAttempt(hbaseId: String, record: ConsumerRecord<ByteArray, ByteArray>, lastUpdated: Long) {
+        val statement = preparedStatement(hbaseId, lastUpdated, record)
+        val rowsInserted = statement.executeUpdate()
+        logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Recorded processing attempt", "wtf", "$rowsInserted")
+    }
+
+    @Synchronized
+    private fun preparedStatement(hbaseId: String, lastUpdated: Long, record: ConsumerRecord<ByteArray, ByteArray>) =
+        recordProcessingAttemptStatement.apply {
+            setString(1, hbaseId)
+            setTimestamp(2, Timestamp(lastUpdated))
+            setString(3, record.topic())
+            setInt(4, record.partition())
+            setLong(5, record.offset())
+        }
+
+
+    private val recordProcessingAttemptStatement by lazy {
+        // TODO: determine table name correctly
+        connection.prepareStatement("""
+            INSERT INTO committed_records (hbase_id, hbase_timestamp, topic_name, kafka_partition, kafka_offset)
+            VALUES (?, ?, ?, ?, ?)
+        """.trimIndent())
+    }
 
     companion object {
 
@@ -13,7 +40,7 @@ open class MetadataStoreClient(var connection: Connection) {
 
             val hostname = Config.MetadataStore.properties["rds.endpoint"]
             val port = Config.MetadataStore.properties["rds.port"]
-            val jdbcUrl = "jdbc:mysql://$hostname:$port/"
+            val jdbcUrl = "jdbc:mysql://$hostname:$port/${Config.MetadataStore.properties.getProperty("database")}"
             val username = Config.MetadataStore.properties.getProperty("user")
             val secretName = Config.MetadataStore.properties.getProperty("rds.password.secret.name")
 
@@ -22,7 +49,6 @@ open class MetadataStoreClient(var connection: Connection) {
             val propertiesWithPassword: Properties = Config.MetadataStore.properties.clone() as Properties
 
             propertiesWithPassword["password"] = secretHelper.getSecret(secretName)
-
             return MetadataStoreClient(DriverManager.getConnection(jdbcUrl, propertiesWithPassword))
         }
 

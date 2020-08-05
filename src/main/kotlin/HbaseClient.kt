@@ -13,6 +13,7 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
             Config.Hbase.regionReplication)
 
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(HbaseClient::class.toString())
+        val textUtils = TextUtils()
     }
 
     fun put(table: String, key: ByteArray, body: ByteArray, version: Long) {
@@ -55,7 +56,7 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
 
         ensureTable(tableName)
 
-        val printableKey = printableKey(key)
+        val printableKey = textUtils.printableKey(key)
 
         if (Config.Hbase.logKeys) {
             logger.info("Putting record", "key", printableKey, "table", tableName, "version", "$version")
@@ -72,16 +73,6 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
         }
     }
 
-    private fun printableKey(key: ByteArray) =
-        if (key.size > 4) {
-            val hash = key.slice(IntRange(0, 3))
-            val hex = hash.joinToString("") { String.format("\\x%02X", it) }
-            val renderable = key.slice(IntRange(4, key.size - 1)).map { it.toChar() }.joinToString("")
-            "${hex}${renderable}"
-        }
-        else {
-            String(key)
-        }
 
     fun getCellAfterTimestamp(tableName: String, key: ByteArray, timestamp: Long): ByteArray? {
         connection.getTable(TableName.valueOf(tableName)).use { table ->

@@ -33,6 +33,8 @@ class RecordProcessorTest : StringSpec() {
     private lateinit var hbaseClient: HbaseClient
     private lateinit var logger: Logger
     private lateinit var processor: RecordProcessor
+    private lateinit var metadataStoreClient: MetadataStoreClient
+
     private val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
     override fun isInstancePerTest(): Boolean = true
@@ -44,6 +46,7 @@ class RecordProcessorTest : StringSpec() {
         mockMessageParser = mock()
         hbaseClient = mock()
         logger = mock()
+        metadataStoreClient = mock()
         processor = spy(RecordProcessor(mockValidator, mockConverter))
         doNothing().whenever(mockValidator).validate(any())
         doNothing().whenever(processor).sendMessageToDlq(any(), any())
@@ -69,7 +72,7 @@ class RecordProcessorTest : StringSpec() {
 
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
-            processor.processRecord(record, hbaseClient, mockMessageParser)
+            processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
             verify(hbaseClient).putVersion("database:collection", testByteArray, persistedBody.toByteArray(), 1544799662000)
         }
 
@@ -78,7 +81,7 @@ class RecordProcessorTest : StringSpec() {
             val messageBody = """{"message":{"_id":{"test_key_a":,"test_key_b":"test_value_b"}}}"""
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
-            processor.processRecord(record, hbaseClient, mockMessageParser)
+            processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
 
             verifyZeroInteractions(hbaseClient)
         }
@@ -134,7 +137,7 @@ class RecordProcessorTest : StringSpec() {
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
 
             shouldThrow<DlqException> {
-                processor.processRecord(record, hbaseClient, mockMessageParser)
+                processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
             }
 
             verifyZeroInteractions(hbaseClient)
@@ -151,7 +154,7 @@ class RecordProcessorTest : StringSpec() {
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(ByteArray(0))
 
-            processor.processRecord(record, hbaseClient, mockMessageParser)
+            processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
 
             verifyZeroInteractions(hbaseClient)
         }
@@ -177,7 +180,7 @@ class RecordProcessorTest : StringSpec() {
             whenever(hbaseClient.putVersion("database:collection", testByteArray, persistedBody.toByteArray(), 1544799662000)).doThrow(RuntimeException("testException"))
 
             try {
-                processor.processRecord(record, hbaseClient, mockMessageParser)
+                processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
                 fail("test did not throw an exception")
             } catch (e: HbaseWriteException) {
                 assertEquals("Error writing record to HBase: java.lang.RuntimeException: testException", e.localizedMessage)
@@ -203,7 +206,7 @@ class RecordProcessorTest : StringSpec() {
             doReturn(jsonObject).`when`(mockConverter).convertToJson(record.value())
             doThrow(InvalidMessageException("oops!!", Exception())).`when`(mockValidator).validate(jsonObject.toJsonString())
 
-            processor.processRecord(record, hbaseClient, mockMessageParser)
+            processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
 
             verifyZeroInteractions(hbaseClient)
             verify(processor, times(1)).sendMessageToDlq(eq(record), eq("Invalid schema for key:db.database.collection:1:11: oops!!"))
@@ -218,7 +221,7 @@ class RecordProcessorTest : StringSpec() {
             doThrow(IllegalArgumentException()).`when`(mockConverter).convertToJson(record.value())
             //whenever(mockConverter.convertToJson(record.value())).thenThrow(IllegalArgumentException())
 
-            processor.processRecord(record, hbaseClient, mockMessageParser)
+            processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
 
             verifyZeroInteractions(hbaseClient)
             verify(processor, times(1)).sendMessageToDlq(eq(record), eq("Invalid json"))
@@ -255,7 +258,7 @@ class RecordProcessorTest : StringSpec() {
 
             val hbaseClientMock = HbaseClient(mockConnection, "cf".toByteArray(), "record".toByteArray(), 2)
             shouldThrow<HbaseWriteException> {
-                processor.processRecord(record, hbaseClientMock, mockMessageParser)
+                processor.processRecord(record, hbaseClientMock, metadataStoreClient, mockMessageParser)
             }
         }
 
