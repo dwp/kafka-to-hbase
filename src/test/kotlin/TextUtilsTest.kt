@@ -4,6 +4,10 @@ import io.kotlintest.specs.StringSpec
 
 class TextUtilsTest : StringSpec({
 
+    fun reset() {
+        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
+    }
+
     "agent_core:agentToDoArchive is coalesced." {
         val actual = TextUtils().coalescedName("agent_core:agentToDoArchive")
         actual shouldBe "agent_core:agentToDo"

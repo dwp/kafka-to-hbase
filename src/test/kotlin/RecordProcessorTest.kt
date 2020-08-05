@@ -47,7 +47,6 @@ class RecordProcessorTest : StringSpec() {
         processor = spy(RecordProcessor(mockValidator, mockConverter))
         doNothing().whenever(mockValidator).validate(any())
         doNothing().whenever(processor).sendMessageToDlq(any(), any())
-        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
     }
 
     init {
