@@ -117,8 +117,8 @@ object Config {
         val isUsingAWS = useAwsSecretsString == "true"
 
         val properties = Properties().apply {
-            put("user", getEnv("K2HB_RDS_USERNAME") ?: "user")
-            put("rds.password.secret.name", getEnv("K2HB_RDS_PASSWORD_SECRET_NAME") ?: "metastore_password")
+            put("user", getEnv("K2HB_RDS_USERNAME") ?: "k2hbwriter")
+            put("rds.password.secret.name", getEnv("K2HB_RDS_PASSWORD_SECRET_NAME") ?: "password")
             put("database", getEnv("K2HB_RDS_DATABASE_NAME") ?: "database")
             put("rds.endpoint", getEnv("K2HB_RDS_ENDPOINT") ?: "127.0.0.1")
             put("rds.port", getEnv("K2HB_RDS_PORT") ?: "3306")

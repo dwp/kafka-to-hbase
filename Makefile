@@ -1,5 +1,6 @@
 SHELL=bash
 S3_READY_REGEX=^Ready\.$
+RDBMS_READY_REGEX='mysqld: ready for connections'
 aws_dev_account=NOT_SET
 temp_image_name=NOT_SET
 aws_default_region=NOT_SET
@@ -36,8 +37,20 @@ local-test: ## Run the unit tests with gradle
 
 local-all: local-build local-test local-dist ## Build and test with gradle
 
-services: ## Bring up supporting services in docker
-	docker-compose -f docker-compose.yaml up --build -d zookeeper kafka hbase aws-s3 metadatastore
+rdbms: ## Bring up and provision mysql
+	docker-compose -f docker-compose.yaml up -d metadatastore
+	@{ \
+		while ! docker logs metadatastore 2>&1 | grep "^Version"; do \
+			echo Waiting for metadatastore.; \
+			sleep 2; \
+		done; \
+		sleep 5; \
+	}
+	docker exec -i metadatastore mysql --host=127.0.0.1 --user=root --password=password reconciliation  < ./docker/metadatastore/create_table.sql
+	docker exec -i metadatastore mysql --host=127.0.0.1 --user=root --password=password reconciliation  < ./docker/metadatastore/grant_user.sql
+
+services: rdbms ## Bring up supporting services in docker
+	docker-compose -f docker-compose.yaml up --build -d zookeeper kafka hbase aws-s3
 	@{ \
 		while ! docker logs aws-s3 2> /dev/null | grep -q $(S3_READY_REGEX); do \
 			echo Waiting for s3.; \
@@ -46,6 +59,10 @@ services: ## Bring up supporting services in docker
 	}
 	docker-compose up --build s3-provision
 	docker-compose up --build -d kafka2s3
+
+
+mysql_client: ## Get a client session on the metadatastore database.
+	docker exec -it metadatastore mysql --host=127.0.0.1 --user=root --password=password reconciliation
 
 up: services ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose -f docker-compose.yaml up --build -d kafka2hbase
