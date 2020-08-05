@@ -29,7 +29,7 @@ object Config {
     }
 
     object Validator {
-        val properties = Properties().apply {
+        var properties = Properties().apply {
             put("schema.location", getEnv("K2HB_VALIDATOR_SCHEMA") ?: "message.schema.json")
         }
     }
