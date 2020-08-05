@@ -35,6 +35,8 @@ class TextUtilsTest : StringSpec({
 
         assert(result!!.groupValues[1] == "ucfs")
         assert(result.groupValues[2] == "data")
+
+        reset()
     }
 
     "Test topic name table matcher will use data equalities regex to match against valid table name" {
@@ -49,5 +51,7 @@ class TextUtilsTest : StringSpec({
 
         assert(result!!.groupValues[1] == "data")
         assert(result.groupValues[2] == "equalities")
+
+        reset()
     }
 })
