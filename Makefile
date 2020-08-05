@@ -49,6 +49,7 @@ services: ## Bring up supporting services in docker
 
 up: services ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose -f docker-compose.yaml up --build -d kafka2hbase
+	docker-compose -f docker-compose.yaml up --build -d kafka2hbaseequality
 
 restart: ## Restart Kafka2Hbase and all supporting services
 	docker-compose restart
@@ -67,7 +68,7 @@ integration-test: ## Run the integration tests in a Docker container
 		docker rm integration-test ;\
  		set -e ;\
  	}
-	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test -x test -x integration-load-test
+	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test integration-task-equality -x test -x integration-load-test
 
 integration-load-test: ## Run the integration load tests in a Docker container
 	@{ \

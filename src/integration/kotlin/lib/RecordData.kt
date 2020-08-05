@@ -31,6 +31,26 @@ fun wellFormedValidPayload(collectionName: String = "exampleCollectionName",
         }
     }""".toByteArray()
 
+fun wellFormedValidPayloadEquality() = """{
+        "traceId": "00001111-abcd-4567-4321-1234567890ab",
+        "unitOfWorkId": "00002222-abcd-7654-1234-1234567890ab",
+		"@type": "V4",
+		"version": "core-X.release_XXX.X",
+		"timestamp": "2020-05-21T17:18:15.706+0000",
+		"message": {
+			"@type": "EQUALITY_QUESTIONS_ANSWERED",
+			"_id": {
+				"messageId": "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+			},
+			"_lastModifiedDateTime": "${getISO8601Timestamp()}",
+			"encryption": {
+				"keyEncryptionKeyId": "cloudhsm:1,2",
+				"encryptedEncryptionKey": "bHJjhg2Jb0uyidkl867gtFkjl4fgh9Ab",
+				"initialisationVector": "kjGyvY67jhJHVdo2"
+			},
+			"dbObject": "xxxxxx"
+		}
+	}""".toByteArray()
 
 fun getISO8601Timestamp(): String {
     val tz = TimeZone.getTimeZone("UTC")
@@ -40,5 +60,8 @@ fun getISO8601Timestamp(): String {
 }
 
 fun uniqueTopicName() = "db.database.collection_${Instant.now().toEpochMilli()}"
+
+fun uniqueEqualityTopicName() = "data.equality_${Instant.now().toEpochMilli()}"
+
 
 
