@@ -121,7 +121,7 @@ services:
     container_name: metadatastore
     environment:
       MYSQL_ROOT_PASSWORD: "password"
-      MYSQL_DATABASE: "reconciliation"
+      MYSQL_DATABASE: "metadatastore"
       MYSQL_USER: "k2hbwriter"
       MYSQL_PASSWORD: "password"
 

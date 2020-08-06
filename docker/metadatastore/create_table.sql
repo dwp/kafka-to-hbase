@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `committed_records` (
+CREATE TABLE IF NOT EXISTS `ucfs` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `hbase_id` VARCHAR(2048) NULL,
     `hbase_timestamp` DATETIME NULL,

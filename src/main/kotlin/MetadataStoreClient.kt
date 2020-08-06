@@ -6,13 +6,12 @@ import java.util.*
 
 open class MetadataStoreClient(private val connection: Connection) {
 
+    @Synchronized
     fun recordProcessingAttempt(hbaseId: String, record: ConsumerRecord<ByteArray, ByteArray>, lastUpdated: Long) {
-        val statement = preparedStatement(hbaseId, lastUpdated, record)
-        val rowsInserted = statement.executeUpdate()
-        logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Recorded processing attempt", "wtf", "$rowsInserted")
+        val rowsInserted = preparedStatement(hbaseId, lastUpdated, record).executeUpdate()
+        logger.info("Recorded processing attempt", "rows_inserted", "$rowsInserted")
     }
 
-    @Synchronized
     private fun preparedStatement(hbaseId: String, lastUpdated: Long, record: ConsumerRecord<ByteArray, ByteArray>) =
         recordProcessingAttemptStatement.apply {
             setString(1, hbaseId)
@@ -26,13 +25,12 @@ open class MetadataStoreClient(private val connection: Connection) {
     private val recordProcessingAttemptStatement by lazy {
         // TODO: determine table name correctly
         connection.prepareStatement("""
-            INSERT INTO committed_records (hbase_id, hbase_timestamp, topic_name, kafka_partition, kafka_offset)
+            INSERT INTO ucfs (hbase_id, hbase_timestamp, topic_name, kafka_partition, kafka_offset)
             VALUES (?, ?, ?, ?, ?)
         """.trimIndent())
     }
 
     companion object {
-
         private val isUsingAWS = Config.MetadataStore.isUsingAWS
         private val secretHelper: SecretHelperInterface =  if (isUsingAWS) AWSSecretHelper() else DummySecretHelper()
 

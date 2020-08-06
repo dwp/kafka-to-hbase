@@ -20,6 +20,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
+import java.sql.Connection
+import java.sql.PreparedStatement
 import java.time.Duration
 import java.util.concurrent.Future
 import java.util.logging.Logger
@@ -34,19 +36,25 @@ class RecordProcessorTest : StringSpec() {
     private lateinit var logger: Logger
     private lateinit var processor: RecordProcessor
     private lateinit var metadataStoreClient: MetadataStoreClient
-
+    private lateinit var connection: Connection
+    private lateinit var preparedStatement: PreparedStatement
     private val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
     override fun isInstancePerTest(): Boolean = true
 
     private fun reset() {
-        println("Before every spec/test case")
         mockValidator = mock()
         mockConverter = spy()
         mockMessageParser = mock()
         hbaseClient = mock()
         logger = mock()
-        metadataStoreClient = mock()
+        preparedStatement = mock()
+
+        connection = mock {
+            on { prepareStatement(any()) } doReturn preparedStatement
+        }
+
+        metadataStoreClient = MetadataStoreClient(connection)
         processor = spy(RecordProcessor(mockValidator, mockConverter))
         doNothing().whenever(mockValidator).validate(any())
         doNothing().whenever(processor).sendMessageToDlq(any(), any())

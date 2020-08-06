@@ -46,8 +46,8 @@ rdbms: ## Bring up and provision mysql
 		done; \
 		sleep 5; \
 	}
-	docker exec -i metadatastore mysql --host=127.0.0.1 --user=root --password=password reconciliation  < ./docker/metadatastore/create_table.sql
-	docker exec -i metadatastore mysql --host=127.0.0.1 --user=root --password=password reconciliation  < ./docker/metadatastore/grant_user.sql
+	docker exec -i metadatastore mysql --host=127.0.0.1 --user=root --password=password metadatastore  < ./docker/metadatastore/create_table.sql
+	docker exec -i metadatastore mysql --host=127.0.0.1 --user=root --password=password metadatastore  < ./docker/metadatastore/grant_user.sql
 
 services: rdbms ## Bring up supporting services in docker
 	docker-compose -f docker-compose.yaml up --build -d zookeeper kafka hbase aws-s3
@@ -62,7 +62,7 @@ services: rdbms ## Bring up supporting services in docker
 
 
 mysql_client: ## Get a client session on the metadatastore database.
-	docker exec -it metadatastore mysql --host=127.0.0.1 --user=root --password=password reconciliation
+	docker exec -it metadatastore mysql --host=127.0.0.1 --user=root --password=password metadatastore
 
 up: services ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose -f docker-compose.yaml up --build -d kafka2hbase

@@ -53,9 +53,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
             val lastModifiedTimestampLong = converter.getTimestampAsLong(lastModifiedTimestampStr)
             val matcher = textUtils.topicNameTableMatcher(record.topic())
             if (matcher != null) {
-
                 metadataStoreClient.recordProcessingAttempt(textUtils.printableKey(formattedKey), record, lastModifiedTimestampLong)
-
                 val namespace = matcher.groupValues[1]
                 val tableName = matcher.groupValues[2]
                 val qualifiedTableName = targetTable(namespace, tableName)
