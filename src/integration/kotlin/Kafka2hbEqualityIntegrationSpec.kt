@@ -30,7 +30,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             val parser = MessageParser()
             val converter = Converter()
-            val topic = uniqueTopicName()
+            val topic = uniqueEqualityTopicName()
             val matcher = TextUtils().topicNameTableMatcher(topic)
             matcher shouldNotBe null
             if (matcher != null) {
@@ -43,10 +43,10 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
                 summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
                 val body = wellFormedValidPayloadEquality()
                 val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-                val hbaseKey = parser.generateKey(converter.convertToJson(getId().toByteArray()))
-                log.info("Sending well-formed record to kafka topic '$topic'.")
+                val hbaseKey = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
+                println("Sending well-formed record to kafka topic '$topic'.")
                 producer.sendRecord(topic.toByteArray(), "key1".toByteArray(), body, timestamp)
-                log.info("Sent well-formed record to kafka topic '$topic'.")
+                println("Sent well-formed record to kafka topic '$topic'.")
                 val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
                 val storedValue =
                     waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
@@ -65,13 +65,12 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             //TODO: For future implementations so that we can assert what is in the db
             //TODO: val metadataStore = MetadataStoreClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
-
             val parser = MessageParser()
             val converter = Converter()
-            val topic = uniqueTopicName()
+            val topic = uniqueEqualityTopicName()
             val matcher1 = TextUtils().topicNameTableMatcher(topic)
             matcher1 shouldNotBe null
-            val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
+            val key = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
             val body1 = wellFormedValidPayloadEquality()
             if (matcher1 != null) {
                 val namespace = matcher1.groupValues[1]
@@ -115,7 +114,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val s3Client = getS3Client()
 
             val converter = Converter()
-            val topic = uniqueTopicName()
+            val topic = uniqueEqualityTopicName()
             val body = "junk".toByteArray()
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
@@ -134,7 +133,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
         "Invalid json messages as per the schema are written to dlq topic" {
             val s3Client = getS3Client()
             val converter = Converter()
-            val topic = uniqueTopicName()
+            val topic = uniqueEqualityTopicName()
             val body = """{ "key": "value" } """.toByteArray()
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
@@ -147,7 +146,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val actual = s3Object.bufferedReader().use(BufferedReader::readText)
             val malformedRecord = MalformedRecord(
                 "key4", String(body),
-                "Invalid schema for key4:$topic:0:0: Message failed schema validation: '#: required key [message] not found'."
+                "Invalid schema for key4:$topic:0:0: Message failed schema validation: '#: 6 schema violations found'."
             )
             val expected = Klaxon().toJsonString(malformedRecord)
             actual shouldBe expected

@@ -7,6 +7,9 @@ import kotlin.collections.AbstractCollection
 
 fun getId() = """{ "exampleId": "aaaa1111-abcd-4567-1234-1234567890ab"}"""
 
+fun getEqualityId() = """{ "messageId": "aaaa1111-abcd-4567-4321-1234567890ab"}"""
+
+
 fun wellFormedValidPayload(collectionName: String = "exampleCollectionName",
                            dbName: String = "exampleDbName") = """{
         "traceId": "00001111-abcd-4567-1234-1234567890ab",
@@ -39,16 +42,15 @@ fun wellFormedValidPayloadEquality() = """{
 		"timestamp": "2020-05-21T17:18:15.706+0000",
 		"message": {
 			"@type": "EQUALITY_QUESTIONS_ANSWERED",
-			"_id": {
-				"messageId": "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			},
+            "_id": ${getEqualityId()},
 			"_lastModifiedDateTime": "${getISO8601Timestamp()}",
 			"encryption": {
 				"keyEncryptionKeyId": "cloudhsm:1,2",
 				"encryptedEncryptionKey": "bHJjhg2Jb0uyidkl867gtFkjl4fgh9Ab",
 				"initialisationVector": "kjGyvY67jhJHVdo2"
 			},
-			"dbObject": "xxxxxx"
+			"dbObject": "xxxxxx",
+            "timestamp_created_from": "_lastModifiedDateTime"
 		}
 	}""".toByteArray()
 
@@ -62,6 +64,3 @@ fun getISO8601Timestamp(): String {
 fun uniqueTopicName() = "db.database.collection_${Instant.now().toEpochMilli()}"
 
 fun uniqueEqualityTopicName() = "data.equality_${Instant.now().toEpochMilli()}"
-
-
-

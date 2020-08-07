@@ -110,7 +110,7 @@ services:
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
       K2HB_IMAGE_DIGEST: "latest"
       K2HB_VALIDATOR_SCHEMA: "equality_message.schema.json"
-      K2HB_QUALIFIED_TABLE_PATTERN: "([-\\w]+)\\.([-\\w]+)"
+      K2HB_QUALIFIED_TABLE_PATTERN: ([-\w]+)\.([-\w]+)
       K2HB_KAFKA_TOPIC_REGEX: "^data.(.*)"
 
   kafka2s3:

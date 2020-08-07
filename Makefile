@@ -48,8 +48,7 @@ services: ## Bring up supporting services in docker
 	docker-compose up --build -d kafka2s3
 
 up: services ## Bring up Kafka2Hbase in Docker with supporting services
-	docker-compose -f docker-compose.yaml up --build -d kafka2hbase
-	docker-compose -f docker-compose.yaml up --build -d kafka2hbaseequality
+	docker-compose -f docker-compose.yaml up --build -d kafka2hbase kafka2hbaseequality
 
 restart: ## Restart Kafka2Hbase and all supporting services
 	docker-compose restart
