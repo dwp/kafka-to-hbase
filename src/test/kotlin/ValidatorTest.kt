@@ -1051,47 +1051,6 @@ class ValidatorTest : StringSpec({
         exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     "Equality schema: Valid message passes validation." {        
         Config.Validator.properties = Properties().apply {
             put("schema.location", "equality_message.schema.json")
