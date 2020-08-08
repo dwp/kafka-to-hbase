@@ -71,7 +71,7 @@ tasks.register<Test>("integration-test") {
     testClassesDirs = sourceSets["integration"].output.classesDirs
     classpath = sourceSets["integration"].runtimeClasspath
     filter {
-        includeTestsMatching("Kafka2bIntegrationSpec*")
+        includeTestsMatching("Kafka2hbIntegrationSpec*")
     }
     environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
