@@ -40,21 +40,21 @@ class RecordProcessorTest : StringSpec() {
     private lateinit var preparedStatement: PreparedStatement
     private val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
-    override fun isInstancePerTest(): Boolean = true
-
     private fun reset() {
         mockValidator = mock()
         mockConverter = spy()
         mockMessageParser = mock()
         hbaseClient = mock()
         logger = mock()
-        preparedStatement = mock()
+        preparedStatement = mock {
+            on { executeUpdate() } doReturn 1
+        }
 
         connection = mock {
             on { prepareStatement(any()) } doReturn preparedStatement
         }
 
-        metadataStoreClient = MetadataStoreClient(connection)
+        metadataStoreClient = spy(MetadataStoreClient(connection))
         processor = spy(RecordProcessor(mockValidator, mockConverter))
         doNothing().whenever(mockValidator).validate(any())
         doNothing().whenever(processor).sendMessageToDlq(any(), any())
@@ -82,6 +82,7 @@ class RecordProcessorTest : StringSpec() {
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
             processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
             verify(hbaseClient).putVersion("database:collection", testByteArray, persistedBody.toByteArray(), 1544799662000)
+            verify(metadataStoreClient).recordProcessingAttempt(TextUtils().printableKey(testByteArray), record, 1544799662000)
         }
 
         "record value with invalid json is not sent to hbase" {
@@ -92,6 +93,7 @@ class RecordProcessorTest : StringSpec() {
             processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
 
             verifyZeroInteractions(hbaseClient)
+            verifyZeroInteractions(metadataStoreClient)
         }
 
         "Exception should be thrown when dlq topic is not available and message  is not sent to hbase" {

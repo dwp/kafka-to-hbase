@@ -23,7 +23,6 @@ open class MetadataStoreClient(private val connection: Connection) {
 
 
     private val recordProcessingAttemptStatement by lazy {
-        // TODO: determine table name correctly
         connection.prepareStatement("""
             INSERT INTO ucfs (hbase_id, hbase_timestamp, topic_name, kafka_partition, kafka_offset)
             VALUES (?, ?, ?, ?, ?)
