@@ -1,16 +1,15 @@
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
-import java.util.*
 
-class ValidatorTest : StringSpec({
+class ValidatorTest : StringSpec() {
 
-    "Default schema: Valid message passes validation." {        
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
-        }
+    init {
+        "Default schema: Valid message passes validation." {
+            TestUtils.defaultMessageValidator()
 
-        Validator().validate("""
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -28,15 +27,15 @@ class ValidatorTest : StringSpec({
             |       }
             |   }
             |}
-        """.trimMargin())
-    }
-
-    "Default schema: Valid message alternate date format passes validation." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Default schema: Valid message alternate date format passes validation." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -54,15 +53,15 @@ class ValidatorTest : StringSpec({
             |       }
             |   }
             |}
-        """.trimMargin())
-    }
-
-    "Default schema: Valid message alternate date format number two passes validation." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Default schema: Valid message alternate date format number two passes validation." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -80,15 +79,15 @@ class ValidatorTest : StringSpec({
             |       }
             |   }
             |}
-        """.trimMargin())
-    }
-
-    "Default schema: Additional properties allowed." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Default schema: Additional properties allowed." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -109,40 +108,42 @@ class ValidatorTest : StringSpec({
             |   },
             |   "additional": [0, 1, 2, 3, 4]
             |}
-        """.trimMargin())
-    }
+        """.trimMargin()
+            )
+        }
 
-    "Missing '#/message' causes validation failure." {
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Missing '#/message' causes validation failure." {
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "msg": [0, 1, 2]
             |}
             """.trimMargin()
-            )
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#: required key [message] not found'."
         }
-        exception.message shouldBe "Message failed schema validation: '#: required key [message] not found'."
-    }
 
-    "Incorrect '#/message' type causes validation failure." {
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Incorrect '#/message' type causes validation failure." {
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": 123
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: expected type: JSONObject, found: Integer'."
-    }
-
-    "Default schema: Missing '#/message/@type' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: expected type: JSONObject, found: Integer'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing '#/message/@type' field causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
                 |       "_id": {
@@ -160,18 +161,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [@type] not found'."
-    }
-
-    "Default schema: Incorrect '#/message/@type' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [@type] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/@type' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "_id": {
@@ -190,17 +190,16 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
-    }
-
-    "Default schema: String '#/message/_id' field does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
         }
 
-            Validator().validate("""
+        "Default schema: String '#/message/_id' field does not cause validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -218,14 +217,13 @@ class ValidatorTest : StringSpec({
             |}
             """.trimMargin()
             )
-    }
-
-    "Default schema: Integer '#/message/_id' field does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
         }
 
-        Validator().validate("""
+        "Default schema: Integer '#/message/_id' field does not cause validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -242,18 +240,16 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-        )
-    }
-
-
-    "Default schema: Empty string '#/message/_id' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+            )
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate(
-                """
+
+        "Default schema: Empty string '#/message/_id' field causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -270,19 +266,18 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
+                )
+            }
+
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
         }
 
-        exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
-    }
+        "Default schema: Incorrect '#/message/_id' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
 
-    "Default schema: Incorrect '#/message/_id' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
-        }
-
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -299,18 +294,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
-    }
-
-    "Default schema: Empty '#/message/_id' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty '#/message/_id' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -327,17 +321,16 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
-    }
-
-    "Default schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: no subschema matched out of the total 3 subschemas'."
         }
 
-        Validator().validate("""
+        "Default schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
         |{
         |   "message": {
         |       "@type": "hello",
@@ -353,15 +346,14 @@ class ValidatorTest : StringSpec({
         |   }
         |}
         """.trimMargin()
-        )
-    }
-
-    "Default schema: Null '#/message/_lastModifiedDateTime' does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+            )
         }
 
-        Validator().validate("""
+        "Default schema: Null '#/message/_lastModifiedDateTime' does not cause validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -379,15 +371,15 @@ class ValidatorTest : StringSpec({
             |       }
             |   }
             |}
-        """.trimMargin())
-    }
-
-    "Default schema: Empty '#/message/_lastModifiedDateTime' does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Default schema: Empty '#/message/_lastModifiedDateTime' does not cause validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -405,17 +397,17 @@ class ValidatorTest : StringSpec({
             |       }
             |   }
             |}
-        """.trimMargin())
-    }
-
-
-    "Default schema: Incorrect '#/message/_lastModifiedDateTime' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+
+        "Default schema: Incorrect '#/message/_lastModifiedDateTime' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -432,18 +424,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
-    }
-
-    "Default schema: Incorrect '#/message/_lastModifiedDateTime' format causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/_lastModifiedDateTime' format causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -460,18 +451,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
-    }
-
-    "Default schema: Missing '#/message/db' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing '#/message/db' field causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -489,18 +479,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [db] not found'."
-    }
-
-    "Default schema: Incorrect '#/message/db' type  causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [db] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/db' type  causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -519,18 +508,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/db: expected type: String, found: JSONArray'."
-    }
-
-    "Default schema: Empty '#/message/db' causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/db: expected type: String, found: JSONArray'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty '#/message/db' causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -549,18 +537,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/db: expected minLength: 1, actual: 0'."
-    }
-
-    "Default schema: Missing '#/message/collection' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/db: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing '#/message/collection' field causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -578,18 +565,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [collection] not found'."
-    }
-
-    "Default schema: Incorrect '#/message/collection' type  causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [collection] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/collection' type  causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -608,18 +594,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/collection: expected type: String, found: Integer'."
-    }
-
-    "Default schema: Empty '#/message/collection' causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/collection: expected type: String, found: Integer'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty '#/message/collection' causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -638,19 +623,18 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/collection: expected minLength: 1, actual: 0'."
-    }
-
-
-    "Default schema: Missing '#/message/dbObject' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/collection: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+
+        "Default schema: Missing '#/message/dbObject' field causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -668,18 +652,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [dbObject] not found'."
-    }
-
-    "Default schema: Incorrect '#/message/dbObject' type  causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [dbObject] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/dbObject' type  causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -698,18 +681,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected type: String, found: JSONObject'."
-    }
-
-    "Default schema: Empty '#/message/dbObject' causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected type: String, found: JSONObject'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty '#/message/dbObject' causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -728,18 +710,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected minLength: 1, actual: 0'."
-    }
-
-    "Default schema: Missing '#/message/encryption' causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing '#/message/encryption' causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -753,18 +734,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [encryption] not found'."
-    }
-
-    "Default schema: Incorrect '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [encryption] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -779,18 +759,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: expected type: JSONObject, found: String'."
-    }
-
-    "Default schema: Missing keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: expected type: JSONObject, found: String'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -808,18 +787,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [keyEncryptionKeyId] not found'."
-    }
-
-    "Default schema: Missing initialisationVector from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [keyEncryptionKeyId] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing initialisationVector from '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -837,18 +815,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [initialisationVector] not found'."
-    }
-
-    "Default schema: Missing encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [initialisationVector] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Missing encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -866,18 +843,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [encryptedEncryptionKey] not found'."
-    }
-
-    "Default schema: Empty keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [encryptedEncryptionKey] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -896,18 +872,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:\\d+,\\d+\$'."
-    }
-
-    "Default schema: Empty initialisationVector from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:\\d+,\\d+\$'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty initialisationVector from '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -926,18 +901,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected minLength: 1, actual: 0'."
-    }
-
-    "Default schema: Empty encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Empty encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -956,18 +930,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected minLength: 1, actual: 0'."
-    }
-
-    "Default schema: Incorrect '#/message/encryption/keyEncryptionKeyId' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/encryption/keyEncryptionKeyId' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -986,18 +959,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: expected type: String, found: Integer'."
-    }
-
-    "Default schema: Incorrect initialisationVector '#/message/encryption/initialisationVector' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: expected type: String, found: Integer'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect initialisationVector '#/message/encryption/initialisationVector' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -1016,18 +988,17 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected type: String, found: JSONObject'."
-    }
-
-    "Default schema: Incorrect '#/message/encryption/encryptedEncryptionKey' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected type: String, found: JSONObject'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Default schema: Incorrect '#/message/encryption/encryptedEncryptionKey' type causes validation failure." {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "message": {
             |       "@type": "hello",
@@ -1046,17 +1017,16 @@ class ValidatorTest : StringSpec({
             |   }
             |}
             """.trimMargin()
-            )
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
-    }
-
-    "Equality schema: Valid message passes validation." {        
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
         }
 
-        Validator().validate("""
+        "Equality schema: Valid message passes validation." {
+            TestUtils.equalityMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1077,15 +1047,15 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-        """.trimMargin())
-    }
-
-    "Equality schema: Valid message alternate date format passes validation." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Equality schema: Valid message alternate date format passes validation." {
+            TestUtils.equalityMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1106,15 +1076,15 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706"
             |}
-        """.trimMargin())
-    }
-
-    "Equality schema: Valid message alternate date format number two passes validation." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Equality schema: Valid message alternate date format number two passes validation." {
+            TestUtils.equalityMessageValidator()
+
+            Validator().validate(
+                """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1135,16 +1105,16 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706Z"
             |}
-        """.trimMargin())
-    }
-
-    "Equality schema: Missing '#/message/@type' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+        """.trimMargin()
+            )
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Missing '#/message/@type' field causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1164,18 +1134,18 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-            """.trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [@type] not found'."
-    }
-
-    "Equality schema: Incorrect '#/message/@type' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+            """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [@type] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect '#/message/@type' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1196,18 +1166,18 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-            """.trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
-    }
-
-    "Equality schema: Empty string '#/message/_id/messageId' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+            """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Empty string '#/message/_id/messageId' field causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1228,19 +1198,19 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-            """.trimMargin())
+            """.trimMargin()
+                )
+            }
+
+            exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
         }
 
-        exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
-    }
+        "Equality schema: Incorrect '#/message/_id' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
 
-    "Equality schema: Incorrect '#/message/_id' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
-        }
-
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1259,18 +1229,18 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-            """.trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
-    }
-
-    "Equality schema: Empty '#/message/_id' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+            """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Empty '#/message/_id' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
             |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1289,17 +1259,17 @@ class ValidatorTest : StringSpec({
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-            """.trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
-    }
-
-    "Equality schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+            """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
         }
 
-        Validator().validate("""
+        "Equality schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            Validator().validate(
+                """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1319,15 +1289,15 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-    }
-
-    "Equality schema: Null '#/message/_lastModifiedDateTime' does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Equality schema: Null '#/message/_lastModifiedDateTime' does not cause validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            Validator().validate(
+                """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1348,15 +1318,15 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-    }
-
-    "Equality schema: Empty '#/message/_lastModifiedDateTime' does not cause validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+            )
         }
 
-        Validator().validate("""
+        "Equality schema: Empty '#/message/_lastModifiedDateTime' does not cause validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            Validator().validate(
+                """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1377,17 +1347,17 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-    }
-
-
-    "Equality schema: Incorrect '#/message/_lastModifiedDateTime' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+            )
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+
+        "Equality schema: Incorrect '#/message/_lastModifiedDateTime' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1408,18 +1378,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
-    }
-
-    "Equality schema: Incorrect '#/message/_lastModifiedDateTime' format causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect '#/message/_lastModifiedDateTime' format causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1440,18 +1410,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
-    }
-
-    "Equality schema: Missing '#/message/dbObject' field causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Missing '#/message/dbObject' field causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1471,18 +1441,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [dbObject] not found'."
-    }
-
-    "Equality schema: Incorrect '#/message/dbObject' type  causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [dbObject] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect '#/message/dbObject' type  causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1503,18 +1473,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected type: String, found: JSONObject'."
-    }
-
-    "Equality schema: Empty '#/message/dbObject' causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected type: String, found: JSONObject'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Empty '#/message/dbObject' causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1535,18 +1505,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected minLength: 1, actual: 0'."
-    }
-
-    "Equality schema: Missing '#/message/encryption' causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Missing '#/message/encryption' causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1562,18 +1532,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message: required key [encryption] not found'."
-    }
-
-    "Equality schema: Incorrect '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: required key [encryption] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1590,17 +1560,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: expected type: JSONObject, found: String'."
-    }
-
-    "Equality schema: Missing keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: expected type: JSONObject, found: String'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Missing keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1620,18 +1591,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [keyEncryptionKeyId] not found'."
-    }
-
-    "Equality schema: Missing initialisationVector from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [keyEncryptionKeyId] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Missing initialisationVector from '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1651,18 +1622,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [initialisationVector] not found'."
-    }
-
-    "Equality schema: Missing encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [initialisationVector] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Missing encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1682,18 +1653,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [encryptedEncryptionKey] not found'."
-    }
-
-    "Equality schema: Empty keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [encryptedEncryptionKey] not found'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Empty keyEncryptionKeyId from '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1714,18 +1685,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:.*$'."
-    }
-
-    "Equality schema: Empty initialisationVector from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:.*$'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Empty initialisationVector from '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1746,18 +1717,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected minLength: 1, actual: 0'."
-    }
-
-    "Equality schema: Empty encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Empty encryptedEncryptionKey from '#/message/encryption' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1778,18 +1749,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected minLength: 1, actual: 0'."
-    }
-
-    "Equality schema: Incorrect '#/message/encryption/keyEncryptionKeyId' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected minLength: 1, actual: 0'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect '#/message/encryption/keyEncryptionKeyId' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1810,18 +1781,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: expected type: String, found: Integer'."
-    }
-
-    "Equality schema: Incorrect initialisationVector '#/message/encryption/initialisationVector' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: expected type: String, found: Integer'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect initialisationVector '#/message/encryption/initialisationVector' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1842,18 +1813,18 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
-        }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected type: String, found: JSONObject'."
-    }
-
-    "Equality schema: Incorrect '#/message/encryption/encryptedEncryptionKey' type causes validation failure." {
-        Config.Validator.properties = Properties().apply {
-            put("schema.location", "equality_message.schema.json")
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected type: String, found: JSONObject'."
         }
 
-        val exception = shouldThrow<InvalidMessageException> {
-            Validator().validate("""
+        "Equality schema: Incorrect '#/message/encryption/encryptedEncryptionKey' type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
 			|{
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
@@ -1874,8 +1845,10 @@ class ValidatorTest : StringSpec({
 			|   "version" : "core-4.release_147.3",
 			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
 			|}
-			""".trimMargin())
+			""".trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
         }
-        exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
     }
-})
+}

@@ -18,7 +18,7 @@ import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Kafkha2bIntegrationSpec : StringSpec() {
+class Kafka2hbIntegrationSpec : StringSpec() {
 
     private val log = Logger.getLogger(Kafka2hbIntegrationSpec::class.toString())
 
