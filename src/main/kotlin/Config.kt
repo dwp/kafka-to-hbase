@@ -23,6 +23,9 @@ fun readFile(fileName: String): String
 object Config {
 
     const val metaDataRefreshKey = "metadata.max.age.ms"
+    const val schemaFileProperty = "schema.location"
+    const val mainSchemaFile = "message.schema.json"
+    const val equalitySchemaFile = "equality_message.schema.json"
 
     object Shovel {
         val reportFrequency = getEnv("K2HB_KAFKA_REPORT_FREQUENCY")?.toInt() ?: 100
@@ -30,7 +33,7 @@ object Config {
 
     object Validator {
         var properties = Properties().apply {
-            put("schema.location", getEnv("K2HB_VALIDATOR_SCHEMA") ?: "message.schema.json")
+            put(schemaFileProperty, getEnv("K2HB_VALIDATOR_SCHEMA") ?: mainSchemaFile)
         }
     }
 

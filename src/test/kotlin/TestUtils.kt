@@ -5,13 +5,13 @@ class TestUtils {
     companion object {
         fun defaultMessageValidator(){
             Config.Validator.properties = Properties().apply {
-                put("schema.location", "message.schema.json")
+                put(Config.schemaFileProperty, Config.mainSchemaFile)
             }
         }
 
         fun equalityMessageValidator(){
             Config.Validator.properties = Properties().apply {
-                put("schema.location", "equality_message.schema.json")
+                put(Config.schemaFileProperty, Config.equalitySchemaFile)
             }
         }
     }
