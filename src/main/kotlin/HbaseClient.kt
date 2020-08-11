@@ -3,20 +3,14 @@ import org.apache.hadoop.hbase.client.*
 import org.apache.hadoop.hbase.io.TimeRange
 import org.apache.hadoop.hbase.io.compress.Compression.Algorithm
 
-open class HbaseClient(
-    val connection: Connection,
-    private val columnFamily: ByteArray,
-    private val columnQualifier: ByteArray,
-    private val hbaseRegionReplication: Int
-) {
+open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray, private val columnQualifier: ByteArray, private val hbaseRegionReplication: Int) {
 
     companion object {
         fun connect() = HbaseClient(
             ConnectionFactory.createConnection(HBaseConfiguration.create(Config.Hbase.config)),
             Config.Hbase.columnFamily.toByteArray(),
             Config.Hbase.columnQualifier.toByteArray(),
-            Config.Hbase.regionReplication
-        )
+            Config.Hbase.regionReplication)
 
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(HbaseClient::class.toString())
     }
@@ -33,14 +27,12 @@ open class HbaseClient(
             } catch (e: Exception) {
                 val delay = if (attempts == 0) Config.Hbase.retryInitialBackoff
                 else (Config.Hbase.retryInitialBackoff * attempts * Config.Hbase.retryBackoffMultiplier.toFloat()).toLong()
-                logger.warn("Failed to put batch ${e.message}",
-                    "attempt_number", "${attempts + 1}",
-                    "max_attempts", "${Config.Hbase.retryMaxAttempts}",
-                    "retry_delay", "$delay",
-                    "error_message","${e.message}")
+                logger.warn("Failed to put batch ${e.message}", "attempt_number", "${attempts + 1}",
+                    "max_attempts", "${Config.Hbase.retryMaxAttempts}", "retry_delay", "$delay", "error_message","${e.message}")
                 Thread.sleep(delay)
                 exception = e
-            } finally {
+            }
+            finally {
                 attempts++
             }
         }
@@ -88,7 +80,7 @@ open class HbaseClient(
                     exists = table.exists(Get(key).apply {
                         setTimeStamp(version)
                     })
-                    
+
                     if (!exists) {
                         logger.warn("Put record does not exist","attempts", "$attempts",
                             "key", printableKey(key), "table", tableName, "version", "$version")
@@ -116,7 +108,8 @@ open class HbaseClient(
             val hex = hash.joinToString("") { String.format("\\x%02X", it) }
             val renderable = key.slice(IntRange(4, key.size - 1)).map { it.toChar() }.joinToString("")
             "${hex}${renderable}"
-        } else {
+        }
+        else {
             String(key)
         }
 
@@ -148,9 +141,11 @@ open class HbaseClient(
             try {
                 logger.info("Creating namespace", "namespace", namespace)
                 connection.admin.createNamespace(NamespaceDescriptor.create(namespace).build())
-            } catch (e: NamespaceExistException) {
+            }
+            catch (e: NamespaceExistException) {
                 logger.info("Namespace already exists, probably created by another process", "namespace", namespace)
-            } finally {
+            }
+            finally {
                 namespaces[namespace] = true
             }
         }
@@ -170,10 +165,8 @@ open class HbaseClient(
                     regionReplication = hbaseRegionReplication
                 })
             } catch (e: TableExistsException) {
-                logger.info(
-                    "Didn't create table, table already exists, probably created by another process",
-                    "table_name", tableName
-                )
+                logger.info("Didn't create table, table already exists, probably created by another process",
+                    "table_name", tableName)
             } finally {
                 tables[tableName] = true
             }
