@@ -84,7 +84,7 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
                     if (!exists) {
                         logger.warn("Put record does not exist","attempts", "$attempts",
                             "key", printableKey(key), "table", tableName, "version", "$version")
-                        if (++attempts >= Config.Hbase.retryMaxAttempts) {
+                        if (++attempts >= Config.Hbase.maxExistenceChecks) {
                             logger.error("Put record does not exist after max retry attempts",
                                 "attempts", "$attempts", "key", printableKey(key), "table", tableName, "version", "$version")
                             throw Exception("Put record does not exist after max retry attempts: $tableName/${printableKey(key)}/$version")
