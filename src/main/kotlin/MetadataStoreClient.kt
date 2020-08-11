@@ -7,7 +7,7 @@ import java.util.*
 open class MetadataStoreClient(private val connection: Connection) {
 
     @Synchronized
-    fun recordProcessingAttempt(hbaseId: String, record: ConsumerRecord<ByteArray, ByteArray>, lastUpdated: Long) {
+    open fun recordProcessingAttempt(hbaseId: String, record: ConsumerRecord<ByteArray, ByteArray>, lastUpdated: Long) {
         val rowsInserted = preparedStatement(hbaseId, lastUpdated, record).executeUpdate()
         logger.info("Recorded processing attempt", "rows_inserted", "$rowsInserted")
     }

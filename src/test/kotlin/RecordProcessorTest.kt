@@ -1,6 +1,7 @@
 import com.beust.klaxon.JsonObject
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
+import io.kotlintest.TestCaseOrder
 import io.kotlintest.fail
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
@@ -28,16 +29,24 @@ import java.util.logging.Logger
 
 
 class RecordProcessorTest : StringSpec() {
-
+    override fun testCaseOrder() = TestCaseOrder.Random
     private lateinit var mockValidator: Validator
     private lateinit var mockConverter: Converter
     private lateinit var mockMessageParser: MessageParser
     private lateinit var hbaseClient: HbaseClient
     private lateinit var logger: Logger
     private lateinit var processor: RecordProcessor
-    private lateinit var metadataStoreClient: MetadataStoreClient
-    private lateinit var connection: Connection
-    private lateinit var preparedStatement: PreparedStatement
+
+    private val preparedStatement: PreparedStatement = mock {
+        on { executeUpdate() } doReturn 1
+    }
+
+    private val connection: Connection = mock {
+        on { prepareStatement(any()) } doReturn preparedStatement
+    }
+
+    private val metadataStoreClient: MetadataStoreClient = spy(MetadataStoreClient(connection))
+
     private val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
     private fun reset() {
@@ -46,18 +55,10 @@ class RecordProcessorTest : StringSpec() {
         mockMessageParser = mock()
         hbaseClient = mock()
         logger = mock()
-        preparedStatement = mock {
-            on { executeUpdate() } doReturn 1
-        }
-
-        connection = mock {
-            on { prepareStatement(any()) } doReturn preparedStatement
-        }
-
-        metadataStoreClient = spy(MetadataStoreClient(connection))
         processor = spy(RecordProcessor(mockValidator, mockConverter))
         doNothing().whenever(mockValidator).validate(any())
         doNothing().whenever(processor).sendMessageToDlq(any(), any())
+        reset(metadataStoreClient)
     }
 
     init {
