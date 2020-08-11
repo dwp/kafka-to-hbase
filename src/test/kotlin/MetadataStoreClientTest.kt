@@ -17,6 +17,11 @@ class MetadataStoreClientTest : StringSpec({
 
         val client = MetadataStoreClient(connection)
 
+        val sql = """
+            INSERT INTO ucfs (hbase_id, hbase_timestamp, topic_name, kafka_partition, kafka_offset)
+            VALUES (?, ?, ?, ?, ?)
+        """.trimIndent()
+
         val partition = 1
         val offset = 2L
         val id = "ID"
@@ -29,13 +34,15 @@ class MetadataStoreClientTest : StringSpec({
 
         val lastUpdated = 1L
         client.recordProcessingAttempt(id, record, lastUpdated)
-
+        verify(connection, times(1)).prepareStatement(sql)
+        verifyNoMoreInteractions(connection)
         verify(statement, times(1)).setString(1, id)
         verify(statement, times(1)).setTimestamp(2, Timestamp(lastUpdated))
         verify(statement, times(1)).setString(3, topic)
         verify(statement, times(1)).setInt(4, partition)
         verify(statement, times(1)).setLong(5, offset)
         verify(statement, times(1)).executeUpdate()
+        verifyNoMoreInteractions(statement)
     }
 
 })
