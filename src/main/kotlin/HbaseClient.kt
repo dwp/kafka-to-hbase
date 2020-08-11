@@ -62,14 +62,42 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
         }
 
         connection.getTable(TableName.valueOf(tableName)).use { table ->
-            table.put(Put(key).apply {
-                this.addColumn(columnFamily, columnQualifier, version, body)
-            })
+            if (Config.Hbase.checkExistence) {
+                var exists = false
+                var attempts = 0
+                while (!exists) {
+                    putRecord(table, key, version, body)
+                    exists = table.exists(Get(key).apply {
+                        setTimeStamp(version)
+                    })
+                    if (!exists) {
+                        logger.warn("Put record does not exist","attempts", "$attempts", "key", printableKey, "table", tableName, "version", "$version")
+                    }
+                    if (++attempts >= Config.Hbase.retryMaxAttempts) {
+                        logger.error("Put record does not exist after max retry attempts", "attempts", "$attempts", "key", printableKey, "table", tableName, "version", "$version")
+                        throw Exception("Put record does not exist after max retry attempts: $tableName/$printableKey/$version")
+                    }
+                }
+
+            } else {
+                putRecord(table, key, version, body)
+            }
         }
 
         if (Config.Hbase.logKeys) {
             logger.info("Put record", "key", printableKey, "table", tableName, "version", "$version")
         }
+    }
+
+    private fun putRecord(
+        table: Table,
+        key: ByteArray,
+        version: Long,
+        body: ByteArray
+    ) {
+        table.put(Put(key).apply {
+            addColumn(columnFamily, columnQualifier, version, body)
+        })
     }
 
     private fun printableKey(key: ByteArray) =
