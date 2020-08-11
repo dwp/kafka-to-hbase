@@ -23,14 +23,17 @@ fun readFile(fileName: String): String
 object Config {
 
     const val metaDataRefreshKey = "metadata.max.age.ms"
+    const val schemaFileProperty = "schema.location"
+    const val mainSchemaFile = "message.schema.json"
+    const val equalitySchemaFile = "equality_message.schema.json"
 
     object Shovel {
         val reportFrequency = getEnv("K2HB_KAFKA_REPORT_FREQUENCY")?.toInt() ?: 100
     }
 
     object Validator {
-        val properties = Properties().apply {
-            put("schema.location", getEnv("K2HB_VALIDATOR_SCHEMA") ?: "message.schema.json")
+        var properties = Properties().apply {
+            put(schemaFileProperty, getEnv("K2HB_VALIDATOR_SCHEMA") ?: mainSchemaFile)
         }
     }
 
@@ -48,6 +51,8 @@ object Config {
         val columnFamily = getEnv("K2HB_HBASE_COLUMN_FAMILY") ?: "cf"
         val columnQualifier = getEnv("K2HB_HBASE_COLUMN_QUALIFIER") ?: "record"
         val retryMaxAttempts: Int = getEnv("K2HB_RETRY_MAX_ATTEMPTS")?.toInt() ?: 3
+        val maxExistenceChecks: Int = getEnv("K2HB_MAX_EXISTENCE_CHECKS")?.toInt() ?: 3
+        val checkExistence: Boolean = getEnv("K2HB_CHECK_EXISTENCE")?.toBoolean() ?: true
         val retryInitialBackoff: Long = getEnv("K2HB_RETRY_INITIAL_BACKOFF")?.toLong() ?: 10000
         val retryBackoffMultiplier: Long = getEnv("K2HB_RETRY_BACKOFF_MULTIPLIER")?.toLong() ?: 2
         val regionReplication: Int = getEnv("K2HB_HBASE_REGION_REPLICATION")?.toInt() ?: 3

@@ -65,7 +65,7 @@ mysql_client: ## Get a client session on the metadatastore database.
 	docker exec -it metadatastore mysql --host=127.0.0.1 --user=root --password=password metadatastore
 
 up: services ## Bring up Kafka2Hbase in Docker with supporting services
-	docker-compose -f docker-compose.yaml up --build -d kafka2hbase
+	docker-compose -f docker-compose.yaml up --build -d kafka2hbase kafka2hbaseequality
 
 restart: ## Restart Kafka2Hbase and all supporting services
 	docker-compose restart
@@ -84,7 +84,16 @@ integration-test: ## Run the integration tests in a Docker container
 		docker rm integration-test ;\
  		set -e ;\
  	}
-	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test -x test -x integration-load-test
+	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test -x test -x integration-load-test -x integration-test-equality
+
+integration-test-equality: ## Run the integration tests in a Docker container
+	@{ \
+		set +e ;\
+		docker stop integration-test ;\
+		docker rm integration-test ;\
+ 		set -e ;\
+ 	}
+	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test-equality -x test -x integration-load-test -x integration-test
 
 integration-load-test: ## Run the integration load tests in a Docker container
 	@{ \
@@ -96,7 +105,7 @@ integration-load-test: ## Run the integration load tests in a Docker container
 	docker-compose -f docker-compose.yaml run --name integration-load-test integration-test gradle --no-daemon --rerun-tasks integration-load-test -x test -x integration-test
 
 .PHONY: integration-all ## Build and Run all the tests in containers from a clean start
-integration-all: down destroy build up integration-test
+integration-all: down destroy build up integration-test integration-test-equality
 
 hbase-shell: ## Open an Hbase shell onto the running Hbase container
 	docker-compose run --rm hbase shell
