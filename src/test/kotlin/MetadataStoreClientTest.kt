@@ -10,18 +10,16 @@ class MetadataStoreClientTest : StringSpec({
 
     "works" {
         val statement = mock<PreparedStatement>()
-
-        val connection = mock<Connection> {
-            on { prepareStatement(any()) } doReturn statement
-        }
-
-        val client = MetadataStoreClient(connection)
-
         val sql = """
             INSERT INTO ucfs (hbase_id, hbase_timestamp, topic_name, kafka_partition, kafka_offset)
             VALUES (?, ?, ?, ?, ?)
         """.trimIndent()
 
+        val connection = mock<Connection> {
+            on { prepareStatement(sql) } doReturn statement
+        }
+
+        val client = MetadataStoreClient(connection)
         val partition = 1
         val offset = 2L
         val id = "ID"
