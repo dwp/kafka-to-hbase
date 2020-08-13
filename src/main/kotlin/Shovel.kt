@@ -1,12 +1,8 @@
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumesAll
 import org.apache.hadoop.hbase.client.HBaseAdmin
-import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.TopicPartition
 import java.time.Duration
 import java.util.*
-import kotlin.time.toDuration
 
 val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger("ShovelKt")
 
@@ -43,7 +39,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                     var succeeded = false
                     try {
                         if (Config.Shovel.processLists) {
-                            listProcessor.processList(hbase, consumer, parser, records)
+                            listProcessor.processRecords(hbase, consumer, parser, records)
                         }
                         else {
                             for (record in records) {
@@ -60,9 +56,8 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                             }
                             logger.info("Committing offset")
                             consumer.commitSync()
-
+                            succeeded = true
                         }
-                        succeeded = true
                     } finally {
                         val now = Date().time
                         logger.info("Processed batch", "succeeded", "$succeeded", "size", "${records.count()}", "duration_ms", "${now - then}")

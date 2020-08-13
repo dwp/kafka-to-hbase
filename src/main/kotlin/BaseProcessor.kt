@@ -5,7 +5,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 open class BaseProcessor(private val validator: Validator, private val converter: Converter) {
 
-    open fun convertAndValidateJsonRecord(record: ConsumerRecord<ByteArray, ByteArray>) =
+    open fun recordAsJson(record: ConsumerRecord<ByteArray, ByteArray>) =
             try {
                 converter.convertToJson(record.value()).let { json ->
                     validator.validate(json.toJsonString())

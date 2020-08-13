@@ -1,7 +1,6 @@
 import com.nhaarman.mockitokotlin2.*
 import io.kotlintest.specs.StringSpec
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 
@@ -40,7 +39,7 @@ class ListProcessorTest : StringSpec() {
 //            }
 
 
-            recordProcessor.processList(hbaseClient, consumer, parser, records)
+            recordProcessor.processRecords(hbaseClient, consumer, parser, records)
         }
     }
 

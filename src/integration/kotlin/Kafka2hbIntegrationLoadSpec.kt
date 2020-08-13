@@ -33,5 +33,4 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             }
         }
     }
-
 }

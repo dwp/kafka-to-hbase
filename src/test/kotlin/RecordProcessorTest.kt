@@ -274,7 +274,7 @@ class RecordProcessorTest : StringSpec() {
             doReturn(jsonObject).`when`(mockConverter).convertToJson(record.value())
             doNothing().`when`(mockValidator).validate(jsonObject.toJsonString())
 
-            val response = processor.convertAndValidateJsonRecord(record)
+            val response = processor.recordAsJson(record)
 
             assertEquals(jsonObject, response)
         }
@@ -285,7 +285,7 @@ class RecordProcessorTest : StringSpec() {
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
             doThrow(IllegalArgumentException()).`when`(mockConverter).convertToJson(record.value())
 
-            val response = processor.convertAndValidateJsonRecord(record)
+            val response = processor.recordAsJson(record)
 
             assertNull(response)
         }
@@ -298,7 +298,7 @@ class RecordProcessorTest : StringSpec() {
             doReturn(jsonObject).`when`(mockConverter).convertToJson(record.value())
             doThrow(InvalidMessageException("oops!!", Exception())).`when`(mockValidator).validate(jsonObject.toJsonString())
 
-            val response = processor.convertAndValidateJsonRecord(record)
+            val response = processor.recordAsJson(record)
 
             assertNull(response)
         }
