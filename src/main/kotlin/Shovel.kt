@@ -1,7 +1,9 @@
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumesAll
 import org.apache.hadoop.hbase.client.HBaseAdmin
+import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.TopicPartition
 import java.time.Duration
 import java.util.*
 import kotlin.time.toDuration
@@ -14,6 +16,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
         val validator = Validator()
         val converter = Converter()
         val processor = RecordProcessor(validator, converter)
+        val listProcessor = ListProcessor(validator, converter)
         val offsets = mutableMapOf<String, Map<String, String>>()
         var batchCount = 0
         val usedPartitions = mutableMapOf<String, MutableSet<Int>>()
@@ -35,25 +38,30 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                 val records = consumer.poll(pollTimeout)
 
                 if (records.count() > 0) {
-                    val hbase = HbaseClient.connect()
                     val then = Date().time
+                    val hbase = HbaseClient.connect()
                     var succeeded = false
                     try {
-                        logger.info("Processing records", "record_count", records.count().toString())
-                        for (record in records) {
-                            //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
-                            processor.processRecord(record, hbase, parser)
-                            offsets[record.topic()] = mutableMapOf(
-                                "offset" to "${record.offset()}",
-                                "partition" to "${record.partition()}"
-                            )
-                            val set =
-                                if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
-                            set?.add(record.partition())
-                            usedPartitions[record.topic()] = set!!
+                        if (Config.Shovel.processLists) {
+                            listProcessor.processList(hbase, consumer, parser, records)
                         }
-                        logger.info("Committing offset")
-                        consumer.commitSync()
+                        else {
+                            for (record in records) {
+                                //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
+                                processor.processRecord(record, hbase, parser)
+                                offsets[record.topic()] = mutableMapOf(
+                                        "offset" to "${record.offset()}",
+                                        "partition" to "${record.partition()}"
+                                )
+                                val set =
+                                        if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
+                                set?.add(record.partition())
+                                usedPartitions[record.topic()] = set!!
+                            }
+                            logger.info("Committing offset")
+                            consumer.commitSync()
+
+                        }
                         succeeded = true
                     } finally {
                         val now = Date().time
@@ -78,6 +86,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
             }
         }
     }
+
 
 
 fun validateHbaseConnection(hbase: HbaseClient) {

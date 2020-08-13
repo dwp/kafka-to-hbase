@@ -35,21 +35,28 @@ class RecordProcessorTest : StringSpec() {
     private lateinit var processor: RecordProcessor
     private val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
-    override fun isInstancePerTest(): Boolean = true
+    //override fun isInstancePerTest(): Boolean = true
 
     private fun reset() {
-        println("Before every spec/test case")
-        mockValidator = mock()
-        mockConverter = spy()
-        mockMessageParser = mock()
-        hbaseClient = mock()
-        logger = mock()
-        processor = spy(RecordProcessor(mockValidator, mockConverter))
-        doNothing().whenever(mockValidator).validate(any())
-        doNothing().whenever(processor).sendMessageToDlq(any(), any())
+        try {
+            println("Before every spec/test case")
+            mockValidator = mock()
+            mockConverter = spy()
+            mockMessageParser = mock()
+            hbaseClient = mock()
+            logger = mock()
+            processor = spy(RecordProcessor(mockValidator, mockConverter))
+            doNothing().whenever(mockValidator).validate(any())
+            doNothing().whenever(processor).sendMessageToDlq(any<ConsumerRecord<ByteArray, ByteArray>>(), any<String>())
+        } catch (e: Exception) {
+            println("========================")
+            e.printStackTrace()
+            println("========================")
+        }
     }
 
     init {
+
         "valid record is sent to hbase successfully" {
             reset()
             val messageBody = """{
