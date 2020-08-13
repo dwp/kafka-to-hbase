@@ -1,8 +1,13 @@
 import com.nhaarman.mockitokotlin2.*
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.StringSpec
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
 
 
 class ListProcessorTest : StringSpec() {
@@ -12,38 +17,47 @@ class ListProcessorTest : StringSpec() {
         "works" {
             val validator = mock<Validator>()
             val recordProcessor = ListProcessor(validator, Converter())
-
-            val hbaseClient = mock<HbaseClient> {
-                on { ensureTable(any())} doAnswer { println("Creating table") }
-            }
-
-            val consumer = mock<KafkaConsumer<ByteArray, ByteArray>> {
-
-            }
+            val hbaseClient = mock<HbaseClient>()
+            val consumer = mock<KafkaConsumer<ByteArray, ByteArray>>()
 
             val parser = mock<MessageParser> {
-                val hbaseKeys = (1 .. 100).map {Bytes.toBytes(it)}
-                on {generateKeyFromRecordBody(any())} doReturnConsecutively hbaseKeys
+                val hbaseKeys = (1..1000000).map { Bytes.toBytes(it) }
+                on { generateKeyFromRecordBody(any()) } doReturnConsecutively hbaseKeys
             }
 
-            val records = mock<ConsumerRecords<ByteArray, ByteArray>> {
-
+            val map = (1..10).associate { topicNumber ->
+                TopicPartition("db.database$topicNumber.collection$topicNumber", 10 - topicNumber) to (1..100).map { recordNumber ->
+                    val body = Bytes.toBytes(json(recordNumber))
+                    val key = Bytes.toBytes(recordNumber)
+                    mock<ConsumerRecord<ByteArray, ByteArray>> {
+                        on { value() } doReturn body
+                        on { key() } doReturn key
+                        on { offset() } doReturn recordNumber.toLong()
+                    }
+                }
             }
-//            val records2 = (1..100).map {
-//                val body = Bytes.toBytes(json(it))
-//                val key = Bytes.toBytes(it)
-//                mock<ConsumerRecord<ByteArray, ByteArray>> {
-//                    on { value() } doReturn body
-//                    on { key() } doReturn key
-//                }
-//            }
 
+            recordProcessor.processRecords(hbaseClient, consumer, parser, ConsumerRecords<ByteArray, ByteArray>(map))
 
-            recordProcessor.processRecords(hbaseClient, consumer, parser, records)
+            val tableNameCaptor = argumentCaptor<String>()
+            val recordCaptor = argumentCaptor<List<HbasePayload>>()
+            verify(hbaseClient, times(10)).putList(tableNameCaptor.capture(), recordCaptor.capture())
+            tableNameCaptor.allValues shouldBe (1..10).map { "database$it:collection$it" }
+
+            val commitCaptor = argumentCaptor<Map<TopicPartition, OffsetAndMetadata>>()
+            verify(consumer, times(10)).commitSync(commitCaptor.capture())
+
+            commitCaptor.allValues.forEachIndexed { index, element ->
+                val topicNumber = index + 1
+                element.size shouldBe 1
+                val topicPartition = TopicPartition("db.database$topicNumber.collection$topicNumber", 10 - topicNumber)
+                element[topicPartition] shouldNotBe null
+                element[topicPartition]?.offset() shouldBe 101
+            }
         }
     }
 
-    fun json(id: Any) =
+    private fun json(id: Any) =
         """
         {
             "message": {
