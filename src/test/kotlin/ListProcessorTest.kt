@@ -15,13 +15,10 @@ class ListProcessorTest : StringSpec() {
 
     init {
         "Only commits offsets on success, resets position on failure" {
-            val validator = mock<Validator>()
-            val recordProcessor = ListProcessor(validator, Converter())
+            val processor = ListProcessor(mock<Validator>(), Converter())
             val hbaseClient = hbaseClient()
             val consumer = kafkaConsumer()
-            val parser = messageParser()
-            val consumerRecords = ConsumerRecords<ByteArray, ByteArray>(consumerRecords())
-            recordProcessor.processRecords(hbaseClient, consumer, parser, consumerRecords)
+            processor.processRecords(hbaseClient, consumer, messageParser(),  consumerRecords())
             verifyHbaseInteractions(hbaseClient)
             verifyKafkaInteractions(consumer)
         }
@@ -37,6 +34,14 @@ class ListProcessorTest : StringSpec() {
         val recordCaptor = argumentCaptor<List<HbasePayload>>()
         verify(hbaseClient, times(10)).putList(tableNameCaptor.capture(), recordCaptor.capture())
         tableNameCaptor.allValues shouldBe (1..10).map { "database$it:collection$it" }
+        recordCaptor.allValues.forEachIndexed { index, list ->
+            list.size shouldBe 100
+        }
+
+        recordCaptor.allValues.flatten().forEachIndexed { index, hbasePayload ->
+            String(hbasePayload.key) shouldBe index.toString()
+            String(hbasePayload.body) shouldBe """{"message":{"_id":{"id":"${(index % 100) + 1}"},"timestamp_created_from":"epoch"}}"""
+        }
     }
 
     private fun verifyKafkaInteractions(consumer: KafkaConsumer<ByteArray, ByteArray>) {
@@ -86,7 +91,7 @@ class ListProcessorTest : StringSpec() {
     }
 
     private fun consumerRecords()  =
-        (1..10).associate { topicNumber ->
+        ConsumerRecords((1..10).associate { topicNumber ->
             TopicPartition(topicName(topicNumber), 10 - topicNumber) to (1..100).map { recordNumber ->
                 val body = Bytes.toBytes(json(recordNumber))
                 val key = Bytes.toBytes(recordNumber)
@@ -96,11 +101,11 @@ class ListProcessorTest : StringSpec() {
                     on { offset() } doReturn (topicNumber * recordNumber * 20).toLong()
                 }
             }
-        }
+        })
 
     private fun messageParser() =
             mock<MessageParser> {
-                val hbaseKeys = (1..1000000).map { Bytes.toBytes(it) }
+                val hbaseKeys = (0..1000000).map { Bytes.toBytes("$it") }
                 on { generateKeyFromRecordBody(any()) } doReturnConsecutively hbaseKeys
             }
 
