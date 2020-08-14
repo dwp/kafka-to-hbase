@@ -15,7 +15,7 @@ class ListProcessorTest : StringSpec() {
 
     init {
         "Only commits offsets on success, resets position on failure" {
-            val processor = ListProcessor(mock<Validator>(), Converter())
+            val processor = ListProcessor(mock(), Converter())
             val hbaseClient = hbaseClient()
             val consumer = kafkaConsumer()
             processor.processRecords(hbaseClient, consumer, messageParser(),  consumerRecords())

@@ -47,7 +47,7 @@ class RecordProcessorTest : StringSpec() {
             logger = mock()
             processor = spy(RecordProcessor(mockValidator, mockConverter))
             doNothing().whenever(mockValidator).validate(any())
-            doNothing().whenever(processor).sendMessageToDlq(any<ConsumerRecord<ByteArray, ByteArray>>(), any<String>())
+            doNothing().whenever(processor).sendMessageToDlq(any(), any())
         } catch (e: Exception) {
             println("========================")
             e.printStackTrace()

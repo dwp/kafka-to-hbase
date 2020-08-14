@@ -1,5 +1,4 @@
 import kotlinx.coroutines.*
-import org.apache.hadoop.hbase.client.HBaseAdmin
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
 import java.util.*
@@ -82,38 +81,6 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
         }
     }
 
-
-
-fun validateHbaseConnection(hbase: HbaseClient) {
-    val maxAttempts = Config.Hbase.retryMaxAttempts
-    val initialBackoffMillis = Config.Hbase.retryInitialBackoff
-
-    var success = false
-    var attempts = 0
-
-    while (!success && attempts < maxAttempts) {
-        try {
-            HBaseAdmin.checkHBaseAvailable(hbase.connection.configuration)
-            success = true
-        } catch (e: Exception) {
-            val delay: Long = if (attempts == 0) initialBackoffMillis
-            else (initialBackoffMillis * attempts * 2)
-            logger.warn(
-                "Failed to connect to Hbase after multiple attempts",
-                "attempt", (attempts + 1).toString(),
-                "max_attempts", maxAttempts.toString(),
-                "retry_delay", delay.toString()
-            )
-            Thread.sleep(delay)
-        } finally {
-            attempts++
-        }
-    }
-
-    if (!success) {
-        throw HbaseConnectionException("Unable to reconnect to Hbase after $attempts attempts")
-    }
-}
 
 fun printLogs(
     consumer: KafkaConsumer<ByteArray, ByteArray>,

@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
+import org.apache.kafka.common.TopicPartition
 import java.io.IOException
 
 class ListProcessor(validator: Validator, private val converter: Converter): BaseProcessor(validator, converter) {
@@ -12,31 +13,46 @@ class ListProcessor(validator: Validator, private val converter: Converter): Bas
                        parser: MessageParser,
                        records: ConsumerRecords<ByteArray, ByteArray>) {
         records.partitions().forEach { partition ->
-            try {
-                val partitionRecords = records.records(partition)
-                processList(hbase, parser, partition.topic(), partitionRecords)
-                val lastOffset: Long = partitionRecords.get(partitionRecords.size - 1).offset()
-                logger.info("Committing offset", "topic", partition.topic(),
-                        "partition", "${partition.partition()}", "offset", "$lastOffset")
-                consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastOffset + 1)));
-            }
-            catch (e: IOException) {
-                val committed = consumer.committed(partition)
-                logger.error("Batch failed, not committing offset, resetting position to last commit", e,
-                        "error", e.message ?: "No message",
-                        "topic", partition.topic(), "partition", "${partition.partition()}",
-                        "committed_offset", "${committed.offset()}")
-                consumer.seek(partition, committed.offset())
+            val partitionRecords = records.records(partition)
+            val payloads = payloads(partitionRecords, parser)
+            textUtils.qualifiedTableName(partition.topic())?.let { table ->
+                try {
+                    hbase.putList(table, payloads)
+                    val lastPosition = lastPosition(partitionRecords)
+                    logger.info("Batch succeeded, committing offset", "topic", partition.topic(),
+                            "partition", "${partition.partition()}", "offset", "$lastPosition")
+                    consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
+                    logSuccessfulPuts(table, payloads)
+                } catch (e: IOException) {
+                    val lastCommittedOffset = lastCommittedOffset(consumer, partition)
+                    consumer.seek(partition, lastCommittedOffset)
+                    logger.error("Batch failed, not committing offset, resetting position to last commit", e,
+                            "error", e.message ?: "No message", "topic", partition.topic(), "partition", "${partition.partition()}",
+                            "committed_offset", "$lastCommittedOffset")
+                    logFailedPuts(table, payloads)
+                }
             }
         }
     }
 
-    @Throws(IOException::class)
-    private fun processList(hbase: HbaseClient, parser: MessageParser, topic: String,
-                            records: List<ConsumerRecord<ByteArray, ByteArray>>) =
-            textUtils.qualifiedTableName(topic)?.let { table ->
-                hbase.putList(table, payloads(records, parser))
-            }
+    private fun logFailedPuts(table: String, payloads: List<HbasePayload>) =
+        payloads.forEach {
+            logger.error("Failed to put record", "table", table,
+                    "key", textUtils.printableKey(it.key), "version", "${it.version}")
+        }
+
+
+    private fun logSuccessfulPuts(table: String, payloads: List<HbasePayload>) =
+        payloads.forEach {
+            logger.info("Put record", "table", table, "key", textUtils.printableKey(it.key), "version", "${it.version}")
+        }
+
+
+    private fun lastCommittedOffset(consumer: KafkaConsumer<ByteArray, ByteArray>, partition: TopicPartition): Long =
+        consumer.committed(partition).offset()
+
+    private fun lastPosition(partitionRecords: MutableList<ConsumerRecord<ByteArray, ByteArray>>) =
+            partitionRecords[partitionRecords.size - 1].offset()
 
     private fun payloads(records: List<ConsumerRecord<ByteArray, ByteArray>>, parser: MessageParser): List<HbasePayload> =
             records.mapNotNull { record ->
