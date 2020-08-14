@@ -34,8 +34,8 @@ class ListProcessorTest : StringSpec() {
         val recordCaptor = argumentCaptor<List<HbasePayload>>()
         verify(hbaseClient, times(10)).putList(tableNameCaptor.capture(), recordCaptor.capture())
         tableNameCaptor.allValues shouldBe (1..10).map { "database$it:collection$it" }
-        recordCaptor.allValues.forEachIndexed { index, list ->
-            list.size shouldBe 100
+        recordCaptor.allValues.forEach {
+            it.size shouldBe 100
         }
 
         recordCaptor.allValues.flatten().forEachIndexed { index, hbasePayload ->
