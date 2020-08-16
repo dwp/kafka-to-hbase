@@ -111,7 +111,7 @@ class ListProcessorTest : StringSpec() {
 
     private fun kafkaConsumer() =
             mock<KafkaConsumer<ByteArray, ByteArray>> {
-                (1..10).forEach { topicNumber ->
+                repeat(10) { topicNumber ->
                     on {
                         committed(TopicPartition(topicName(topicNumber), 10 - topicNumber))
                     } doReturn OffsetAndMetadata((topicNumber * 10).toLong(), "")

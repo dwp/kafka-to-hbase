@@ -4,7 +4,8 @@ import org.apache.hadoop.hbase.io.TimeRange
 import org.apache.hadoop.hbase.io.compress.Compression.Algorithm
 import java.io.IOException
 
-open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray, private val columnQualifier: ByteArray, private val hbaseRegionReplication: Int) {
+open class HbaseClient(val connection: Connection, private val columnFamily: ByteArray,
+                       private val columnQualifier: ByteArray, private val hbaseRegionReplication: Int): AutoCloseable {
 
     @Throws(IOException::class)
     open fun putList(tableName: String, payloads: List<HbasePayload>) {
@@ -202,6 +203,6 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
     }
 
 
-    fun close() = connection.close()
+    override fun close() = connection.close()
 
 }

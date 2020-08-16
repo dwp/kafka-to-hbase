@@ -19,16 +19,16 @@ class ListProcessor(validator: Validator, private val converter: Converter): Bas
                 try {
                     hbase.putList(table, payloads)
                     val lastPosition = lastPosition(partitionRecords)
-                    logger.info("Batch succeeded, committing offset", "topic", partition.topic(),
-                            "partition", "${partition.partition()}", "offset", "$lastPosition")
+                    logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
+                            "${partition.partition()}", "offset", "$lastPosition")
                     consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
                     logSuccessfulPuts(table, payloads)
                 } catch (e: IOException) {
                     val lastCommittedOffset = lastCommittedOffset(consumer, partition)
                     consumer.seek(partition, lastCommittedOffset)
                     logger.error("Batch failed, not committing offset, resetting position to last commit", e,
-                            "error", e.message ?: "No message", "topic", partition.topic(), "partition", "${partition.partition()}",
-                            "committed_offset", "$lastCommittedOffset")
+                            "error", e.message ?: "No message", "topic", partition.topic(),
+                            "partition", "${partition.partition()}", "committed_offset", "$lastCommittedOffset")
                     logFailedPuts(table, payloads)
                 }
             }
@@ -36,20 +36,20 @@ class ListProcessor(validator: Validator, private val converter: Converter): Bas
     }
 
     private fun logFailedPuts(table: String, payloads: List<HbasePayload>) =
-        payloads.forEach {
-            logger.error("Failed to put record", "table", table,
-                    "key", textUtils.printableKey(it.key), "version", "${it.version}")
-        }
+            payloads.forEach {
+                logger.error("Failed to put record", "table", table,
+                        "key", textUtils.printableKey(it.key), "version", "${it.version}")
+            }
 
 
     private fun logSuccessfulPuts(table: String, payloads: List<HbasePayload>) =
-        payloads.forEach {
-            logger.info("Put record", "table", table, "key", textUtils.printableKey(it.key), "version", "${it.version}")
-        }
+            payloads.forEach {
+                logger.info("Put record", "table", table, "key", textUtils.printableKey(it.key), "version", "${it.version}")
+            }
 
 
     private fun lastCommittedOffset(consumer: KafkaConsumer<ByteArray, ByteArray>, partition: TopicPartition): Long =
-        consumer.committed(partition).offset()
+            consumer.committed(partition).offset()
 
     private fun lastPosition(partitionRecords: MutableList<ConsumerRecord<ByteArray, ByteArray>>) =
             partitionRecords[partitionRecords.size - 1].offset()
