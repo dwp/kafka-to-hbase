@@ -35,24 +35,16 @@ class RecordProcessorTest : StringSpec() {
     private lateinit var processor: RecordProcessor
     private val testByteArray: ByteArray = byteArrayOf(0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte(), 0xA1.toByte())
 
-    //override fun isInstancePerTest(): Boolean = true
-
     private fun reset() {
-        try {
-            println("Before every spec/test case")
-            mockValidator = mock()
-            mockConverter = spy()
-            mockMessageParser = mock()
-            hbaseClient = mock()
-            logger = mock()
-            processor = spy(RecordProcessor(mockValidator, mockConverter))
-            doNothing().whenever(mockValidator).validate(any())
-            doNothing().whenever(processor).sendMessageToDlq(any(), any())
-        } catch (e: Exception) {
-            println("========================")
-            e.printStackTrace()
-            println("========================")
-        }
+        println("Before every spec/test case")
+        mockValidator = mock()
+        mockConverter = spy()
+        mockMessageParser = mock()
+        hbaseClient = mock()
+        logger = mock()
+        processor = spy(RecordProcessor(mockValidator, mockConverter))
+        doNothing().whenever(mockValidator).validate(any())
+        doNothing().whenever(processor).sendMessageToDlq(any(), any())
     }
 
     init {
@@ -221,9 +213,7 @@ class RecordProcessorTest : StringSpec() {
             val messageBody = "Hello everyone"
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
             doReturn(testByteArray).`when`(mockMessageParser).generateKeyFromRecordBody(any())
-            //whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
             doThrow(IllegalArgumentException()).`when`(mockConverter).convertToJson(record.value())
-            //whenever(mockConverter.convertToJson(record.value())).thenThrow(IllegalArgumentException())
 
             processor.processRecord(record, hbaseClient, mockMessageParser)
 
