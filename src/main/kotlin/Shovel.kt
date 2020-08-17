@@ -17,50 +17,40 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
         val usedPartitions = mutableMapOf<String, MutableSet<Int>>()
         while (isActive) {
             try {
-                logger.debug(
-                    "Subscribing",
-                    "topic_regex", Config.Kafka.topicRegex.pattern(),
-                    "metadata_refresh", Config.Kafka.metadataRefresh()
-                )
                 consumer.subscribe(Config.Kafka.topicRegex)
-
-                logger.info(
-                    "Polling",
-                    "poll_timeout", pollTimeout.toString(),
-                    "topic_regex", Config.Kafka.topicRegex.pattern()
-                )
-
+                logger.info("Polling","poll_timeout", pollTimeout.toString(), "topic_regex", Config.Kafka.topicRegex.pattern())
                 val records = consumer.poll(pollTimeout)
 
                 if (records.count() > 0) {
                     val then = Date().time
-                    val hbase = HbaseClient.connect()
-                    var succeeded = false
-                    try {
-                        if (Config.Shovel.processLists) {
-                            listProcessor.processRecords(hbase, consumer, parser, records)
-                        }
-                        else {
-                            for (record in records) {
-                                //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
-                                processor.processRecord(record, hbase, parser)
-                                offsets[record.topic()] = mutableMapOf(
-                                        "offset" to "${record.offset()}",
-                                        "partition" to "${record.partition()}"
-                                )
-                                val set =
-                                        if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
-                                set?.add(record.partition())
-                                usedPartitions[record.topic()] = set!!
+                    HbaseClient.connect().use { hbase ->
+                        var succeeded = false
+                        try {
+                            if (Config.Shovel.processLists) {
+                                listProcessor.processRecords(hbase, consumer, parser, records)
+                                succeeded = true
                             }
-                            logger.info("Committing offset")
-                            consumer.commitSync()
-                            succeeded = true
+                            else {
+                                for (record in records) {
+                                    //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
+                                    processor.processRecord(record, hbase, parser)
+                                    offsets[record.topic()] = mutableMapOf(
+                                            "offset" to "${record.offset()}",
+                                            "partition" to "${record.partition()}"
+                                    )
+                                    val set =
+                                            if (usedPartitions.containsKey(record.topic())) usedPartitions[record.topic()] else mutableSetOf()
+                                    set?.add(record.partition())
+                                    usedPartitions[record.topic()] = set!!
+                                }
+                                logger.info("Committing offset")
+                                consumer.commitSync()
+                                succeeded = true
+                            }
+                        } finally {
+                            val now = Date().time
+                            logger.info("Processed batch", "succeeded", "$succeeded", "size", "${records.count()}", "duration_ms", "${now - then}")
                         }
-                    } finally {
-                        val now = Date().time
-                        logger.info("Processed batch", "succeeded", "$succeeded", "size", "${records.count()}", "duration_ms", "${now - then}")
-                        hbase.close()
                     }
                 }
 
