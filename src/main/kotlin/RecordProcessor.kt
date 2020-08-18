@@ -1,18 +1,15 @@
-import Config.Kafka.dlqTopic
 import com.beust.klaxon.JsonObject
-import com.beust.klaxon.Klaxon
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.producer.ProducerRecord
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
 
-open class RecordProcessor(private val validator: Validator, private val converter: Converter) {
+open class RecordProcessor(validator: Validator, private val converter: Converter) : BaseProcessor(validator, converter) {
 
     private val textUtils = TextUtils()
 
     open fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient,
                            metadataStoreClient: MetadataStoreClient, parser: MessageParser) {
-        convertAndValidateJsonRecord(record)?.let { json ->
+        recordAsJson(record)?.let { json ->
             val formattedKey = parser.generateKeyFromRecordBody(json)
             if (formattedKey.isEmpty()) {
                 logger.warn("Empty key for record", "record", getDataStringForRecord(record))
@@ -23,28 +20,8 @@ open class RecordProcessor(private val validator: Validator, private val convert
         }
     }
 
-    fun convertAndValidateJsonRecord(record: ConsumerRecord<ByteArray, ByteArray>): JsonObject? {
-        try {
-            converter.convertToJson(record.value()).let { json ->
-                validator.validate(json.toJsonString())
-                return json
-            }
-        } catch (e: IllegalArgumentException) {
-            logger.warn("Could not parse message body", "record", getDataStringForRecord(record))
-            sendMessageToDlq(record, "Invalid json")
-            return null
-        } catch (e: InvalidMessageException) {
-            logger.warn("Schema validation error", "record", getDataStringForRecord(record), "message", "${e.message}")
-            sendMessageToDlq(record, "Invalid schema for ${getDataStringForRecord(record)}: ${e.message}")
-            return null
-        }
-    }
-
-    private fun writeRecordToHbase(json: JsonObject,
-                                   record: ConsumerRecord<ByteArray, ByteArray>,
-                                   hbase: HbaseClient,
-                                   metadataStoreClient: MetadataStoreClient,
-                                   formattedKey: ByteArray) {
+    private fun writeRecordToHbase(json: JsonObject, record: ConsumerRecord<ByteArray, ByteArray>,
+                                   hbase: HbaseClient, metadataStoreClient: MetadataStoreClient, formattedKey: ByteArray) {
         try {
             val (lastModifiedTimestampStr, fieldTimestampCreatedFrom) = converter.getLastModifiedTimestamp(json)
             val message = json["message"] as JsonObject
@@ -69,42 +46,7 @@ open class RecordProcessor(private val validator: Validator, private val convert
     }
 
     private fun targetTable(namespace: String, tableName: String) =
-        textUtils.coalescedName("$namespace:$tableName")?.replace("-", "_")
-
-    open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>, reason: String) {
-        val body = record.value()
-        logger.warn("Error processing record, sending to dlq",
-            "reason", reason, "key", String(record.key())
-        )
-        try {
-            val malformedRecord = MalformedRecord(String(record.key()), String(body), reason)
-            val jsonString = Klaxon().toJsonString(malformedRecord)
-            val producerRecord = ProducerRecord(
-                dlqTopic,
-                null,
-                null,
-                record.key(),
-                jsonString.toByteArray(),
-                null
-            )
-            val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
-            logger.info(
-                "Sending message to dlq",
-                "key",
-                String(record.key()),
-                "topic",
-                metadata?.topic().toString(),
-                "offset",
-                "${metadata?.offset()}"
-            )
-        } catch (e: Exception) {
-            logger.error(
-                "Error sending message to dlq",
-                "key", String(record.key()), "topic", record.topic(), "offset", "${record.offset()}"
-            )
-            throw DlqException("Exception while sending message to DLQ : $e")
-        }
-    }
+            textUtils.coalescedName("$namespace:$tableName")?.replace("-", "_")
 
     fun getObjectAsByteArray(obj: MalformedRecord): ByteArray? {
         val bos = ByteArrayOutputStream()

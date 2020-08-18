@@ -61,8 +61,11 @@ services: rdbms ## Bring up supporting services in docker
 	docker-compose up --build -d kafka2s3
 
 
-mysql_client: ## Get a client session on the metadatastore database.
+mysql_root: ## Get a client session on the metadatastore database.
 	docker exec -it metadatastore mysql --host=127.0.0.1 --user=root --password=password metadatastore
+
+mysql_k2hbwriter: ## Get a client session on the metadatastore database.
+	docker exec -it metadatastore mysql --host=127.0.0.1 --user=k2hbwriter --password=password metadatastore
 
 up: services ## Bring up Kafka2Hbase in Docker with supporting services
 	docker-compose -f docker-compose.yaml up --build -d kafka2hbase kafka2hbaseequality
@@ -82,8 +85,8 @@ integration-test: ## Run the integration tests in a Docker container
 		set +e ;\
 		docker stop integration-test ;\
 		docker rm integration-test ;\
- 		set -e ;\
- 	}
+		set -e ;\
+	}
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test -x test -x integration-load-test -x integration-test-equality
 
 integration-test-equality: ## Run the integration tests in a Docker container
@@ -91,8 +94,8 @@ integration-test-equality: ## Run the integration tests in a Docker container
 		set +e ;\
 		docker stop integration-test ;\
 		docker rm integration-test ;\
- 		set -e ;\
- 	}
+		set -e ;\
+	}
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test-equality -x test -x integration-load-test -x integration-test
 
 integration-load-test: ## Run the integration load tests in a Docker container
@@ -100,8 +103,8 @@ integration-load-test: ## Run the integration load tests in a Docker container
 		set +e ;\
 		docker stop integration-load-test ;\
 		docker rm integration-load-test ;\
- 		set -e ;\
- 	}
+		set -e ;\
+	}
 	docker-compose -f docker-compose.yaml run --name integration-load-test integration-test gradle --no-daemon --rerun-tasks integration-load-test -x test -x integration-test
 
 .PHONY: integration-all ## Build and Run all the tests in containers from a clean start
