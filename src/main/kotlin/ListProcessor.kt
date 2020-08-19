@@ -22,6 +22,7 @@ class ListProcessor(validator: Validator, private val converter: Converter): Bas
                     logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
                             "${partition.partition()}", "offset", "$lastPosition")
                     consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
+
                     logSuccessfulPuts(table, payloads)
                 } catch (e: IOException) {
                     val lastCommittedOffset = lastCommittedOffset(consumer, partition)
