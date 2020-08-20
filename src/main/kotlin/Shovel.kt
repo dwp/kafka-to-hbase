@@ -27,7 +27,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                         var succeeded = false
                         try {
                             if (Config.Shovel.processLists) {
-                                listProcessor.processRecords(hbase, consumer, parser, records)
+                                listProcessor.processRecords(hbase, consumer, metadataClient, parser, records)
                                 succeeded = true
                             }
                             else {

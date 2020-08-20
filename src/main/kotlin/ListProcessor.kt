@@ -10,6 +10,7 @@ import java.io.IOException
 class ListProcessor(validator: Validator, private val converter: Converter): BaseProcessor(validator, converter) {
 
     fun processRecords(hbase: HbaseClient, consumer: KafkaConsumer<ByteArray, ByteArray>,
+                       metadataClient: MetadataStoreClient,
                        parser: MessageParser,
                        records: ConsumerRecords<ByteArray, ByteArray>) {
         records.partitions().forEach { partition ->
@@ -22,7 +23,7 @@ class ListProcessor(validator: Validator, private val converter: Converter): Bas
                     logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
                             "${partition.partition()}", "offset", "$lastPosition")
                     consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
-
+                    metadataClient.recordSuccessfulBatch(payloads)
                     logSuccessfulPuts(table, payloads)
                 } catch (e: IOException) {
                     val lastCommittedOffset = lastCommittedOffset(consumer, partition)
@@ -59,16 +60,16 @@ class ListProcessor(validator: Validator, private val converter: Converter): Bas
             records.mapNotNull { record ->
                 recordAsJson(record)?.let { json ->
                     val formattedKey = parser.generateKeyFromRecordBody(json)
-                    if (formattedKey.isNotEmpty()) hbasePayload(json, formattedKey) else null
+                    if (formattedKey.isNotEmpty()) hbasePayload(json, formattedKey, record) else null
                 }
             }
 
-    private fun hbasePayload(json: JsonObject, formattedKey: ByteArray): HbasePayload {
+    private fun hbasePayload(json: JsonObject, formattedKey: ByteArray, record: ConsumerRecord<ByteArray, ByteArray>): HbasePayload {
         val (timestamp, source) = converter.getLastModifiedTimestamp(json)
         val message = json["message"] as JsonObject
         message["timestamp_created_from"] = source
         val version = converter.getTimestampAsLong(timestamp)
-        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), version)
+        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), version, record)
     }
 
 
