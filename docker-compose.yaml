@@ -139,8 +139,6 @@ services:
     container_name: aws-s3
     environment:
       - SERVICES=s3
-      - DEBUG=1
-      - DATA_DIR=/opt/s3/data
 
   s3-provision:
     image: s3-bucket-provision
@@ -148,13 +146,6 @@ services:
     container_name: s3-provision
     depends_on:
       - aws-s3
-    environment:
-      - S3_SERVICE_ENDPOINT=http://aws-s3:4572
-      - AWS_REGION=eu-west-2
-      - AWS_DEFAULT_REGION=eu-west-2
-      - AWS_ACCESS_KEY_ID=aws-access-key
-      - AWS_SECRET_ACCESS_KEY=aws-secret-access-key
-      - S3_BUCKET=kafka2s3
 
   metadatastore:
     image: mysql:5.7

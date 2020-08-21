@@ -17,6 +17,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
             val payloads = payloads(partitionRecords, parser)
             textUtils.qualifiedTableName(partition.topic())?.let { table ->
                 try {
+                    s3Service.putObjects(payloads, table)
                     hbase.putList(table, payloads)
                     val lastPosition = lastPosition(partitionRecords)
                     logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
@@ -75,6 +76,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
     companion object {
         private val textUtils = TextUtils()
         private val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(ListProcessor::class.toString())
+        private val s3Service = AwsS3Service()
     }
 
 }

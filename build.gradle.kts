@@ -25,12 +25,14 @@ dependencies {
     implementation("com.github.everit-org.json-schema", "org.everit.json.schema", "1.12.1")
     implementation("ch.qos.logback", "logback-classic", "1.2.3")
     implementation("org.apache.commons", "commons-text", "1.8")
+    implementation("commons-codec","commons-codec","1.14")
+
     implementation("com.amazonaws", "aws-java-sdk-secretsmanager", "1.11.819") //1.11.316
     implementation("mysql", "mysql-connector-java", "6.0.6")
     implementation("org.apache.hbase", "hbase-client", "1.4.9")
+    implementation("com.amazonaws:aws-java-sdk-s3:1.11.701")
+    implementation("com.amazonaws:aws-java-sdk-core:1.11.701")
 
-    testImplementation("com.amazonaws:aws-java-sdk-s3:1.11.701")
-    testImplementation("com.amazonaws:aws-java-sdk-core:1.11.701")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
     testImplementation("io.kotlintest", "kotlintest-runner-junit4", "3.4.2")
     testImplementation("com.nhaarman.mockitokotlin2", "mockito-kotlin", "2.2.0")

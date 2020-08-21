@@ -141,4 +141,12 @@ object Config {
             put("region", getEnv("SECRET_MANAGER_REGION") ?: "eu-west-2")
         }
     }
+
+    object AwsS3 {
+        val maxConnections: Int = (getEnv("K2HB_AWS_S3_MAX_CONNECTIONS") ?: "1000").toInt()
+        val useLocalStack = (getEnv("K2HB_AWS_S3_USE_LOCALSTACK") ?: "false").toBoolean()
+        val region = getEnv("K2HB_AWS_S3_REGION") ?: "eu-west-2"
+        val archiveBucket = getEnv("K2HB_AWS_S3_ARCHIVE_BUCKET") ?: "ucarchive"
+        val archiveDirectory = getEnv("K2HB_AWS_S3_ARCHIVE_DIRECTORY") ?: "ucdata_main"
+    }
 }
