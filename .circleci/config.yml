@@ -128,7 +128,7 @@ jobs:
           command: |
             docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
             VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
-            docker build --build-arg VERSION=$VERSION -t $IMAGE_NAME:latest .
+            docker build --build-arg VERSION=$VERSION --build-arg K2HB_WRITE_TO_METADATA_STORE=true -t $IMAGE_NAME:latest .
       # Second snyk scan examines Docker container for sev:high and will fail if found
       - snyk/scan:
           organization: dwp-dataworks
