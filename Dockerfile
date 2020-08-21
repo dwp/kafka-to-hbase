@@ -11,6 +11,7 @@ COPY build.gradle.kts .
 COPY src/ ./src
 
 # Create DistTar
+ARG K2HB_WRITE_TO_METADATA_STORE
 RUN gradle :unit build -x test \
     && gradle distTar
 
