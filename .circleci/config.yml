@@ -36,7 +36,7 @@ jobs:
       - run:
           name: "Build distribution"
           command: |
-            gradle :unit build -x test
+            K2HB_WRITE_TO_METADATA_STORE=true gradle :unit build -x test
             mkdir -p artifacts
             cp -v README.md artifacts
             cp -v build/distributions/*.tar artifacts/
