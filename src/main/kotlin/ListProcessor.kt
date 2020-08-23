@@ -119,10 +119,8 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), version, record)
     }
 
-
     companion object {
         private val textUtils = TextUtils()
         private val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(ListProcessor::class.toString())
     }
-
 }
