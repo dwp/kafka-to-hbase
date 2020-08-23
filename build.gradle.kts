@@ -3,7 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version "1.4.0"
     kotlin("plugin.serialization") version "1.3.70"
     application
 }
@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.8")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.9")
     implementation("org.jetbrains.kotlin", "kotlin-reflect", "1.3.72")
     implementation("org.apache.kafka", "kafka-clients", "2.3.0")
     implementation("com.beust", "klaxon", "4.0.2")
@@ -34,7 +34,13 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk-core:1.11.701")
 
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
-    testImplementation("io.kotlintest", "kotlintest-runner-junit4", "3.4.2")
+
+//    testImplementation("io.kotlintest", "kotlintest-runner-junit4", "3.4.2")
+//    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.2.0")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:4.2.0")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:4.2.0")
+    testImplementation("io.kotest:kotest-property-jvm:4.2.0")
+
     testImplementation("com.nhaarman.mockitokotlin2", "mockito-kotlin", "2.2.0")
     testImplementation("org.mockito", "mockito-core", "2.8.9")
     testImplementation("io.mockk", "mockk", "1.9.3")
@@ -51,6 +57,10 @@ application {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 sourceSets {
@@ -134,6 +144,7 @@ tasks.register<Test>("integration-load-test") {
 }
 
 tasks.register<Test>("unit") {
+    useJUnitPlatform()
     description = "Runs the unit tests"
     group = "verification"
     testClassesDirs = sourceSets["unit"].output.classesDirs

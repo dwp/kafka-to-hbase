@@ -1,18 +1,18 @@
 import com.nhaarman.mockitokotlin2.*
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import org.apache.hadoop.hbase.HColumnDescriptor
+import org.apache.hadoop.hbase.HTableDescriptor
 import org.apache.hadoop.hbase.NamespaceDescriptor
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Admin
 import org.apache.hadoop.hbase.client.Connection
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.client.Table
+import org.apache.hadoop.hbase.io.compress.Compression.Algorithm
 import java.io.IOException
 import java.nio.ByteBuffer
-import org.apache.hadoop.hbase.HColumnDescriptor
-import org.apache.hadoop.hbase.HTableDescriptor
-import org.apache.hadoop.hbase.io.compress.Compression.Algorithm
 
 class HbaseClientTest : StringSpec({
     val columnFamily = "cf".toByteArray()

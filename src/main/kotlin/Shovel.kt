@@ -2,6 +2,7 @@ import kotlinx.coroutines.*
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.time.Duration
 import java.util.*
+import kotlin.system.measureTimeMillis
 
 val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger("ShovelKt")
 
@@ -27,7 +28,12 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                         var succeeded = false
                         try {
                             if (Config.Shovel.processLists) {
-                                listProcessor.processRecords(hbase, consumer, metadataClient, parser, records)
+                                val timeTaken = measureTimeMillis {
+                                    listProcessor.processRecords(hbase, consumer, metadataClient, parser, records)
+                                }
+                                println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+                                logger.info("Processed kafka batch", "time_taken", "$timeTaken", "size", "${records.count()}")
+                                println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
                                 succeeded = true
                             }
                             else {
@@ -54,9 +60,9 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                     }
                 }
 
-                if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
-                    printLogs(consumer, offsets, usedPartitions)
-                }
+//                if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
+//                    printLogs(consumer, offsets, usedPartitions)
+//                }
 
             } catch (e: HbaseConnectionException) {
                 logger.error("Error connecting to Hbase", e)

@@ -25,4 +25,16 @@ data class HbasePayload(
         result = 31 * result + version.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return """{ 
+            |key: '${String(key)}', 
+            |body: '${String(body)}',
+            |record: {
+            |   offset: ${record.offset()},
+            |   partition: ${record.partition()},
+            |   topic: '${record.topic()}'
+            |}
+|       }""".trimMargin().replace(Regex("""\s+"""), " ")
+    }
 }

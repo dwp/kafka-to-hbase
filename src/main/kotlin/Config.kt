@@ -148,5 +148,11 @@ object Config {
         val region = getEnv("K2HB_AWS_S3_REGION") ?: "eu-west-2"
         val archiveBucket = getEnv("K2HB_AWS_S3_ARCHIVE_BUCKET") ?: "ucarchive"
         val archiveDirectory = getEnv("K2HB_AWS_S3_ARCHIVE_DIRECTORY") ?: "ucdata_main"
+        val parallelPuts = (getEnv("K2HB_AWS_S3_PARALLEL_PUTS") ?: "false").toBoolean()
+
+        const val localstackServiceEndPoint = "http://aws-s3:4566/"
+        const val localstackSigningRegion = "eu-west-2"
+        const val localstackAccessKey = "AWS_ACCESS_KEY_ID"
+        const val localstackSecretKey = "AWS_SECRET_ACCESS_KEY"
     }
 }

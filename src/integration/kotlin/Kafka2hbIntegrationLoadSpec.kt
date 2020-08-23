@@ -1,6 +1,7 @@
 
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -32,16 +33,18 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         "Many messages sent to many topics" {
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             val converter = Converter()
+            println("Setting off record producer")
             repeat(TOPIC_COUNT) { collectionNumber ->
                 val topic = topicName(collectionNumber)
                 repeat(RECORDS_PER_TOPIC) { messageNumber ->
-                    launch {
+//                    launch {
                         val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
                         log.info("Sending record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
                         producer.sendRecord(topic.toByteArray(), recordId(collectionNumber, messageNumber), body(messageNumber), timestamp)
-                    }
+//                    }
                 }
             }
+            println("Set off record producer")
 
             HbaseClient.connect().use { hbase ->
                 withTimeout(15.minutes) {
@@ -62,8 +65,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             }
 
             println("Checking metadatastore")
-            val connection = metadataStoreConnection()
-            connection.use { connection ->
+            metadataStoreConnection().use { connection ->
                 connection.createStatement().use { statement ->
                     val results = statement.executeQuery("SELECT count(*) FROM ucfs")
                     results.next() shouldBe true
