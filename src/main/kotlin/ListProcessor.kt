@@ -26,11 +26,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                             val hbaseOk = async { putInHbase(hbase, table, payloads) }
                             val mysqlOk =  async { putInMetadataStore(metadataClient, payloads) }
 
-                            val aOk = s3Ok.await()
-                            val hOk = hbaseOk.await()
-                            val mOk = mysqlOk.await()
-                            if (aOk && hOk && mOk) {
-                            //if (s3Ok.await() && hbaseOk.await() && mysqlOk.await()) {
+                            if (s3Ok.await() && hbaseOk.await() && mysqlOk.await()) {
                                 val lastPosition = lastPosition(partitionRecords)
                                 logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
                                         "${partition.partition()}", "offset", "$lastPosition")
