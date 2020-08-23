@@ -34,14 +34,11 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>,
                                 val timeTaken = measureTimeMillis {
                                     listProcessor.processRecords(hbase, consumer, metadataClient, awsS3Service, parser, records)
                                 }
-                                println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
                                 logger.info("Processed kafka batch", "time_taken", "$timeTaken", "size", "${records.count()}")
-                                println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
                                 succeeded = true
                             }
                             else {
                                 for (record in records) {
-                                    //TODO: Implement saving record to the metadata store database before sending to hbase in case hbase loses it
                                     processor.processRecord(record, hbase, metadataClient, parser)
                                     offsets[record.topic()] = mutableMapOf(
                                             "offset" to "${record.offset()}",
@@ -63,9 +60,9 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>,
                     }
                 }
 
-//                if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
-//                    printLogs(consumer, offsets, usedPartitions)
-//                }
+                if (batchCountIsMultipleOfReportFrequency(batchCount++)) {
+                    printLogs(consumer, offsets, usedPartitions)
+                }
 
             } catch (e: HbaseConnectionException) {
                 logger.error("Error connecting to Hbase", e)
@@ -81,11 +78,9 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>,
     }
 
 
-fun printLogs(
-    consumer: KafkaConsumer<ByteArray, ByteArray>,
+fun printLogs(consumer: KafkaConsumer<ByteArray, ByteArray>,
     offsets: MutableMap<String, Map<String, String>>,
-    usedPartitions: MutableMap<String, MutableSet<Int>>
-) {
+    usedPartitions: MutableMap<String, MutableSet<Int>>) {
     logger.info("Total number of topics", "number_of_topics", offsets.size.toString())
     offsets.forEach { (topic, offset) ->
         logger.info(
@@ -115,6 +110,5 @@ fun printLogs(
         }
 }
 
-fun batchCountIsMultipleOfReportFrequency(batchCount: Int): Boolean {
-    return (batchCount % Config.Shovel.reportFrequency) == 0
-}
+fun batchCountIsMultipleOfReportFrequency(batchCount: Int): Boolean = (batchCount % Config.Shovel.reportFrequency) == 0
+

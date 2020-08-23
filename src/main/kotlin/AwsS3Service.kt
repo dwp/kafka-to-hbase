@@ -1,5 +1,3 @@
-
-
 import Config.AwsS3.localstackAccessKey
 import Config.AwsS3.localstackSecretKey
 import Config.AwsS3.localstackServiceEndPoint
@@ -24,13 +22,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-open class AwsS3Service {
+open class AwsS3Service(private val amazonS3: AmazonS3) {
 
-    // K2HB_S3_TIMESTAMPED_PATH = s3://data_bucket/ucdata_main/<yyyy>/<mm>/<dd>/<db>/<collection>/<id-hex>/<timestamp>.json
-    // K2HB_S3_LATEST_PATH = s3://data_bucket/ucdata_main/latest/<db>/<collection>/<id-hex>.json
     open suspend fun putObjects(hbaseTable: String, payloads: List<HbasePayload>) {
+        logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable)
         val timeTaken = measureTimeMillis {
-            logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable)
             val (database, collection) = hbaseTable.split(Regex(":"))
             coroutineScope {
                 payloads.forEach { payload ->
@@ -47,13 +43,21 @@ open class AwsS3Service {
 
     private suspend fun putPayload(database: String, collection: String, payload: HbasePayload)
             = withContext(Dispatchers.IO) {
-                val timestamp = SimpleDateFormat("yyyy/MM/dd").format(payload.version)
                 val hexedId = Hex.encodeHexString(payload.key)
-                val key = "${Config.AwsS3.archiveDirectory}/$timestamp/$database/$collection/$hexedId/${payload.version}.json"
-    //            logger.info("Putting object into s3", "key", key)
-                client.putObject(putObjectRequest(key, payload, database, collection))
-    //            logger.info("Put object into s3", "key", key)
+                launch { putObject(archiveKey(database, collection, hexedId, payload.version), payload, database, collection) }
+                launch { putObject(latestKey(database, collection, hexedId), payload, database, collection)}
             }
+
+    private suspend fun putObject(key: String, payload: HbasePayload, database: String, collection: String)
+            = withContext(Dispatchers.IO) { amazonS3.putObject(putObjectRequest(key, payload, database, collection)) }
+
+    // K2HB_S3_LATEST_PATH: s3://data_bucket/ucdata_main/latest/<db>/<collection>/<id-hex>.json
+    private fun latestKey(database: String, collection: String, hexedId: String) =
+            "${Config.AwsS3.archiveDirectory}/latest/$database/$collection/$hexedId.json"
+
+    // K2HB_S3_TIMESTAMPED_PATH: s3://data_bucket/ucdata_main/<yyyy>/<mm>/<dd>/<db>/<collection>/<id-hex>/<timestamp>.json
+    private fun archiveKey(database: String, collection: String, hexedId: String, version: Long)
+            = "${Config.AwsS3.archiveDirectory}/${SimpleDateFormat("yyyy/MM/dd").format(version)}/$database/$collection/$hexedId/${version}.json"
 
     private fun putObjectRequest(key: String, payload: HbasePayload, database: String, collection: String) =
             PutObjectRequest(Config.AwsS3.archiveBucket,
@@ -72,29 +76,30 @@ open class AwsS3Service {
             addUserMetadata("timestamp", payload.version.toString())
         }
 
-    val client: AmazonS3 by lazy {
-        if (Config.AwsS3.useLocalStack) {
-            AmazonS3ClientBuilder.standard()
+
+    companion object {
+        fun connect() = AwsS3Service(s3)
+        val textUtils = TextUtils()
+        val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(AwsS3Service::class.toString())
+        private val s3: AmazonS3 by lazy {
+            if (Config.AwsS3.useLocalStack) {
+                AmazonS3ClientBuilder.standard()
                     .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, localstackSigningRegion))
                     .withClientConfiguration(ClientConfiguration().withProtocol(Protocol.HTTP))
                     .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
                     .withPathStyleAccessEnabled(true)
                     .disableChunkedEncoding()
                     .build()
-        }
-        else {
-            AmazonS3ClientBuilder.standard()
+            }
+            else {
+                AmazonS3ClientBuilder.standard()
                     .withCredentials(DefaultAWSCredentialsProviderChain())
                     .withRegion(Config.AwsS3.region)
                     .withClientConfiguration(ClientConfiguration().apply {
                         maxConnections = Config.AwsS3.maxConnections
                     })
                     .build()
+            }
         }
-    }
-
-    private companion object {
-        val textUtils = TextUtils()
-        val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(AwsS3Service::class.toString())
     }
 }

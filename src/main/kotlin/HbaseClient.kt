@@ -203,8 +203,8 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
             Config.Hbase.columnQualifier.toByteArray(),
             Config.Hbase.regionReplication)
 
-        val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(HbaseClient::class.toString())
-        val textUtils = TextUtils()
+        private val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(HbaseClient::class.toString())
+        private val textUtils = TextUtils()
     }
 
 
