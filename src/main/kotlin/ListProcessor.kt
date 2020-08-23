@@ -9,36 +9,43 @@ import org.apache.kafka.common.TopicPartition
 
 class ListProcessor(validator: Validator, private val converter: Converter) : BaseProcessor(validator, converter) {
 
-    fun processRecords(hbase: HbaseClient, consumer: KafkaConsumer<ByteArray, ByteArray>,
+    fun processRecords(hbase: HbaseClient,
+                       consumer: KafkaConsumer<ByteArray, ByteArray>,
                        metadataClient: MetadataStoreClient,
+                       s3Service: AwsS3Service,
                        parser: MessageParser,
                        records: ConsumerRecords<ByteArray, ByteArray>) {
         runBlocking {
             records.partitions().forEach { partition ->
-                launch(Dispatchers.Default) {
+//                launch(Dispatchers.Default) {
                     val partitionRecords = records.records(partition)
                     val payloads = payloads(partitionRecords, parser)
                     textUtils.qualifiedTableName(partition.topic())?.let { table ->
                         coroutineScope {
-                            val s3Ok = async { putInS3(table, payloads) }
+                            val s3Ok = async { putInS3(s3Service, table, payloads) }
                             val hbaseOk = async { putInHbase(hbase, table, payloads) }
                             val mysqlOk =  async { putInMetadataStore(metadataClient, payloads) }
-                            if (s3Ok.await() && hbaseOk.await() && mysqlOk.await()) {
+
+                            val aOk = s3Ok.await()
+                            val hOk = hbaseOk.await()
+                            val mOk = mysqlOk.await()
+                            if (aOk && hOk && mOk) {
+                            //if (s3Ok.await() && hbaseOk.await() && mysqlOk.await()) {
                                 val lastPosition = lastPosition(partitionRecords)
                                 logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
                                         "${partition.partition()}", "offset", "$lastPosition")
                                 consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
-                                logSuccessfulPuts(table, payloads)
+                                //logSuccessfulPuts(table, payloads)
                             }
                             else {
                                 lastCommittedOffset(consumer, partition)?.let { consumer.seek(partition, it) }
                                 logger.error("Batch failed, not committing offset, resetting position to last commit",
                                         "topic", partition.topic(), "partition", "${partition.partition()}"/*, "committed_offset", "$lastCommittedOffset"*/)
-                                logFailedPuts(table, payloads)
+                                //logFailedPuts(table, payloads)
                             }
                         }
                     }
-                }
+//                }
             }
         }
     }
@@ -50,18 +57,19 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                     true
                 }
                 catch (e: Exception) {
-                    logger.error("Failed to put batch into metadatastore", e, "error", e?.message ?: "")
+                    logger.error("Failed to put batch into metadatastore", e, "error", e.message ?: "")
                     false
                 }
             }
 
-    private suspend fun putInS3(table: String, payloads: List<HbasePayload>) =
+    private suspend fun putInS3(s3Service: AwsS3Service, table: String, payloads: List<HbasePayload>) =
             withContext(Dispatchers.IO) {
                 try {
                     s3Service.putObjects(table, payloads)
                     true
                 } catch (e: Exception) {
-                    logger.error("Failed to put batch into s3", e, "error", e?.message ?: "")
+                    e.printStackTrace()
+                    logger.error("Failed to put batch into s3", e, "error", e.message ?: "")
                     false
                 }
             }
@@ -72,7 +80,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                     hbase.putList(table, payloads)
                     true
                 } catch (e: Exception) {
-                    logger.error("Failed to put batch into hbase", e, "error", e?.message ?: "")
+                    logger.error("Failed to put batch into hbase", e, "error", e.message ?: "")
                     false
                 }
             }
@@ -119,7 +127,6 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
     companion object {
         private val textUtils = TextUtils()
         private val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(ListProcessor::class.toString())
-        private val s3Service = AwsS3Service()
     }
 
 }

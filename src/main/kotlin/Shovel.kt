@@ -6,7 +6,10 @@ import kotlin.system.measureTimeMillis
 
 val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger("ShovelKt")
 
-fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: MetadataStoreClient, pollTimeout: Duration) =
+fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>,
+                metadataClient: MetadataStoreClient,
+                awsS3Service: AwsS3Service,
+                pollTimeout: Duration) =
     GlobalScope.async {
         val parser = MessageParser()
         val validator = Validator()
@@ -29,7 +32,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: M
                         try {
                             if (Config.Shovel.processLists) {
                                 val timeTaken = measureTimeMillis {
-                                    listProcessor.processRecords(hbase, consumer, metadataClient, parser, records)
+                                    listProcessor.processRecords(hbase, consumer, metadataClient, awsS3Service, parser, records)
                                 }
                                 println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
                                 logger.info("Processed kafka batch", "time_taken", "$timeTaken", "size", "${records.count()}")

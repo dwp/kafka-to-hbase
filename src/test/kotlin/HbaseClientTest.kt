@@ -56,9 +56,7 @@ class HbaseClientTest : StringSpec({
 
     "Retries until successful put" {
         val table = mock<Table> {
-            on { put(any<Put>()) } doThrow IOException(errorMessage) doAnswer {
-                println("PUT SUCCEEDED")
-            }
+            on { put(any<Put>()) } doThrow IOException(errorMessage) doAnswer {}
 
             on { exists(any()) } doReturn true
         }
@@ -78,9 +76,7 @@ class HbaseClientTest : StringSpec({
 
     "Retries until exists" {
         val table = mock<Table> {
-            on { put(any<Put>()) } doAnswer {
-                println("PUT APPARENTLY SUCCEEDED")
-            }
+            on { put(any<Put>()) } doAnswer {}
 
             on { exists(any()) } doReturnConsecutively listOf(false, true)
         }
@@ -100,9 +96,7 @@ class HbaseClientTest : StringSpec({
 
     "Fails after max existence checks exceeded" {
         val table = mock<Table> {
-            on { put(any<Put>()) } doAnswer {
-                println("PUT SEEMINGLY SUCCEEDED")
-            }
+            on { put(any<Put>()) } doAnswer {}
 
             on { exists(any()) } doReturn false
         }

@@ -30,7 +30,7 @@ open class BaseProcessor(private val validator: Validator, private val converter
             val jsonString = Klaxon().toJsonString(malformedRecord)
             val producerRecord =
                     ProducerRecord(dlqTopic,null,null, record.key(),jsonString.toByteArray(),null)
-            val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
+            val metadata = DlqProducer.getInstance().send(producerRecord)?.get()
             logger.info("Sending message to dlq","key", String(record.key()), "topic",
                     metadata?.topic().toString(), "offset", "${metadata?.offset()}")
         } catch (e: Exception) {

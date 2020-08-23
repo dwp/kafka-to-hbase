@@ -24,11 +24,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-class AwsS3Service {
+open class AwsS3Service {
 
     // K2HB_S3_TIMESTAMPED_PATH = s3://data_bucket/ucdata_main/<yyyy>/<mm>/<dd>/<db>/<collection>/<id-hex>/<timestamp>.json
     // K2HB_S3_LATEST_PATH = s3://data_bucket/ucdata_main/latest/<db>/<collection>/<id-hex>.json
-    suspend fun putObjects(hbaseTable: String, payloads: List<HbasePayload>) {
+    open suspend fun putObjects(hbaseTable: String, payloads: List<HbasePayload>) {
         val timeTaken = measureTimeMillis {
             logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable)
             val (database, collection) = hbaseTable.split(Regex(":"))
