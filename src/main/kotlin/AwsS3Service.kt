@@ -1,3 +1,4 @@
+
 import Config.AwsS3.localstackAccessKey
 import Config.AwsS3.localstackSecretKey
 import Config.AwsS3.localstackServiceEndPoint
@@ -57,7 +58,9 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
 
     // K2HB_S3_TIMESTAMPED_PATH: s3://data_bucket/ucdata_main/<yyyy>/<mm>/<dd>/<db>/<collection>/<id-hex>/<timestamp>.json
     private fun archiveKey(database: String, collection: String, hexedId: String, version: Long)
-            = "${Config.AwsS3.archiveDirectory}/${SimpleDateFormat("yyyy/MM/dd").format(version)}/$database/$collection/$hexedId/${version}.json"
+            = "${Config.AwsS3.archiveDirectory}/${datePath(version)}/$database/$collection/$hexedId/${version}.json"
+
+    private fun datePath(version: Long) = SimpleDateFormat("yyyy/MM/dd").apply { timeZone = TimeZone.getTimeZone("UTC") }.format(version)
 
     private fun putObjectRequest(key: String, payload: HbasePayload, database: String, collection: String) =
             PutObjectRequest(Config.AwsS3.archiveBucket,
@@ -68,7 +71,11 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
             contentLength = payload.body.size.toLong()
             contentType = "application/json"
             addUserMetadata("kafka_message_id", String(payload.record.key()))
-            addUserMetadata("receipt_time", SimpleDateFormat("yyyy/MM/dd").format(Date()))
+
+            addUserMetadata("receipt_time", SimpleDateFormat("yyyy/MM/dd HH:mm:ss").apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.format(Date()))
+
             addUserMetadata("hbase_id", textUtils.printableKey(payload.key))
             addUserMetadata("database", database.replace('_', '-'))
             addUserMetadata("collection", collection.replace('_', '-'))

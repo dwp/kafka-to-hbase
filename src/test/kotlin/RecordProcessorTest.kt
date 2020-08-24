@@ -91,7 +91,6 @@ class RecordProcessorTest : StringSpec() {
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 111, TimestampType.CREATE_TIME, 1111, 1, 1, testByteArray, messageBody.toByteArray())
             whenever(mockMessageParser.generateKeyFromRecordBody(any())).thenReturn(testByteArray)
             processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
-
             verifyZeroInteractions(hbaseClient)
             verifyZeroInteractions(metadataStoreClient)
         }
