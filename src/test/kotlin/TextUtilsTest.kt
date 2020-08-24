@@ -44,6 +44,22 @@ class TextUtilsTest : StringSpec({
         reset()
     }
 
+    "Test topic name table matcher will use ucfs data feed regex to match against valid table name with extra stanza" {
+
+        val tableName = "db.ucfs.data.encrypted"
+
+        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
+
+        val result = TextUtils().topicNameTableMatcher(tableName)
+
+        result shouldNotBe null
+
+        assert(result!!.groupValues[1] == "ucfs")
+        assert(result.groupValues[2] == "data.encrypted")
+
+        reset()
+    }
+
     "Test topic name table matcher will use data equalities regex to match against valid table name" {
 
         val tableName = "data.equality_1324324234"
