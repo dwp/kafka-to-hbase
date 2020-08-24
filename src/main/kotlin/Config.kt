@@ -113,7 +113,7 @@ object Config {
     }
 
     object MetadataStore {
-        val writeToMetadataStore = (getEnv("K2HB_WRITE_TO_METADATA_STORE") ?: "false").toBoolean()
+        val writeToMetadataStore = (getEnv("K2HB_WRITE_TO_METADATA_STORE") ?: "true").toBoolean()
         val metadataStoreTable = getEnv("K2HB_METADATA_STORE_TABLE") ?: "ucfs"
 
         private val useAwsSecretsString = getEnv("K2HB_USE_AWS_SECRETS") ?: "true"
@@ -149,7 +149,7 @@ object Config {
         val archiveBucket = getEnv("K2HB_AWS_S3_ARCHIVE_BUCKET") ?: "ucarchive"
         val archiveDirectory = getEnv("K2HB_AWS_S3_ARCHIVE_DIRECTORY") ?: "ucdata_main"
         val parallelPuts = (getEnv("K2HB_AWS_S3_PARALLEL_PUTS") ?: "false").toBoolean()
-        val batchPuts = (getEnv("K2HB_AWS_S3_BATCH_PUTS") ?: "true").toBoolean()
+        val batchPuts = (getEnv("K2HB_AWS_S3_BATCH_PUTS") ?: "false").toBoolean()
 
         const val localstackServiceEndPoint = "http://aws-s3:4566/"
         const val localstackSigningRegion = "eu-west-2"
