@@ -1,6 +1,11 @@
 
+import com.amazonaws.services.s3.model.GetObjectRequest
+import com.amazonaws.services.s3.model.ListObjectsRequest
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.*
 import lib.getISO8601Timestamp
 import lib.sendRecord
@@ -9,8 +14,11 @@ import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.client.Table
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.Logger
+import java.io.ByteArrayOutputStream
 import java.sql.Connection
 import java.sql.DriverManager
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
 import kotlin.time.seconds
@@ -34,44 +42,81 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             repeat(TOPIC_COUNT) { collectionNumber ->
                 val topic = topicName(collectionNumber)
                 repeat(RECORDS_PER_TOPIC) { messageNumber ->
-                    launch (Dispatchers.IO) {
-                        val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-                        log.info("Sending record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
-                        producer.sendRecord(topic.toByteArray(), recordId(collectionNumber, messageNumber), body(messageNumber), timestamp)
-                        log.info("Sent record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
-                    }
+                    val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
+                    log.info("Sending record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
+                    producer.sendRecord(topic.toByteArray(), recordId(collectionNumber, messageNumber), body(messageNumber), timestamp)
+                    log.info("Sent record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
                 }
             }
             println("Set off record producer")
 
-            HbaseClient.connect().use { hbase ->
-                withTimeout(30.minutes) {
-                    while (expectedTables != loadTestTables(hbase)) {
-                        println("Waiting for tables to appear")
-                        delay(2.seconds)
-                    }
+            verifyHbase()
+            verifyMetadataStore()
+            verifyS3()
+        }
+    }
 
-                    loadTestTables(hbase).forEach { tableName ->
-                        hbase.connection.getTable(TableName.valueOf(tableName)).use { table ->
-                            while (recordCount(table) != RECORDS_PER_TOPIC) {
-                                println("Waiting for records to appear in $tableName")
-                                delay(2.seconds)
-                            }
+    private suspend fun verifyHbase() =
+        HbaseClient.connect().use { hbase ->
+            withTimeout(30.minutes) {
+                while (expectedTables != loadTestTables(hbase)) {
+                    println("Waiting for tables to appear")
+                    delay(2.seconds)
+                }
+
+                loadTestTables(hbase).forEach { tableName ->
+                    hbase.connection.getTable(TableName.valueOf(tableName)).use { table ->
+                        while (recordCount(table) != RECORDS_PER_TOPIC) {
+                            println("Waiting for records to appear in $tableName")
+                            delay(2.seconds)
                         }
                     }
                 }
             }
+        }
 
-            log.info("Checking metadatastore")
-            metadataStoreConnection().use { connection ->
-                connection.createStatement().use { statement ->
-                    val results = statement.executeQuery("SELECT count(*) FROM `ucfs`")
-                    results.next() shouldBe true
-                    val count = results.getLong(1)
-                    count shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
-                }
+    private fun verifyMetadataStore() =
+        metadataStoreConnection().use { connection ->
+            connection.createStatement().use { statement ->
+                val results = statement.executeQuery("SELECT count(*) FROM ucfs")
+                results.next() shouldBe true
+                val count = results.getLong(1)
+                count shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
             }
         }
+
+    private fun verifyS3() {
+        val listObjectsRequest = ListObjectsRequest().apply { bucketName = Config.AwsS3.archiveBucket }
+        val contentsList = AwsS3Service.s3.listObjects(listObjectsRequest).objectSummaries
+                .map { GetObjectRequest(Config.AwsS3.archiveBucket, it.key) }
+                .map { AwsS3Service.s3.getObject(it) }
+                .map { it.objectContent }
+                .map { GZIPInputStream(it) }
+                .map { input ->
+                    ByteArrayOutputStream().also { output ->
+                        input.copyTo(output)
+                    }
+                }
+                .map { it.toByteArray() }
+                .map { String(it) }
+                .flatMap { it.split("\n") }
+                .filter { it.isNotEmpty() }
+                .map {
+                    Gson().fromJson(it, JsonObject::class.java)
+                }
+
+        contentsList.size shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
+
+        contentsList.forEach {
+            it["traceId"].asJsonPrimitive.asString shouldBe "00002222-abcd-4567-1234-1234567890ab"
+            val message = it["message"]
+            message shouldNotBe null
+            message!!.asJsonObject shouldNotBe null
+            message.asJsonObject!!["dbObject"] shouldNotBe null
+            it["message"]!!.asJsonObject!!["dbObject"]!!.asJsonPrimitive shouldNotBe null
+            it["message"]!!.asJsonObject!!["dbObject"]!!.asJsonPrimitive!!.asString shouldBe "bubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9A"
+        }
+
     }
 
     private fun metadataStoreConnection(): Connection {

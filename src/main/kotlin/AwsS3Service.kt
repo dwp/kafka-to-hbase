@@ -63,17 +63,16 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
         }))
 
 
-    private fun batchBody(payloads: List<HbasePayload>): ByteArray {
-        val outputStream = ByteArrayOutputStream()
-        BufferedOutputStream(GZIPOutputStream(outputStream)).use { bufferedOutputStream ->
-            payloads.forEach { payload ->
-                val body = StringBuilder(String(payload.body, Charset.forName("UTF-8"))
-                        .replace("\n", " ")).append('\n')
-                bufferedOutputStream.write(body.toString().toByteArray(Charset.forName("UTF-8")))
+    private fun batchBody(payloads: List<HbasePayload>) =
+        ByteArrayOutputStream().also {
+            BufferedOutputStream(GZIPOutputStream(it)).use { bufferedOutputStream ->
+                payloads.forEach { payload ->
+                    val body = StringBuilder(String(payload.body, Charset.forName("UTF-8"))
+                            .replace("\n", " ")).append('\n')
+                    bufferedOutputStream.write(body.toString().toByteArray(Charset.forName("UTF-8")))
+                }
             }
-        }
-        return outputStream.toByteArray()
-    }
+        }.toByteArray()
 
     private suspend fun putPayload(database: String, collection: String, payload: HbasePayload)
             = withContext(Dispatchers.IO) {
@@ -135,7 +134,7 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
         fun connect() = AwsS3Service(s3)
         val textUtils = TextUtils()
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(AwsS3Service::class.toString())
-        private val s3: AmazonS3 by lazy {
+        val s3: AmazonS3 by lazy {
             if (Config.AwsS3.useLocalStack) {
                 AmazonS3ClientBuilder.standard()
                     .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, localstackSigningRegion))
