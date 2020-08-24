@@ -8,6 +8,11 @@ class TextUtilsTest : StringSpec({
         Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
     }
 
+    "table names will have dots and dashes replaced" {
+        val actual = TextUtils().targetTable("a.b-c", "d.e-f")
+        actual shouldBe "a_b_c:d_e_f"
+    }
+
     "agent_core:agentToDoArchive is coalesced." {
         val actual = TextUtils().coalescedName("agent_core:agentToDoArchive")
         actual shouldBe "agent_core:agentToDo"
