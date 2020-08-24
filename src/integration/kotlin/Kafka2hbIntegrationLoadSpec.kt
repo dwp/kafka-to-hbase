@@ -1,10 +1,7 @@
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import lib.getISO8601Timestamp
 import lib.sendRecord
 import org.apache.hadoop.hbase.TableName
@@ -24,7 +21,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     companion object {
         private val log = Logger.getLogger(Kafka2hbIntegrationLoadSpec::class.toString())
         private const val TOPIC_COUNT = 10
-        private const val RECORDS_PER_TOPIC = 10_000
+        private const val RECORDS_PER_TOPIC = 1_000
         private const val DB_NAME = "load-test-database"
         private const val COLLECTION_NAME = "load-test-collection"
     }
@@ -37,17 +34,18 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             repeat(TOPIC_COUNT) { collectionNumber ->
                 val topic = topicName(collectionNumber)
                 repeat(RECORDS_PER_TOPIC) { messageNumber ->
-//                    launch {
+                    launch (Dispatchers.IO) {
                         val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
                         log.info("Sending record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
                         producer.sendRecord(topic.toByteArray(), recordId(collectionNumber, messageNumber), body(messageNumber), timestamp)
-//                    }
+                        log.info("Sent record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
+                    }
                 }
             }
             println("Set off record producer")
 
             HbaseClient.connect().use { hbase ->
-                withTimeout(15.minutes) {
+                withTimeout(30.minutes) {
                     while (expectedTables != loadTestTables(hbase)) {
                         println("Waiting for tables to appear")
                         delay(2.seconds)
@@ -64,10 +62,10 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                 }
             }
 
-            println("Checking metadatastore")
+            log.info("Checking metadatastore")
             metadataStoreConnection().use { connection ->
                 connection.createStatement().use { statement ->
-                    val results = statement.executeQuery("SELECT count(*) FROM ucfs")
+                    val results = statement.executeQuery("SELECT count(*) FROM `ucfs`")
                     results.next() shouldBe true
                     val count = results.getLong(1)
                     count shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
@@ -82,11 +80,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     }
 
     private fun recordCount(table: Table) = table.getScanner(Scan()).count()
-
-
-    private val expectedTables by lazy {
-        (0..9).map { tableName(it) }
-    }
+    private val expectedTables by lazy { (0..9).map { tableName(it) } }
 
     private fun loadTestTables(hbase: HbaseClient)
             = hbase.connection.admin.listTableNames()
@@ -94,14 +88,9 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             .filter { Regex(tableNamePattern()).matches(it) }
 
     private fun tableName(it: Int) = "$DB_NAME$it:$COLLECTION_NAME$it".replace("-", "_")
-
     private fun tableNamePattern() = """$DB_NAME\d+:$COLLECTION_NAME\d+""".replace("-", "_")
-
-    private fun topicName(collectionNumber: Int)
-            = "db.$DB_NAME$collectionNumber.$COLLECTION_NAME$collectionNumber"
-
-    private fun recordId(collectionNumber: Int, messageNumber: Int) =
-            "key-$messageNumber/$collectionNumber".toByteArray()
+    private fun topicName(collectionNumber: Int)= "db.$DB_NAME$collectionNumber.$COLLECTION_NAME$collectionNumber"
+    private fun recordId(collectionNumber: Int, messageNumber: Int)= "key-$messageNumber/$collectionNumber".toByteArray()
 
     private fun body(recordNumber: Int) = """{
         "traceId": "00002222-abcd-4567-1234-1234567890ab",

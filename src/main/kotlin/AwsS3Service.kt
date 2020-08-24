@@ -18,9 +18,13 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.codec.binary.Hex
+import java.io.BufferedOutputStream
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.GZIPOutputStream
 import kotlin.system.measureTimeMillis
 
 open class AwsS3Service(private val amazonS3: AmazonS3) {
@@ -30,16 +34,42 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
         val timeTaken = measureTimeMillis {
             val (database, collection) = hbaseTable.split(Regex(":"))
             coroutineScope {
-                payloads.forEach { payload ->
-                    if (Config.AwsS3.parallelPuts) {
-                        launch { putPayload(database, collection, payload) }
-                    } else {
-                        putPayload(database, collection, payload)
+                if (Config.AwsS3.batchPuts) {
+                    val key = batchKey(database, collection, payloads)
+                    logger.info("Batch putting into s3", "key", key)
+                    putBatchObject(key, batchBody(payloads))
+                }
+                else {
+                    payloads.forEach { payload ->
+                        if (Config.AwsS3.parallelPuts) {
+                            launch { putPayload(database, collection, payload) }
+                        } else {
+                            putPayload(database, collection, payload)
+                        }
                     }
                 }
             }
         }
         logger.info("Put batch into s3", "time_taken", "$timeTaken", "size", "${payloads.size}", "hbase_table", hbaseTable)
+    }
+
+    private fun putBatchObject(key: String, body: ByteArray) =
+        amazonS3.putObject(PutObjectRequest(Config.AwsS3.archiveBucket, key,
+                ByteArrayInputStream(body), ObjectMetadata().apply {
+            contentLength = body.size.toLong()
+        }))
+
+
+    private fun batchBody(payloads: List<HbasePayload>): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        BufferedOutputStream(GZIPOutputStream(outputStream)).use { bufferedOutputStream ->
+            payloads.forEach { payload ->
+                val body = StringBuilder(String(payload.body, Charset.forName("UTF-8"))
+                        .replace("\n", " ")).append('\n')
+                bufferedOutputStream.write(body.toString().toByteArray(Charset.forName("UTF-8")))
+            }
+        }
+        return outputStream.toByteArray()
     }
 
     private suspend fun putPayload(database: String, collection: String, payload: HbasePayload)
@@ -49,8 +79,20 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
                 launch { putObject(latestKey(database, collection, hexedId), payload, database, collection)}
             }
 
+
     private suspend fun putObject(key: String, payload: HbasePayload, database: String, collection: String)
             = withContext(Dispatchers.IO) { amazonS3.putObject(putObjectRequest(key, payload, database, collection)) }
+
+    private fun batchKey(database: String, collection: String, payloads: List<HbasePayload>): String {
+        val firstRecord = payloads.first().record
+        val last = payloads.last().record
+        val partition = firstRecord.partition()
+        val firstOffset = firstRecord.offset()
+        val lastOffset =  last.offset()
+        val topic = firstRecord.topic()
+        val filename = "${topic}_${partition}_$firstOffset-$lastOffset"
+        return "${Config.AwsS3.archiveDirectory}/${simpleDateFormatter().format(Date())}/$database/$collection/$filename.jsonl.gz"
+    }
 
     // K2HB_S3_LATEST_PATH: s3://data_bucket/ucdata_main/latest/<db>/<collection>/<id-hex>.json
     private fun latestKey(database: String, collection: String, hexedId: String) =
@@ -60,7 +102,7 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
     private fun archiveKey(database: String, collection: String, hexedId: String, version: Long)
             = "${Config.AwsS3.archiveDirectory}/${datePath(version)}/$database/$collection/$hexedId/${version}.json"
 
-    private fun datePath(version: Long) = SimpleDateFormat("yyyy/MM/dd").apply { timeZone = TimeZone.getTimeZone("UTC") }.format(version)
+    private fun datePath(version: Long) = simpleDateFormatter().format(version)
 
     private fun putObjectRequest(key: String, payload: HbasePayload, database: String, collection: String) =
             PutObjectRequest(Config.AwsS3.archiveBucket,
@@ -83,6 +125,8 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
             addUserMetadata("timestamp", payload.version.toString())
         }
 
+
+    private fun simpleDateFormatter() = SimpleDateFormat("yyyy/MM/dd").apply { timeZone = TimeZone.getTimeZone("UTC") }
 
     companion object {
         fun connect() = AwsS3Service(s3)
