@@ -13,6 +13,11 @@ class TextUtilsTest : StringSpec({
         actual shouldBe "a_b_c:d_e_f"
     }
 
+    "table names will have dots and dashes replaced in edge case topic names" {
+        val actual = TextUtils().targetTable("ucfs", "data.encrypted")
+        actual shouldBe "ucfs:data_encrypted"
+    }
+
     "agent_core:agentToDoArchive is coalesced." {
         val actual = TextUtils().coalescedName("agent_core:agentToDoArchive")
         actual shouldBe "agent_core:agentToDo"
@@ -40,11 +45,11 @@ class TextUtilsTest : StringSpec({
 
         assert(result!!.groupValues[1] == "ucfs")
         assert(result.groupValues[2] == "data")
-
         reset()
     }
 
     "Test topic name table matcher will use ucfs data feed regex to match against valid table name with extra stanza" {
+        // extra stanza test for UC edge cases in topic names
 
         val tableName = "db.ucfs.data.encrypted"
 
@@ -56,7 +61,6 @@ class TextUtilsTest : StringSpec({
 
         assert(result!!.groupValues[1] == "ucfs")
         assert(result.groupValues[2] == "data.encrypted")
-
         reset()
     }
 
