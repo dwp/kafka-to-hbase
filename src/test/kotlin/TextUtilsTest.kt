@@ -5,7 +5,7 @@ import io.kotlintest.specs.StringSpec
 class TextUtilsTest : StringSpec({
 
     fun reset() {
-        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
+        Config.Hbase.qualifiedTablePattern = Config.Hbase.DEFAULT_QUALIFIED_TABLE_PATTERN
     }
 
     "table names will have dots and dashes replaced" {
@@ -37,7 +37,7 @@ class TextUtilsTest : StringSpec({
 
         val tableName = "db.ucfs.data"
 
-        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
+        Config.Hbase.qualifiedTablePattern = Config.Hbase.DEFAULT_QUALIFIED_TABLE_PATTERN
 
         val result = TextUtils().topicNameTableMatcher(tableName)
 
@@ -53,7 +53,7 @@ class TextUtilsTest : StringSpec({
 
         val tableName = "db.ucfs.data.encrypted"
 
-        Config.Hbase.qualifiedTablePattern = """^\w+\.([-\w]+)\.([-\w]+)$"""
+        Config.Hbase.qualifiedTablePattern = Config.Hbase.DEFAULT_QUALIFIED_TABLE_PATTERN
 
         val result = TextUtils().topicNameTableMatcher(tableName)
 

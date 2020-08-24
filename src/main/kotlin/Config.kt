@@ -62,7 +62,8 @@ object Config {
         val retryBackoffMultiplier: Long = getEnv("K2HB_RETRY_BACKOFF_MULTIPLIER")?.toLong() ?: 2
         val regionReplication: Int = getEnv("K2HB_HBASE_REGION_REPLICATION")?.toInt() ?: 3
         val logKeys: Boolean = getEnv("K2HB_HBASE_LOG_KEYS")?.toBoolean() ?: true
-        var qualifiedTablePattern = getEnv("K2HB_QUALIFIED_TABLE_PATTERN") ?: """^\w+\.([-\w]+)\.([-\w]+)$"""
+        var DEFAULT_QUALIFIED_TABLE_PATTERN = """^\w+\.([-\w]+)\.([-.\w]+)$"""
+        var qualifiedTablePattern = getEnv("K2HB_QUALIFIED_TABLE_PATTERN") ?: DEFAULT_QUALIFIED_TABLE_PATTERN
     }
 
     object Kafka {
