@@ -2,7 +2,7 @@
 import Config.AwsS3.localstackAccessKey
 import Config.AwsS3.localstackSecretKey
 import Config.AwsS3.localstackServiceEndPoint
-import Config.AwsS3.dataworksRegion
+import Config.dataworksRegion
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.Protocol
 import com.amazonaws.auth.AWSStaticCredentialsProvider
