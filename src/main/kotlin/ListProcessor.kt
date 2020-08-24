@@ -31,13 +31,13 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                                 logger.info("Batch succeeded, committing offset", "topic", partition.topic(), "partition",
                                         "${partition.partition()}", "offset", "$lastPosition")
                                 consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
-                                //logSuccessfulPuts(table, payloads)
+                                logSuccessfulPuts(table, payloads)
                             }
                             else {
                                 lastCommittedOffset(consumer, partition)?.let { consumer.seek(partition, it) }
                                 logger.error("Batch failed, not committing offset, resetting position to last commit",
                                         "topic", partition.topic(), "partition", "${partition.partition()}"/*, "committed_offset", "$lastCommittedOffset"*/)
-                                //logFailedPuts(table, payloads)
+                                logFailedPuts(table, payloads)
                             }
                         }
                     }

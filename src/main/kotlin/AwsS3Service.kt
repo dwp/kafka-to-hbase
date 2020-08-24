@@ -2,7 +2,7 @@
 import Config.AwsS3.localstackAccessKey
 import Config.AwsS3.localstackSecretKey
 import Config.AwsS3.localstackServiceEndPoint
-import Config.AwsS3.localstackSigningRegion
+import Config.AwsS3.dataworksRegion
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.Protocol
 import com.amazonaws.auth.AWSStaticCredentialsProvider
@@ -137,7 +137,7 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
         val s3: AmazonS3 by lazy {
             if (Config.AwsS3.useLocalStack) {
                 AmazonS3ClientBuilder.standard()
-                    .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, localstackSigningRegion))
+                    .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, dataworksRegion))
                     .withClientConfiguration(ClientConfiguration().withProtocol(Protocol.HTTP))
                     .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
                     .withPathStyleAccessEnabled(true)
