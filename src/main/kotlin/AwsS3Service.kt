@@ -29,23 +29,26 @@ import kotlin.system.measureTimeMillis
 
 open class AwsS3Service(private val amazonS3: AmazonS3) {
 
+    open suspend fun putObjectsAsBatch(hbaseTable: String, payloads: List<HbasePayload>) {
+        val timeTaken = measureTimeMillis {
+            val (database, collection) = hbaseTable.split(Regex(":"))
+            val key = batchKey(database, collection, payloads)
+            logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
+            putBatchObject(key, batchBody(payloads))
+        }
+        logger.info("Put batch into s3", "time_taken", "$timeTaken", "size", "${payloads.size}", "hbase_table", hbaseTable)
+    }
+
     open suspend fun putObjects(hbaseTable: String, payloads: List<HbasePayload>) {
         logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable)
         val timeTaken = measureTimeMillis {
             val (database, collection) = hbaseTable.split(Regex(":"))
             coroutineScope {
-                if (Config.AwsS3.batchPuts) {
-                    val key = batchKey(database, collection, payloads)
-                    logger.info("Batch putting into s3", "key", key)
-                    putBatchObject(key, batchBody(payloads))
-                }
-                else {
-                    payloads.forEach { payload ->
-                        if (Config.AwsS3.parallelPuts) {
-                            launch { putPayload(database, collection, payload) }
-                        } else {
-                            putPayload(database, collection, payload)
-                        }
+                payloads.forEach { payload ->
+                    if (Config.AwsS3.parallelPuts) {
+                        launch { putPayload(database, collection, payload) }
+                    } else {
+                        putPayload(database, collection, payload)
                     }
                 }
             }

@@ -16,12 +16,8 @@ fun getEnv(envVar: String): String? {
     return if (value.isNullOrEmpty()) null else value
 }
 
-fun String.toDuration(): Duration {
-    return Duration.parse(this)
-}
-
-fun readFile(fileName: String): String
-        = File(fileName).readText(Charsets.UTF_8)
+fun String.toDuration() = Duration.parse(this)
+fun readFile(fileName: String): String = File(fileName).readText(Charsets.UTF_8)
 
 object Config {
 
@@ -32,7 +28,6 @@ object Config {
 
     object Shovel {
         val reportFrequency = getEnv("K2HB_KAFKA_REPORT_FREQUENCY")?.toInt() ?: 100
-        val processLists = getEnv("K2HB_BATCH_PUTS")?.toBoolean() ?: true
     }
 
     object Validator {
@@ -108,8 +103,6 @@ object Config {
         val pollTimeout: Duration = getEnv("K2HB_KAFKA_POLL_TIMEOUT")?.toDuration() ?: Duration.ofSeconds(3)
         var topicRegex: Pattern = Pattern.compile(getEnv("K2HB_KAFKA_TOPIC_REGEX") ?: "db.*")
         var dlqTopic = getEnv("K2HB_KAFKA_DLQ_TOPIC") ?: "test-dlq-topic"
-
-        fun metadataRefresh(): String = consumerProps.getProperty(metaDataRefreshKey)
     }
 
     object MetadataStore {

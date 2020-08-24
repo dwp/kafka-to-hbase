@@ -61,7 +61,12 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
     private suspend fun putInS3(s3Service: AwsS3Service, table: String, payloads: List<HbasePayload>) =
             withContext(Dispatchers.IO) {
                 try {
-                    s3Service.putObjects(table, payloads)
+                    if (Config.AwsS3.batchPuts) {
+                        s3Service.putObjectsAsBatch(table, payloads)
+                    }
+                    else {
+                        s3Service.putObjects(table, payloads)
+                    }
                     true
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -96,9 +101,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
 
 
     private fun lastCommittedOffset(consumer: KafkaConsumer<ByteArray, ByteArray>, partition: TopicPartition): Long? =
-            consumer.committed(partition)?.let {
-                it.offset()
-            }
+            consumer.committed(partition)?.let { it.offset() }
 
     private fun lastPosition(partitionRecords: MutableList<ConsumerRecord<ByteArray, ByteArray>>) =
             partitionRecords[partitionRecords.size - 1].offset()
