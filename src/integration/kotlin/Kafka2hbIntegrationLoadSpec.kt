@@ -1,6 +1,5 @@
 
-import com.amazonaws.services.s3.model.GetObjectRequest
-import com.amazonaws.services.s3.model.ListObjectsRequest
+import com.amazonaws.services.s3.model.*
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.kotest.core.spec.style.StringSpec
@@ -35,24 +34,27 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
 
     init {
         "Many messages sent to many topics" {
-            val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
-            val converter = Converter()
-            println("Setting off record producer")
-            repeat(TOPIC_COUNT) { collectionNumber ->
-                val topic = topicName(collectionNumber)
-                repeat(RECORDS_PER_TOPIC) { messageNumber ->
-                    val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-                    log.info("Sending record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
-                    producer.sendRecord(topic.toByteArray(), recordId(collectionNumber, messageNumber), body(messageNumber), timestamp)
-                    log.info("Sent record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
-                }
-            }
-            println("Set off record producer")
-
+            publishRecords()
             verifyHbase()
             verifyMetadataStore()
             verifyS3()
         }
+    }
+
+    private fun publishRecords() {
+        val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
+        val converter = Converter()
+        println("Setting off record producer")
+        repeat(TOPIC_COUNT) { collectionNumber ->
+            val topic = topicName(collectionNumber)
+            repeat(RECORDS_PER_TOPIC) { messageNumber ->
+                val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
+                log.info("Sending record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
+                producer.sendRecord(topic.toByteArray(), recordId(collectionNumber, messageNumber), body(messageNumber), timestamp)
+                log.info("Sent record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
+            }
+        }
+        println("Set off record producer")
     }
 
     private suspend fun verifyHbase() =
@@ -99,23 +101,39 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     }
 
     private fun allObjectContentsAsJson(): List<JsonObject> =
-            AwsS3Service.s3.listObjects(ListObjectsRequest().apply { bucketName = Config.AwsS3.archiveBucket }).objectSummaries
+            objectSummaries()
+                .filter { it.key.endsWith("jsonl.gz") && it.key.contains("load_test") }
                 .map { GetObjectRequest(Config.AwsS3.archiveBucket, it.key) }
-                .filter { it.key.endsWith("jsonl.gz") }
-                .map { AwsS3Service.s3.getObject(it) }
-                .map { it.objectContent }
-                .map { GZIPInputStream(it) }
-                .map { input -> ByteArrayOutputStream().also {
-                        output -> input.copyTo(output)
-                        input.close()
+                .map {
+                    println("Reading '$it.key'.")
+                    GZIPInputStream(AwsS3Service.s3.getObject(it).objectContent).use {
+                        ByteArrayOutputStream().also { output -> it.copyTo(output) }
                     }
                 }
                 .map { it.toByteArray() }
                 .map { String(it) }
                 .flatMap { it.split("\n") }
                 .filter { it.isNotEmpty() }
-                .map { Gson().fromJson(it, JsonObject::class.java) }
+                .map { Gson().fromJson(it, JsonObject::class.java)
+        }
 
+    private fun objectSummaries(): MutableList<S3ObjectSummary> {
+        val objectSummaries = mutableListOf<S3ObjectSummary>()
+        val request = ListObjectsV2Request().apply {
+            bucketName = Config.AwsS3.archiveBucket
+            prefix = Config.AwsS3.archiveDirectory
+        }
+
+        var objectListing: ListObjectsV2Result?
+
+        do {
+            objectListing = AwsS3Service.s3.listObjectsV2(request)
+            objectSummaries.addAll(objectListing.objectSummaries)
+            request.continuationToken = objectListing.nextContinuationToken
+        } while (objectListing != null && objectListing.isTruncated)
+
+        return objectSummaries
+    }
 
     private fun metadataStoreConnection(): Connection {
         val (url, properties) = MetadataStoreClient.connectionProperties()

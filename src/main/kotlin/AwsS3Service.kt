@@ -138,7 +138,10 @@ open class AwsS3Service(private val amazonS3: AmazonS3) {
             if (Config.AwsS3.useLocalStack) {
                 AmazonS3ClientBuilder.standard()
                     .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, dataworksRegion))
-                    .withClientConfiguration(ClientConfiguration().withProtocol(Protocol.HTTP))
+                    .withClientConfiguration(ClientConfiguration().apply {
+                        withProtocol(Protocol.HTTP)
+                        maxConnections = Config.AwsS3.maxConnections
+                    })
                     .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
                     .withPathStyleAccessEnabled(true)
                     .disableChunkedEncoding()
