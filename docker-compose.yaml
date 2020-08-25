@@ -48,7 +48,8 @@ services:
       K2HB_APP_VERSION: "test"
       INSTANCE_ID: "localhost"
       K2HB_KAFKA_INSECURE: "true"
-      K2HB_KAFKA_TOPIC_REGEX: ^(db[.]{1}[-\w]+[.]{1}[-\w]+)\$
+      K2HB_KAFKA_TOPIC_REGEX: ^(db[.]{1}[-\w]+[.]{1}[-\w]+)$
+      K2HB_QUALIFIED_TABLE_PATTERN: ^\w+\.([-\w]+)\.([-.\w]+)$
       K2HB_KAFKA_META_REFRESH_MS: "1000"
       K2HB_KAFKA_POLL_TIMEOUT: "PT10S"
       K2HB_RETRY_MAX_ATTEMPTS: "3"
