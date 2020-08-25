@@ -48,8 +48,6 @@ services:
       K2HB_APP_VERSION: "test"
       INSTANCE_ID: "localhost"
       K2HB_KAFKA_INSECURE: "true"
-      K2HB_KAFKA_TOPIC_REGEX: ^(db[.]{1}[-\w]+[.]{1}[-\w]+)$
-      K2HB_QUALIFIED_TABLE_PATTERN: ^\w+\.([-\w]+)\.([-.\w]+)$
       K2HB_KAFKA_META_REFRESH_MS: "1000"
       K2HB_KAFKA_POLL_TIMEOUT: "PT10S"
       K2HB_RETRY_MAX_ATTEMPTS: "3"
@@ -72,6 +70,8 @@ services:
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
       K2HB_IMAGE_DIGEST: "latest"
       K2HB_WRITE_TO_METADATA_STORE: "true"
+      # use default, which is K2HB_KAFKA_TOPIC_REGEX: ^(db[.]{1}[-\w]+[.]{1}[-\w]+)$
+      K2HB_QUALIFIED_TABLE_PATTERN: \w+\.([-\w]+)\.([-.\w]+)
 
   kafka2hbaseequality:
     image: kafka2hbase:latest
@@ -112,8 +112,8 @@ services:
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
       K2HB_IMAGE_DIGEST: "latest"
       K2HB_VALIDATOR_SCHEMA: "equality_message.schema.json"
+      K2HB_KAFKA_TOPIC_REGEX: (data[.][-\w]+)
       K2HB_QUALIFIED_TABLE_PATTERN: ([-\w]+)\.([-\w]+)
-      K2HB_KAFKA_TOPIC_REGEX: ^(data[.][-\w]+)$
 
   kafka2s3:
     image: dwpdigital/kafka-to-s3:latest
