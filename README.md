@@ -324,6 +324,7 @@ defaulted in the `entrypoint.sh` script.
     The log level of the certificate generator (`CRITICAL`, `ERROR`, `WARNING`, `INFO`, `DEBUG`)
 
 #### Metadatastore 
+
 | Name | Notes |
 |------|--------|
 |K2HB_METADATA_STORE_TABLE| The name of the table to write metadata store entries to |

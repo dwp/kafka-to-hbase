@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream
 import java.sql.Connection
 import java.sql.DriverManager
 import java.util.zip.GZIPInputStream
-import java.util.zip.GZIPOutputStream
 import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
 import kotlin.time.seconds
@@ -86,27 +85,8 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         }
 
     private fun verifyS3() {
-        val listObjectsRequest = ListObjectsRequest().apply { bucketName = Config.AwsS3.archiveBucket }
-        val contentsList = AwsS3Service.s3.listObjects(listObjectsRequest).objectSummaries
-                .map { GetObjectRequest(Config.AwsS3.archiveBucket, it.key) }
-                .map { AwsS3Service.s3.getObject(it) }
-                .map { it.objectContent }
-                .map { GZIPInputStream(it) }
-                .map { input ->
-                    ByteArrayOutputStream().also { output ->
-                        input.copyTo(output)
-                    }
-                }
-                .map { it.toByteArray() }
-                .map { String(it) }
-                .flatMap { it.split("\n") }
-                .filter { it.isNotEmpty() }
-                .map {
-                    Gson().fromJson(it, JsonObject::class.java)
-                }
-
+        val contentsList = allObjectContentsAsJson()
         contentsList.size shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
-
         contentsList.forEach {
             it["traceId"].asJsonPrimitive.asString shouldBe "00002222-abcd-4567-1234-1234567890ab"
             val message = it["message"]
@@ -116,8 +96,22 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             it["message"]!!.asJsonObject!!["dbObject"]!!.asJsonPrimitive shouldNotBe null
             it["message"]!!.asJsonObject!!["dbObject"]!!.asJsonPrimitive!!.asString shouldBe "bubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9A"
         }
-
     }
+
+    private fun allObjectContentsAsJson(): List<JsonObject> =
+            AwsS3Service.s3.listObjects(ListObjectsRequest().apply { bucketName = Config.AwsS3.archiveBucket }).objectSummaries
+                .map { GetObjectRequest(Config.AwsS3.archiveBucket, it.key) }
+                .filter { it.key.endsWith("jsonl.gz") }
+                .map { AwsS3Service.s3.getObject(it) }
+                .map { it.objectContent }
+                .map { GZIPInputStream(it) }
+                .map { input -> ByteArrayOutputStream().also { output -> input.copyTo(output) } }
+                .map { it.toByteArray() }
+                .map { String(it) }
+                .flatMap { it.split("\n") }
+                .filter { it.isNotEmpty() }
+                .map { Gson().fromJson(it, JsonObject::class.java) }
+
 
     private fun metadataStoreConnection(): Connection {
         val (url, properties) = MetadataStoreClient.connectionProperties()
@@ -162,5 +156,3 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         }
     }""".toByteArray()
 }
-
-
