@@ -98,7 +98,7 @@ tasks.register<Test>("integration-test-equality") {
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
     environment("K2HB_VALIDATOR_SCHEMA", "equality_message.schema.json")
     environment("K2HB_QUALIFIED_TABLE_PATTERN", """([-\w]+)\.([-\w]+)""")
-    environment("K2HB_KAFKA_TOPIC_REGEX", "^data.(.*)")
+    environment("K2HB_KAFKA_TOPIC_REGEX", """^(data[.][-\w]+)$""")
 
     testLogging {
         outputs.upToDateWhen {false}
