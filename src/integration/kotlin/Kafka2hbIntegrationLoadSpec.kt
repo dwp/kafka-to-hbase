@@ -103,19 +103,18 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     private fun allObjectContentsAsJson(): List<JsonObject> =
             objectSummaries()
                 .filter { it.key.endsWith("jsonl.gz") && it.key.contains("load_test") }
-                .map { GetObjectRequest(Config.AwsS3.archiveBucket, it.key) }
-                .map {
-                    println("Reading '$it.key'.")
-                    GZIPInputStream(AwsS3Service.s3.getObject(it).objectContent).use {
-                        ByteArrayOutputStream().also { output -> it.copyTo(output) }
-                    }
-                }
-                .map { it.toByteArray() }
+                .map { it.key }
+                .map { objectContents(it) }
                 .map { String(it) }
                 .flatMap { it.split("\n") }
                 .filter { it.isNotEmpty() }
-                .map { Gson().fromJson(it, JsonObject::class.java)
-        }
+                .map { Gson().fromJson(it, JsonObject::class.java) }
+
+    private fun objectContents(key: String) =
+            GZIPInputStream(AwsS3Service.s3.getObject(GetObjectRequest(Config.AwsS3.archiveBucket, key)).objectContent).use {
+                ByteArrayOutputStream().also { output -> it.copyTo(output) }
+            }.toByteArray()
+
 
     private fun objectSummaries(): MutableList<S3ObjectSummary> {
         val objectSummaries = mutableListOf<S3ObjectSummary>()
