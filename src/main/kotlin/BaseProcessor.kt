@@ -39,7 +39,7 @@ open class BaseProcessor(private val validator: Validator, private val converter
                 "Sending message to dlq", "key", stringKey, "original_topic", originalTopic,
                 "original_offset", originalOffset
             )
-            val metadata = DlqProducer.getInstance()?.send(producerRecord)?.get()
+            val metadata = DlqProducer.getInstance().send(producerRecord)?.get()
             logger.info(
                 "Sent message to dlq", "key", stringKey, "dlq_topic",
                 metadata?.topic().toString(), "dlq_offset", "${metadata?.offset()}"
@@ -47,10 +47,12 @@ open class BaseProcessor(private val validator: Validator, private val converter
         } catch (e: Exception) {
             logger.error(
                 "Error sending message to dlq",
-                "key", stringKey, "original_topic", originalTopic, "original_offset", originalOffset
+                "key", String(record.key()), "topic", record.topic(), "offset", "${record.offset()}"
             )
             throw DlqException("Exception while sending message to DLQ : $e")
         }
     }
 
+    fun getDataStringForRecord(record: ConsumerRecord<ByteArray, ByteArray>) =
+        "${String(record.key() ?: ByteArray(0))}:${record.topic()}:${record.partition()}:${record.offset()}"
 }
