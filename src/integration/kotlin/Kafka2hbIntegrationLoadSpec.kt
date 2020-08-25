@@ -77,7 +77,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     private fun verifyMetadataStore() =
         metadataStoreConnection().use { connection ->
             connection.createStatement().use { statement ->
-                val results = statement.executeQuery("SELECT count(*) FROM ucfs")
+                val results = statement.executeQuery("SELECT count(*) FROM ucfs WHERE topic_name like '%$DB_NAME%'")
                 results.next() shouldBe true
                 val count = results.getLong(1)
                 count shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
@@ -105,7 +105,11 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                 .map { AwsS3Service.s3.getObject(it) }
                 .map { it.objectContent }
                 .map { GZIPInputStream(it) }
-                .map { input -> ByteArrayOutputStream().also { output -> input.copyTo(output) } }
+                .map { input -> ByteArrayOutputStream().also {
+                        output -> input.copyTo(output)
+                        input.close()
+                    }
+                }
                 .map { it.toByteArray() }
                 .map { String(it) }
                 .flatMap { it.split("\n") }
