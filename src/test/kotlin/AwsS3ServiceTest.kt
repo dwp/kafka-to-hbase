@@ -48,7 +48,7 @@ class AwsS3ServiceTest : StringSpec() {
             verifyNoMoreInteractions(amazonS3)
             val request = requestCaptor.firstValue
             request.bucketName shouldBe "ucarchive"
-            request.key shouldBe "ucdata_main/2020/08/24/database/collection/db.database.collection_10_1-100.jsonl.gz"
+            request.key shouldBe "ucdata_main/${today()}/database/collection/db.database.collection_10_1-100.jsonl.gz"
             val lineReader = LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream)))
 
             lineReader.forEachLine {
@@ -87,12 +87,10 @@ class AwsS3ServiceTest : StringSpec() {
         userMetadata["timestamp"] shouldBe payloadTime(index + 1).toString()
     }
 
+    private fun today() = dateFormat().format(Date())
     private fun hexedId(index: Int) = Hex.encodeHexString("key-${index}".toByteArray())
     private fun payloadTime(index: Int) = payloadTimestamp(index).time
-
-    private fun payloadTimestamp(index: Int) =
-            SimpleDateFormat("yyyy/MM/dd").apply {
-                timeZone = TimeZone.getTimeZone("UTC") }.parse(payloadDate(index))
-
+    private fun payloadTimestamp(index: Int) = dateFormat().parse(payloadDate(index))
+    private fun dateFormat() = SimpleDateFormat("yyyy/MM/dd").apply { timeZone = TimeZone.getTimeZone("UTC") }
     private fun payloadDate(index: Int) = "2020/01/%02d".format((index % 20) + 1)
 }

@@ -30,11 +30,13 @@ import kotlin.system.measureTimeMillis
 open class AwsS3Service(private val amazonS3: AmazonS3) {
 
     open suspend fun putObjectsAsBatch(hbaseTable: String, payloads: List<HbasePayload>) {
-        val (database, collection) = hbaseTable.split(Regex(":"))
-        val key = batchKey(database, collection, payloads)
-        logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
-        val timeTaken = measureTimeMillis { putBatchObject(key, batchBody(payloads)) }
-        logger.info("Put batch into s3", "time_taken", "$timeTaken", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
+        if (payloads.isNotEmpty()) {
+            val (database, collection) = hbaseTable.split(Regex(":"))
+            val key = batchKey(database, collection, payloads)
+            logger.info("Putting batch into s3", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
+            val timeTaken = measureTimeMillis { putBatchObject(key, batchBody(payloads)) }
+            logger.info("Put batch into s3", "time_taken", "$timeTaken", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
+        }
     }
 
     open suspend fun putObjects(hbaseTable: String, payloads: List<HbasePayload>) {
