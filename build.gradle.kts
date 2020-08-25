@@ -97,6 +97,7 @@ tasks.register<Test>("integration-test-equality") {
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
     environment("K2HB_VALIDATOR_SCHEMA", "equality_message.schema.json")
+    environment("K2HB_WRITE_TO_METADATA_STORE", "true")
     environment("K2HB_QUALIFIED_TABLE_PATTERN", """([-\w]+)\.([-\w]+)""")
     environment("K2HB_KAFKA_TOPIC_REGEX", """^(data[.][-\w]+)$""")
 
@@ -122,6 +123,7 @@ tasks.register<Test>("integration-load-test") {
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
     environment("K2HB_USE_AWS_SECRETS", "false")
+    environment("K2HB_WRITE_TO_METADATA_STORE", "true")
 
     testLogging {
         outputs.upToDateWhen {false}
@@ -141,6 +143,7 @@ tasks.register<Test>("unit") {
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
     environment("K2HB_USE_AWS_SECRETS", "false")
+    environment("K2HB_WRITE_TO_METADATA_STORE", "true")
 
     testLogging {
         outputs.upToDateWhen {false}
