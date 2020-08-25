@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import lib.getISO8601Timestamp
+import lib.sampleQualifiedTableName
 import lib.sendRecord
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Scan
@@ -62,8 +63,8 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             }
 
             println("Checking metadatastore")
-            val connection = metadataStoreConnection()
-            connection.use { connection ->
+            val newConnection = metadataStoreConnection()
+            newConnection.use { connection ->
                 connection.createStatement().use { statement ->
                     val results = statement.executeQuery("SELECT count(*) FROM ucfs")
                     results.next() shouldBe true
@@ -91,9 +92,8 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             .map { it.nameAsString }
             .filter { Regex(tableNamePattern()).matches(it) }
 
-    private fun tableName(it: Int) = "$DB_NAME$it:$COLLECTION_NAME$it".replace("-", "_")
-
-    private fun tableNamePattern() = """$DB_NAME\d+:$COLLECTION_NAME\d+""".replace("-", "_")
+    private fun tableName(counter: Int) = sampleQualifiedTableName("$DB_NAME$counter", "COLLECTION_NAME$counter")
+    private fun tableNamePattern() = """$DB_NAME\d+:$COLLECTION_NAME\d+""".replace("-", "_").replace(".", "_")
 
     private fun topicName(collectionNumber: Int)
             = "db.$DB_NAME$collectionNumber.$COLLECTION_NAME$collectionNumber"
