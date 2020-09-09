@@ -99,6 +99,7 @@ integration-test-ucfs-and-equality: ## Run the integration tests in a Docker con
 		docker rm integration-test ;\
 		set -e ;\
 	}
+	docker-compose -f docker-compose.yaml build integration-test
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test integration-test-equality -x test -x integration-load-test
 
 integration-load-test: ## Run the integration load tests in a Docker container

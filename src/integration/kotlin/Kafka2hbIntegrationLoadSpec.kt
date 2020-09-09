@@ -58,16 +58,17 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
 
     private suspend fun verifyHbase() {
         var waitSoFarSecs = 0
-        val interval = 10
+        val shortInterval = 5
+        val longInterval = 10
         val expectedTablesSorted = expectedTables.sorted()
         println("Waiting for ${expectedTablesSorted.size} hbase tables to appear; Expecting to create: $expectedTablesSorted")
         HbaseClient.connect().use { hbase ->
-            withTimeout(60.minutes) {
+            withTimeout(30.minutes) {
                 do {
                     val foundTablesSorted = loadTestTables(hbase)
                     println("Waiting for ${expectedTablesSorted.size} hbase tables to appear; Found ${foundTablesSorted.size}; Total of $waitSoFarSecs seconds elapsed")
-                    delay(interval.seconds)
-                    waitSoFarSecs += interval
+                    delay(longInterval.seconds)
+                    waitSoFarSecs += longInterval
                 } while (expectedTablesSorted.toSet() != foundTablesSorted.toSet())
 
                 loadTestTables(hbase).forEach { tableName ->
@@ -75,8 +76,8 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                         do {
                             val foundRecords = recordCount(table)
                             println("Waiting for $RECORDS_PER_TOPIC hbase records to appear in $tableName; Found $foundRecords; Total of $waitSoFarSecs seconds elapsed")
-                            delay(interval.seconds)
-                            waitSoFarSecs += interval
+                            delay(shortInterval.seconds)
+                            waitSoFarSecs += shortInterval
                         } while (foundRecords != RECORDS_PER_TOPIC)
                     }
                 }
