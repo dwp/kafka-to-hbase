@@ -35,7 +35,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         "Many messages sent to many topics" {
             publishRecords()
             verifyHbase()
-            verifyMetadataStore(TOPIC_COUNT * RECORDS_PER_TOPIC, DB_NAME)
+            verifyMetadataStore(TOPIC_COUNT * RECORDS_PER_TOPIC, DB_NAME, false)
             verifyS3()
         }
     }
@@ -78,7 +78,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                             println("Waiting for $RECORDS_PER_TOPIC hbase records to appear in $tableName; Found $foundRecords; Total of $waitSoFarSecs seconds elapsed")
                             delay(shortInterval.seconds)
                             waitSoFarSecs += shortInterval
-                        } while (foundRecords != RECORDS_PER_TOPIC)
+                        } while (foundRecords < RECORDS_PER_TOPIC)
                     }
                 }
             }

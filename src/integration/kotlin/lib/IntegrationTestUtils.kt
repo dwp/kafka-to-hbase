@@ -7,6 +7,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import io.kotest.matchers.longs.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import java.sql.Connection
 import java.sql.DriverManager
@@ -95,12 +96,16 @@ fun metadataStoreConnection(): Connection {
     return DriverManager.getConnection(url, properties)
 }
 
-fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String) =
+fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, exactMatch: Boolean = true) =
     metadataStoreConnection().use { connection ->
         connection.createStatement().use { statement ->
             val results = statement.executeQuery("SELECT count(*) FROM ucfs WHERE topic_name like '%$expectedTopicName%'")
             results.next() shouldBe true
             val count = results.getLong(1)
-            count shouldBe expectedCount
+            if (exactMatch) {
+                count shouldBe expectedCount.toLong()
+            } else {
+                count shouldBeGreaterThanOrEqual expectedCount.toLong()
+            }
         }
     }
