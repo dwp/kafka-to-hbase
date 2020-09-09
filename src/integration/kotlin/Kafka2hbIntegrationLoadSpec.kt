@@ -130,10 +130,13 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     private fun recordCount(table: Table) = table.getScanner(Scan()).count()
     private val expectedTables by lazy { (0..9).map { tableName(it) } }
 
-    private fun loadTestTables(hbase: HbaseClient)
-            = hbase.connection.admin.listTableNames()
+    private fun loadTestTables(hbase: HbaseClient): List<String> {
+        val tables = hbase.connection.admin.listTableNames()
             .map { it.nameAsString }
             .filter { Regex(tableNamePattern()).matches(it) }
+        println("...hbase tables: found ${tables.size}: $tables")
+        return tables
+    }
 
     private fun tableName(counter: Int) = sampleQualifiedTableName("$DB_NAME$counter", "COLLECTION_NAME$counter")
     private fun tableNamePattern() = """$DB_NAME\d+:$COLLECTION_NAME\d+""".replace("-", "_").replace(".", "_")

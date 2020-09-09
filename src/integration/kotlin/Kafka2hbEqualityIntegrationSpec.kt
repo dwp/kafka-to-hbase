@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import lib.*
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.log4j.Logger
 import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.*
