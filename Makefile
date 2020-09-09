@@ -101,20 +101,21 @@ integration-test-ucfs-and-equality: ## Run the integration tests in a Docker con
 	}
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test integration-test-equality -x test -x integration-load-test
 
-integration-load-test: ## Run the integration load tests in a Docker container
+integration-load-test ## Run the integration load tests in a Docker container
 	@{ \
 		set +e ;\
 		docker stop integration-load-test ;\
 		docker rm integration-load-test ;\
 		set -e ;\
 	}
+	docker-compose -f docker-compose.yaml build integration-test
 	docker-compose -f docker-compose.yaml run --name integration-load-test integration-test gradle --no-daemon --rerun-tasks integration-load-test -x test -x integration-test -x integration-test-equality
 
 .PHONY: integration-all ## Build and Run all the tests in containers from a clean start
 integration-all: down destroy build up integration-test-ucfs-and-equality
 
-hbase-shell: ## Open an Hbase shell onto the running Hbase container
-	docker-compose run --rm hbase shell
+hbase-shell: ## Open an hbase shell in the running hbase container
+	docker exec -it hbase hbase shell
 
 build: build-base ## build main images
 	docker-compose build
