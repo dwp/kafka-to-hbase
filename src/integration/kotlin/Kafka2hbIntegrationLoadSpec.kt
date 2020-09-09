@@ -1,4 +1,3 @@
-
 import com.amazonaws.services.s3.model.*
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -57,24 +56,29 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         println("...Started record producer")
     }
 
-    private suspend fun verifyHbase() =
+    private suspend fun verifyHbase() {
+        var waitSoFarSecs = 0
+        val interval = 10
         HbaseClient.connect().use { hbase ->
             withTimeout(30.minutes) {
                 while (expectedTables != loadTestTables(hbase)) {
-                    println("Waiting for tables to appear")
-                    delay(2.seconds)
+                    println("Waiting for hbase tables to appear; Total of $waitSoFarSecs seconds elapsed")
+                    delay(interval.seconds)
+                    waitSoFarSecs += interval
                 }
 
                 loadTestTables(hbase).forEach { tableName ->
                     hbase.connection.getTable(TableName.valueOf(tableName)).use { table ->
                         while (recordCount(table) != RECORDS_PER_TOPIC) {
-                            println("Waiting for records to appear in $tableName")
-                            delay(2.seconds)
+                            println("Waiting for hbase records to appear in $tableName; Total of $waitSoFarSecs seconds elapsed")
+                            delay(interval.seconds)
+                            waitSoFarSecs += interval
                         }
                     }
                 }
             }
         }
+    }
 
     private fun verifyS3() {
         val contentsList = allObjectContentsAsJson()

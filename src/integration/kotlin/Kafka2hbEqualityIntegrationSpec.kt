@@ -1,10 +1,3 @@
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.Protocol
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.beust.klaxon.Klaxon
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -19,8 +12,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class Kafka2hbEqualityIntegrationSpec : StringSpec() {
-
-    private val log = Logger.getLogger(Kafka2hbEqualityIntegrationSpec::class.toString())
 
     init {
         "Equality Messages with new identifiers are written to hbase but not to dlq" {
@@ -68,14 +59,14 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val parser = MessageParser()
             val converter = Converter()
             val topic = uniqueEqualityTopicName()
-            val matcher1 = TextUtils().topicNameTableMatcher(topic)!!
+            val matcher = TextUtils().topicNameTableMatcher(topic)!!
             val key = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
             val body1 = wellFormedValidPayloadEquality()
-            val namespace1 = matcher1.groupValues[1]
-            val tableName1 = matcher1.groupValues[2]
-            val qualifiedTableName1 = sampleQualifiedTableName(namespace1, tableName1)
+            val namespace = matcher.groupValues[1]
+            val tableName = matcher.groupValues[2]
+            val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
             val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
-            hbase.putVersion(qualifiedTableName1, key, body1, kafkaTimestamp1)
+            hbase.putVersion(qualifiedTableName, key, body1, kafkaTimestamp1)
 
             Thread.sleep(1000)
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
@@ -88,10 +79,6 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
 
-            val matcher2 = TextUtils().topicNameTableMatcher(topic)!!
-            val namespace2 = matcher2.groupValues[1]
-            val tableName2 = matcher2.groupValues[2]
-            val qualifiedTableName = sampleQualifiedTableName(namespace2, tableName2)
             val storedNewValue =
                 waitFor { hbase.getCellAfterTimestamp(qualifiedTableName, key, referenceTimestamp) }
             Gson().fromJson(
