@@ -143,7 +143,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         return tables
     }
 
-    private fun tableName(counter: Int) = sampleQualifiedTableName("$DB_NAME$counter", "COLLECTION_NAME$counter")
+    private fun tableName(counter: Int) = sampleQualifiedTableName("$DB_NAME$counter", "$COLLECTION_NAME$counter")
     private fun tableNamePattern() = """$DB_NAME\d+:$COLLECTION_NAME\d+""".replace("-", "_").replace(".", "_")
 
     private fun topicName(collectionNumber: Int)
