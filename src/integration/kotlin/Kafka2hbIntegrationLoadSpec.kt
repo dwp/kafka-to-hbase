@@ -59,21 +59,25 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     private suspend fun verifyHbase() {
         var waitSoFarSecs = 0
         val interval = 10
+        val expectedTablesSorted = expectedTables.sorted()
+        println("Waiting for ${expectedTablesSorted.size} hbase tables to appear; Expecting to create: $expectedTablesSorted")
         HbaseClient.connect().use { hbase ->
-            withTimeout(30.minutes) {
-                while (expectedTables != loadTestTables(hbase)) {
-                    println("Waiting for hbase tables to appear; Total of $waitSoFarSecs seconds elapsed")
+            withTimeout(60.minutes) {
+                do {
+                    val foundTablesSorted = loadTestTables(hbase)
+                    println("Waiting for ${expectedTablesSorted.size} hbase tables to appear; Found ${foundTablesSorted.size}; Total of $waitSoFarSecs seconds elapsed")
                     delay(interval.seconds)
                     waitSoFarSecs += interval
-                }
+                } while (expectedTablesSorted.toSet() != foundTablesSorted.toSet())
 
                 loadTestTables(hbase).forEach { tableName ->
                     hbase.connection.getTable(TableName.valueOf(tableName)).use { table ->
-                        while (recordCount(table) != RECORDS_PER_TOPIC) {
-                            println("Waiting for hbase records to appear in $tableName; Total of $waitSoFarSecs seconds elapsed")
+                        do {
+                            val foundRecords = recordCount(table)
+                            println("Waiting for $RECORDS_PER_TOPIC hbase records to appear in $tableName; Found $foundRecords; Total of $waitSoFarSecs seconds elapsed")
                             delay(interval.seconds)
                             waitSoFarSecs += interval
-                        }
+                        } while (foundRecords != RECORDS_PER_TOPIC)
                     }
                 }
             }
@@ -134,6 +138,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         val tables = hbase.connection.admin.listTableNames()
             .map { it.nameAsString }
             .filter { Regex(tableNamePattern()).matches(it) }
+            .sorted()
         println("...hbase tables: found ${tables.size}: $tables")
         return tables
     }
