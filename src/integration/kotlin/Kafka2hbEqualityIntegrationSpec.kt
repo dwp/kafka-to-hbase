@@ -23,7 +23,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
     private val log = Logger.getLogger(Kafka2hbEqualityIntegrationSpec::class.toString())
 
     init {
-        "Messages with new identifiers are written to hbase but not to dlq" {
+        "Equality Messages with new identifiers are written to hbase but not to dlq" {
             val hbase = HbaseClient.connect()
             //TODO: For future implementations so that we can assert what is in the db
             //TODO: val metadataStore = MetadataStoreClient.connect()
@@ -56,7 +56,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             }
         }
 
-        "Messages with previously received identifiers are written as new versions to hbase but not to dlq" {
+        "Equality Messages with previously received identifiers are written as new versions to hbase but not to dlq" {
             val s3Client = getS3Client()
             val summaries = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
@@ -110,7 +110,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             }
         }
 
-        "Malformed json messages are written to dlq topic" {
+        "Equality Malformed json messages are written to dlq topic" {
             val s3Client = getS3Client()
 
             val converter = Converter()
@@ -130,7 +130,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             actual shouldBe expected
         }
 
-        "Invalid json messages as per the schema are written to dlq topic" {
+        "Equality Invalid json messages as per the schema are written to dlq topic" {
             val s3Client = getS3Client()
             val converter = Converter()
             val topic = uniqueEqualityTopicName()
@@ -153,15 +153,4 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
         }
     }
 
-    private fun getS3Client(): AmazonS3 {
-        return AmazonS3ClientBuilder.standard()
-            .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://aws-s3:4572", "eu-west-2"))
-            .withClientConfiguration(ClientConfiguration().withProtocol(Protocol.HTTP))
-            .withCredentials(
-                AWSStaticCredentialsProvider(BasicAWSCredentials("aws-access-key", "aws-secret-access-key"))
-            )
-            .withPathStyleAccessEnabled(true)
-            .disableChunkedEncoding()
-            .build()
-    }
 }

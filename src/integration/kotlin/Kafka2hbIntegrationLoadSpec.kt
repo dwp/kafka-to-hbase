@@ -116,7 +116,6 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                 ByteArrayOutputStream().also { output -> it.copyTo(output) }
             }.toByteArray()
 
-
     private fun objectSummaries(): MutableList<S3ObjectSummary> {
         val objectSummaries = mutableListOf<S3ObjectSummary>()
         val request = ListObjectsV2Request().apply {

@@ -1,5 +1,12 @@
 package lib
 
+import com.amazonaws.ClientConfiguration
+import com.amazonaws.Protocol
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.client.builder.AwsClientBuilder
+import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
@@ -7,7 +14,6 @@ import java.util.*
 fun getId() = """{ "exampleId": "aaaa1111-abcd-4567-1234-1234567890ab"}"""
 
 fun getEqualityId() = """{ "messageId": "aaaa1111-abcd-4567-4321-1234567890ab"}"""
-
 
 fun wellFormedValidPayload(dbName: String = "exampleDbName",
                            collectionName: String = "exampleCollectionName") = """{
@@ -68,3 +74,15 @@ fun uniqueEqualityTopicName() = "data.equality_${Instant.now().toEpochMilli()}"
 
 fun sampleQualifiedTableName(namespace: String, tableName: String) =
     "$namespace:$tableName".replace("-", "_").replace(".", "_")
+
+fun getS3Client(): AmazonS3 {
+    return AmazonS3ClientBuilder.standard()
+        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://aws-s3:4572", "eu-west-2"))
+        .withClientConfiguration(ClientConfiguration().withProtocol(Protocol.HTTP))
+        .withCredentials(
+            AWSStaticCredentialsProvider(BasicAWSCredentials("aws-access-key", "aws-secret-access-key"))
+        )
+        .withPathStyleAccessEnabled(true)
+        .disableChunkedEncoding()
+        .build()
+}
