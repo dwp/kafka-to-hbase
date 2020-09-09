@@ -68,17 +68,14 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val parser = MessageParser()
             val converter = Converter()
             val topic = uniqueEqualityTopicName()
-            val matcher1 = TextUtils().topicNameTableMatcher(topic)
-            matcher1 shouldNotBe null
+            val matcher1 = TextUtils().topicNameTableMatcher(topic)!!
             val key = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
             val body1 = wellFormedValidPayloadEquality()
-            if (matcher1 != null) {
-                val namespace = matcher1.groupValues[1]
-                val tableName = matcher1.groupValues[2]
-                val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
-                val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
-                hbase.putVersion(qualifiedTableName, key, body1, kafkaTimestamp1)
-            }
+            val namespace1 = matcher1.groupValues[1]
+            val tableName1 = matcher1.groupValues[2]
+            val qualifiedTableName1 = sampleQualifiedTableName(namespace1, tableName1)
+            val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
+            hbase.putVersion(qualifiedTableName1, key, body1, kafkaTimestamp1)
 
             Thread.sleep(1000)
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
@@ -91,23 +88,20 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
 
-            val matcher = TextUtils().topicNameTableMatcher(topic)
-            matcher shouldNotBe null
-            if (matcher != null) {
-                val namespace = matcher.groupValues[1]
-                val tableName = matcher.groupValues[2]
-                val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
-                val storedNewValue =
-                    waitFor { hbase.getCellAfterTimestamp(qualifiedTableName, key, referenceTimestamp) }
-                Gson().fromJson(
-                    String(storedNewValue!!),
-                    JsonObject::class.java
-                ) shouldBe Gson().fromJson(String(body2), JsonObject::class.java)
+            val matcher2 = TextUtils().topicNameTableMatcher(topic)!!
+            val namespace2 = matcher2.groupValues[1]
+            val tableName2 = matcher2.groupValues[2]
+            val qualifiedTableName = sampleQualifiedTableName(namespace2, tableName2)
+            val storedNewValue =
+                waitFor { hbase.getCellAfterTimestamp(qualifiedTableName, key, referenceTimestamp) }
+            Gson().fromJson(
+                String(storedNewValue!!),
+                JsonObject::class.java
+            ) shouldBe Gson().fromJson(String(body2), JsonObject::class.java)
 
-                val storedPreviousValue =
-                    waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, key, referenceTimestamp) }
-                String(storedPreviousValue!!) shouldBe String(body1)
-            }
+            val storedPreviousValue =
+                waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, key, referenceTimestamp) }
+            String(storedPreviousValue!!) shouldBe String(body1)
         }
 
         "Equality Malformed json messages are written to dlq topic" {

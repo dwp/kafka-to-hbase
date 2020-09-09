@@ -15,12 +15,11 @@ import org.apache.hadoop.hbase.client.Table
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.Logger
 import java.io.ByteArrayOutputStream
-import java.sql.Connection
-import java.sql.DriverManager
 import java.util.zip.GZIPInputStream
 import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
 import kotlin.time.seconds
+import lib.*
 
 @ExperimentalTime
 class Kafka2hbIntegrationLoadSpec : StringSpec() {
@@ -37,7 +36,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         "Many messages sent to many topics" {
             publishRecords()
             verifyHbase()
-            verifyMetadataStore()
+            verifyMetadataStore(TOPIC_COUNT * RECORDS_PER_TOPIC, DB_NAME)
             verifyS3()
         }
     }
@@ -45,7 +44,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
     private fun publishRecords() {
         val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
         val converter = Converter()
-        println("Setting off record producer")
+        println("Starting record producer...")
         repeat(TOPIC_COUNT) { collectionNumber ->
             val topic = topicName(collectionNumber)
             repeat(RECORDS_PER_TOPIC) { messageNumber ->
@@ -55,7 +54,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                 log.info("Sent record $messageNumber/$RECORDS_PER_TOPIC to kafka topic '$topic'.")
             }
         }
-        println("Set off record producer")
+        println("...Started record producer")
     }
 
     private suspend fun verifyHbase() =
@@ -74,16 +73,6 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                         }
                     }
                 }
-            }
-        }
-
-    private fun verifyMetadataStore() =
-        metadataStoreConnection().use { connection ->
-            connection.createStatement().use { statement ->
-                val results = statement.executeQuery("SELECT count(*) FROM ucfs WHERE topic_name like '%$DB_NAME%'")
-                results.next() shouldBe true
-                val count = results.getLong(1)
-                count shouldBe TOPIC_COUNT * RECORDS_PER_TOPIC
             }
         }
 
@@ -132,11 +121,6 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
         } while (objectListing != null && objectListing.isTruncated)
 
         return objectSummaries
-    }
-
-    private fun metadataStoreConnection(): Connection {
-        val (url, properties) = MetadataStoreClient.connectionProperties()
-        return DriverManager.getConnection(url, properties)
     }
 
     private fun recordCount(table: Table) = table.getScanner(Scan()).count()

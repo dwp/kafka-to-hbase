@@ -31,10 +31,12 @@ class Kafka2hbIntegrationSpec : StringSpec() {
                 val tableName = matcher.groupValues[2]
                 val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
                 hbase.ensureTable(qualifiedTableName)
+
                 val s3Client = getS3Client()
                 val summaries = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
                 summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
-                val body = wellFormedValidPayload()
+
+                val body = wellFormedValidPayload(namespace, tableName)
                 val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
                 val hbaseKey = parser.generateKey(converter.convertToJson(getId().toByteArray()))
                 log.info("Sending well-formed record to kafka topic '$topic'.")
@@ -59,7 +61,7 @@ class Kafka2hbIntegrationSpec : StringSpec() {
             val topic = "db.agent_core.agentToDoArchive"
             val qualifiedTableName = "agent_core:agentToDo"
             hbase.ensureTable(qualifiedTableName)
-            val body = wellFormedValidPayload()
+            val body = wellFormedValidPayload("agent_core", "agentToDoArchive")
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
             log.info("Sending well-formed record to kafka topic '$topic'.")
@@ -83,46 +85,42 @@ class Kafka2hbIntegrationSpec : StringSpec() {
             val parser = MessageParser()
             val converter = Converter()
             val topic = uniqueTopicName()
-            val matcher1 = TextUtils().topicNameTableMatcher(topic)
+            val matcher1 = TextUtils().topicNameTableMatcher(topic)!!
             matcher1 shouldNotBe null
             val key = parser.generateKey(converter.convertToJson(getId().toByteArray()))
-            val body1 = wellFormedValidPayload()
-            if (matcher1 != null) {
-                val namespace = matcher1.groupValues[1]
-                val tableName = matcher1.groupValues[2]
-                val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
-                val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
-                hbase.putVersion(qualifiedTableName, key, body1, kafkaTimestamp1)
-            }
+            val namespace1 = matcher1.groupValues[1]
+            val tableName1 = matcher1.groupValues[2]
+            val qualifiedTableName1 = sampleQualifiedTableName(namespace1, tableName1)
+            val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
+            val body1 = wellFormedValidPayload(namespace1, tableName1)
+            hbase.putVersion(qualifiedTableName1, key, body1, kafkaTimestamp1)
 
             Thread.sleep(1000)
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             Thread.sleep(1000)
 
-            val body2 = wellFormedValidPayload()
+            val body2 = wellFormedValidPayload(namespace1, tableName1)
+
             val kafkaTimestamp2 = converter.getTimestampAsLong(getISO8601Timestamp())
             producer.sendRecord(topic.toByteArray(), "key2".toByteArray(), body2, kafkaTimestamp2)
 
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
 
-            val matcher = TextUtils().topicNameTableMatcher(topic)
-            matcher shouldNotBe null
-            if (matcher != null) {
-                val namespace = matcher.groupValues[1]
-                val tableName = matcher.groupValues[2]
-                val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
-                val storedNewValue =
-                    waitFor { hbase.getCellAfterTimestamp(qualifiedTableName, key, referenceTimestamp) }
-                Gson().fromJson(
-                    String(storedNewValue!!),
-                    JsonObject::class.java
-                ) shouldBe Gson().fromJson(String(body2), JsonObject::class.java)
+            val matcher2 = TextUtils().topicNameTableMatcher(topic)!!
+            val namespace2 = matcher2.groupValues[1]
+            val tableName2 = matcher2.groupValues[2]
+            val qualifiedTableName2 = sampleQualifiedTableName(namespace2, tableName2)
+            val storedNewValue =
+                waitFor { hbase.getCellAfterTimestamp(qualifiedTableName2, key, referenceTimestamp) }
+            Gson().fromJson(
+                String(storedNewValue!!),
+                JsonObject::class.java
+            ) shouldBe Gson().fromJson(String(body2), JsonObject::class.java)
 
-                val storedPreviousValue =
-                    waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, key, referenceTimestamp) }
-                String(storedPreviousValue!!) shouldBe String(body1)
-            }
+            val storedPreviousValue =
+                waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName2, key, referenceTimestamp) }
+            String(storedPreviousValue!!) shouldBe String(body1)
         }
 
         "UCFS Malformed json messages are written to dlq topic" {
