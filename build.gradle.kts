@@ -99,6 +99,8 @@ tasks.register<Test>("integration-test-equality") {
     filter {
         includeTestsMatching("Kafka2hbEqualityIntegrationSpec*")
     }
+    //copy all env vars from unix/your integration container into the test
+    setEnvironment(System.getenv())
     environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")
@@ -125,6 +127,8 @@ tasks.register<Test>("integration-load-test") {
         includeTestsMatching("*IntegrationLoadSpec*")
     }
 
+    //copy all env vars from unix/your integration container into the test
+    setEnvironment(System.getenv())
     environment("K2HB_RETRY_INITIAL_BACKOFF", "1")
     environment("K2HB_RETRY_MAX_ATTEMPTS", "3")
     environment("K2HB_RETRY_BACKOFF_MULTIPLIER", "1")

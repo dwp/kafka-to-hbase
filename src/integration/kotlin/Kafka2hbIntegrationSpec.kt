@@ -173,6 +173,39 @@ class Kafka2hbIntegrationSpec : StringSpec() {
             val expected = Klaxon().toJsonString(malformedRecord)
             actual shouldBe expected
         }
+
+        "Messages with a dot in the collection.name are written to hbase but not to dlq" {
+            val hbase = HbaseClient.connect()
+            //TODO: For future implementations so that we can assert what is in the db
+            //TODO: val metadataStore = MetadataStoreClient.connect()
+            val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
+            val parser = MessageParser()
+            val converter = Converter()
+            val topic = uniqueTopicNameWithDot()
+            val matcher = TextUtils().topicNameTableMatcher(topic)
+            matcher shouldNotBe null
+            if (matcher != null) {
+                val namespace = matcher.groupValues[1]
+                val tableName = matcher.groupValues[2]
+                val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
+                hbase.ensureTable(qualifiedTableName)
+                val s3Client = getS3Client()
+                val summaries = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
+                summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
+                val body = wellFormedValidPayload(namespace, tableName)
+                val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
+                val hbaseKey = parser.generateKey(converter.convertToJson(getId().toByteArray()))
+                log.info("Sending well-formed record to kafka topic '$topic'.")
+                producer.sendRecord(topic.toByteArray(), "key1".toByteArray(), body, timestamp)
+                log.info("Sent well-formed record to kafka topic '$topic'.")
+                val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
+                val storedValue =
+                    waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
+                String(storedValue!!) shouldBe Gson().fromJson(String(body), JsonObject::class.java).toString()
+                val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
+                summaries1.size shouldBe 0
+            }
+        }
     }
 
     private fun getS3Client(): AmazonS3 {

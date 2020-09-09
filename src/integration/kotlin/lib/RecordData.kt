@@ -9,8 +9,8 @@ fun getId() = """{ "exampleId": "aaaa1111-abcd-4567-1234-1234567890ab"}"""
 fun getEqualityId() = """{ "messageId": "aaaa1111-abcd-4567-4321-1234567890ab"}"""
 
 
-fun wellFormedValidPayload(collectionName: String = "exampleCollectionName",
-                           dbName: String = "exampleDbName") = """{
+fun wellFormedValidPayload(dbName: String = "exampleDbName",
+                           collectionName: String = "exampleCollectionName") = """{
         "traceId": "00001111-abcd-4567-1234-1234567890ab",
         "unitOfWorkId": "00002222-abcd-4567-1234-1234567890ab",
         "@type": "V4",
@@ -61,6 +61,8 @@ fun getISO8601Timestamp(): String {
 }
 
 fun uniqueTopicName() = "db.database.collection_${Instant.now().toEpochMilli()}"
+
+fun uniqueTopicNameWithDot() = "db.database.collec.tion_${Instant.now().toEpochMilli()}"
 
 fun uniqueEqualityTopicName() = "data.equality_${Instant.now().toEpochMilli()}"
 
