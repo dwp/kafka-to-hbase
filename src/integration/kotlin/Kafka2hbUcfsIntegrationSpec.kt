@@ -3,14 +3,16 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
+import kotlinx.coroutines.delay
 import lib.*
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.Logger
 import java.io.BufferedReader
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
     private val log = Logger.getLogger(Kafka2hbUcfsIntegrationSpec::class.toString())
@@ -96,9 +98,9 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
             verifyMetadataStore(0, topic, true)
 
-            Thread.sleep(1000)
+            delay(1000)
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-            Thread.sleep(1000)
+            delay(1000)
 
             val body2 = wellFormedValidPayload(namespace, tableName)
 
@@ -136,7 +138,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
             verifyMetadataStore(0, topic, true)
 
-            Thread.sleep(10_000)
+            delay(10_000)
             val s3Object = s3Client.getObject(
                 "kafka2s3",
                 "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key3"
@@ -155,7 +157,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             producer.sendRecord(topic.toByteArray(), "key4".toByteArray(), body, timestamp)
-            Thread.sleep(10_000)
+            delay(10_000)
             val s3Object = s3Client.getObject(
                 "kafka2s3",
                 "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key4"
