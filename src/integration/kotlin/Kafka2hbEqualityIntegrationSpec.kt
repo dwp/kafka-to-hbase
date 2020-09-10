@@ -17,26 +17,6 @@ import kotlin.time.ExperimentalTime
 @ExperimentalTime
 class Kafka2hbEqualityIntegrationSpec : StringSpec() {
 
-//    override fun beforeTest(testCase: TestCase) {
-//        super.beforeTest(testCase)
-//        println("Before every spec/test case")
-//    }
-//
-//    override fun beforeSpec(spec: Spec) {
-//        super.beforeSpec(spec)
-//        println("Before every test suite")
-//    }
-//
-//    override fun afterTest(testCase: TestCase, result: TestResult) {
-//        super.afterTest(testCase, result)
-//        println("After every spec/test case")
-//    }
-//
-//    override fun afterSpec(spec: Spec) {
-//        super.afterSpec(spec)
-//        println("After every test suite")
-//    }
-
     init {
         "Equality Messages with new identifiers are written to hbase but not to dlq" {
             val hbase = HbaseClient.connect()
