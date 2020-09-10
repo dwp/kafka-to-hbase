@@ -123,7 +123,7 @@ object Config {
             put("use.aws.secrets", getEnv("K2HB_USE_AWS_SECRETS") ?: "true")
 
             if (isUsingAWS) {
-                put("ssl_ca_path", getEnv("K2HB_RDS_CA_CERT_PATH") ?: "/Users/markm/dev/dwp/kafka-to-hbase/AmazonRootCA1.pem")
+                put("ssl_ca_path", getEnv("K2HB_RDS_CA_CERT_PATH") ?: "/certs/AmazonRootCA1.pem")
                 put("ssl_ca", readFile(getProperty("ssl_ca_path")))
                 put("ssl_verify_cert", true)
             }
