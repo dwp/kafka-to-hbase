@@ -18,10 +18,10 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                 textUtils.qualifiedTableName(partition.topic())?.let { table ->
                     coroutineScope {
                         val s3OkDeferred = async { putInS3(s3Service, table, payloads) }
-                        val hbaseOk = withContext(Dispatchers.Default) { putInHbase(hbase, table, payloads) }
+                        val hbaseOk = putInHbase(hbase, table, payloads)
 
                         val commitOffset = if (hbaseOk) {
-                            withContext(Dispatchers.Default) { putInMetadataStore(metadataClient, payloads) }
+                            putInMetadataStore(metadataClient, payloads)
                         }
                         else false
 
