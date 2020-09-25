@@ -227,7 +227,7 @@ class RecordProcessorTest : StringSpec() {
             reset()
             val messageBody = "Hello everyone"
             val record: ConsumerRecord<ByteArray, ByteArray> = ConsumerRecord("db.database.collection", 1, 11, 1544799662000, TimestampType.CREATE_TIME, 1111, 1, 1, "key".toByteArray(), messageBody.toByteArray())
-            doReturn(testByteArray).`when`(mockMessageParser).generateKeyFromRecordBody(any())
+            doReturn(Pair(testId, testByteArray).`when`(mockMessageParser).generateKeyFromRecordBody(any())
             doThrow(IllegalArgumentException()).`when`(mockConverter).convertToJson(record.value())
 
             processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)

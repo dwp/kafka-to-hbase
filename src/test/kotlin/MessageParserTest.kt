@@ -202,8 +202,8 @@ class MessageParserTest : StringSpec({
         keyOne shouldNotBe ByteArray(0)
         keyOne shouldBe keyTwo
 
-        unformattedIdOne shouldBe "{\"test_key_a\":\"test_value_a\",\"test_key_b\"    :\"test_value_b\"}"
-        unformattedIdTwo shouldBe "{\"test_key_b\":     \"test_value_b\",\"test_key_a\":\"test_value_a\"}"
+        unformattedIdOne shouldBe "{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"}"
+        unformattedIdTwo shouldBe "{\"test_key_a\":\"test_value_a\",\"test_key_b\":\"test_value_b\"}"
     }
 
     "empty is returned from record body key generation where message does not exist" {
