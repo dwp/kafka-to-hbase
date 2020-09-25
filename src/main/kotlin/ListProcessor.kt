@@ -31,6 +31,9 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                                 "partition","${partition.partition()}", "offset", "$lastPosition")
                             consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
                             logSuccessfulPuts(table, payloads)
+                            if (Config.ManifestS3.writeManifests) {
+                                putManifest(table, payloads)
+                            }
                         } else {
                             lastCommittedOffset(consumer, partition)?.let { consumer.seek(partition, it) }
                             logger.error("Batch failed, not committing offset, resetting position to last commit",
@@ -88,6 +91,18 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                 "Failed to put record", "table", table,
                 "key", textUtils.printableKey(it.key), "version", "${it.version}"
             )
+        }
+
+    private fun putManifest(manifestService: ManifestAwsS3Service, table: String, payloads: List<HbasePayload>) =
+        withContext(Dispatchers.IO) {
+            try {
+                manifestService.putManifestFile(table, payloads)
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                logger.error("Failed to put manifest file in to s3", e, "error", e.message ?: "")
+                false
+            }
         }
 
 

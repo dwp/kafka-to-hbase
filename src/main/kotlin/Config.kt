@@ -188,6 +188,6 @@ object Config {
     object ManifestS3 {
         val manifestBucket = getEnv("K2HB_AWS_S3_MANIFEST_BUCKET") ?: "manifests"
         val manifestDirectory = getEnv("K2HB_AWS_S3_MANIFEST_DIRECTORY") ?: "streamed"
-        val batchManifests = (getEnv("K2HB_AWS_S3_BATCH_MANIFESTS") ?: "true").toBoolean()
+        val writeManifests = (getEnv("K2HB_AWS_S3_WRITE_MANIFESTS") ?: "true").toBoolean()
     }
 }
