@@ -10,6 +10,7 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 import java.util.regex.Pattern
+import com.amazonaws.services.s3.AmazonS3
 
 fun getEnv(envVar: String): String? {
     val value = System.getenv(envVar)
@@ -137,7 +138,7 @@ object Config {
     }
 
     object AwsS3 {
-        val maxConnections: Int = (getEnv("K2HB_AWS_S3_MAX_CONNECTIONS") ?: "2000").toInt()
+        val maxS3Connections: Int = (getEnv("K2HB_AWS_S3_MAX_CONNECTIONS") ?: "2000").toInt()
         val useLocalStack = (getEnv("K2HB_AWS_S3_USE_LOCALSTACK") ?: "false").toBoolean()
         val region = getEnv("K2HB_AWS_S3_REGION") ?: dataworksRegion
 
@@ -146,12 +147,12 @@ object Config {
         const val localstackSecretKey = "AWS_SECRET_ACCESS_KEY"
 
         val s3: AmazonS3 by lazy {
-            if (Config.AwsS3.useLocalStack) {
+            if (useLocalStack) {
                 AmazonS3ClientBuilder.standard()
                     .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, dataworksRegion))
                     .withClientConfiguration(ClientConfiguration().apply {
                         withProtocol(Protocol.HTTP)
-                        maxConnections = Config.AwsS3.maxConnections
+                        maxConnections = maxS3Connections
                     })
                     .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
                     .withPathStyleAccessEnabled(true)
@@ -161,9 +162,9 @@ object Config {
             else {
                 AmazonS3ClientBuilder.standard()
                     .withCredentials(DefaultAWSCredentialsProviderChain())
-                    .withRegion(Config.AwsS3.region)
+                    .withRegion(region)
                     .withClientConfiguration(ClientConfiguration().apply {
-                        maxConnections = Config.AwsS3.maxConnections
+                        maxConnections = maxS3Connections
                     })
                     .build()
             }
