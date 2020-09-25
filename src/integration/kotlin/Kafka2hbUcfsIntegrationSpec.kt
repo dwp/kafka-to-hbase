@@ -37,8 +37,8 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             val s3Client = getS3Client()
             val summaries = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries.forEach { s3Client.deleteObject("kafka2s3", it.key) }
-            val summariesManifests = s3Client.listObjectsV2("manifests_bucket", "manifest_prefix").objectSummaries
-            summariesManifests.forEach { s3Client.deleteObject("manifests_bucket", it.key) }
+            val summariesManifests = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
+            summariesManifests.forEach { s3Client.deleteObject("manifests", it.key) }
 
             verifyMetadataStore(0, topic, true)
 
@@ -55,7 +55,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
-            val summariesManifests1 = s3Client.listObjectsV2("manifests_bucket", "manifest_prefix").objectSummaries
+            val summariesManifests1 = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
             summariesManifests1.size shouldBe 1
 
             verifyMetadataStore(1, topic, true)
