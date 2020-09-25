@@ -9,6 +9,7 @@ val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger("ShovelKt")
 fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>,
                 metadataClient: MetadataStoreClient,
                 archiveAwsS3Service: ArchiveAwsS3Service,
+                manifestAwsS3Service: ManifestAwsS3Service,
                 pollTimeout: Duration) =
     GlobalScope.async {
         val parser = MessageParser()
@@ -24,7 +25,7 @@ fun shovelAsync(consumer: KafkaConsumer<ByteArray, ByteArray>,
                 if (records.count() > 0) {
                     HbaseClient.connect().use { hbase ->
                         val timeTaken = measureTimeMillis {
-                            listProcessor.processRecords(hbase, consumer, metadataClient, archiveAwsS3Service, parser, records)
+                            listProcessor.processRecords(hbase, consumer, metadataClient, archiveAwsS3Service, manifestAwsS3Service, parser, records)
                         }
                         logger.info("Processed batch", "time_taken", "$timeTaken", "size", "${records.count()}")
                     }

@@ -19,7 +19,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
             val amazonS3 = mock<AmazonS3>()
             val manifestAwsS3Service = ManifestAwsS3Service(amazonS3)
             val payloads = hbasePayloads()
-            manifestAwsS3Service.putManifestFile("database_one:collection", payloads)
+            manifestAwsS3Service.putManifestFile("database_one:collection_one", payloads)
             val requestCaptor = argumentCaptor<PutObjectRequest>()
             verify(amazonS3, times(1)).putObject(requestCaptor.capture())
             verifyNoMoreInteractions(amazonS3)

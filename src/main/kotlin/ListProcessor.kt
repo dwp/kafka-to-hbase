@@ -10,7 +10,7 @@ import org.apache.kafka.common.TopicPartition
 class ListProcessor(validator: Validator, private val converter: Converter) : BaseProcessor(validator, converter) {
 
     fun processRecords(hbase: HbaseClient, consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: MetadataStoreClient,
-        s3Service: ArchiveAwsS3Service, parser: MessageParser, records: ConsumerRecords<ByteArray, ByteArray>) {
+        s3Service: ArchiveAwsS3Service, manifestService: ManifestAwsS3Service, parser: MessageParser, records: ConsumerRecords<ByteArray, ByteArray>) {
         runBlocking {
             records.partitions().forEach { partition ->
                 val partitionRecords = records.records(partition)
