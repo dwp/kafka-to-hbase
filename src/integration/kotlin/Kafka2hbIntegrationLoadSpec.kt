@@ -121,14 +121,14 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             manifestLines.forEach {
                 val fields = it.split("|")
                 fields.size shouldBe 8
-                list.get(0) shouldNotBe ""
-                list.get(1) shouldNotBe ""
-                list.get(2) shouldNotBe ""
-                list.get(3) shouldNotBe ""
-                list.get(4) shouldBe "STREAMED"
-                list.get(5) shouldBe "K2HB"
-                list.get(6) shouldNotBe ""
-                list.get(7) shouldBe "KAFKA_RECORD"
+                fields.get(0) shouldNotBe ""
+                fields.get(1) shouldNotBe ""
+                fields.get(2) shouldNotBe ""
+                fields.get(3) shouldNotBe ""
+                fields.get(4) shouldBe "STREAMED"
+                fields.get(5) shouldBe "K2HB"
+                fields.get(6) shouldNotBe ""
+                fields.get(7) shouldBe "KAFKA_RECORD"
             }
         }
     }
@@ -156,9 +156,10 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                 .map(::String)
 
     private fun manifestObjectContents(key: String) =
-            return ManifestAwsS3Service.s3.getObject(GetObjectRequest(Config.ManifestS3.manifestBucket, key))
-                .objectContent
-                .toByteArray()
+            ManifestAwsS3Service.s3.getObject(GetObjectRequest(Config.ManifestS3.manifestBucket, key))
+                .objectContent.use {
+                    ByteArrayOutputStream().also { output -> it.copyTo(output) }
+                }.toByteArray()
 
     private fun objectSummaries(s3BucketName: String, s3Prefix: String, s3Connection: AmazonS3): MutableList<S3ObjectSummary> {
         val objectSummaries = mutableListOf<S3ObjectSummary>()
@@ -167,7 +168,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             prefix = s3Prefix
         }
 
-        var objectListing: s3ConnectionListObjectsV2Result?
+        var objectListing: ListObjectsV2Result?
 
         do {
             objectListing = s3Connection.listObjectsV2(request)
