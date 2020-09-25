@@ -26,7 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.GZIPOutputStream
 import kotlin.system.measureTimeMillis
-import org.apache.commons.text.StringEscapeUtils]
+import org.apache.commons.text.StringEscapeUtils
 import com.beust.klaxon.JsonObject
 
 open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {

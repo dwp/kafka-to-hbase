@@ -110,7 +110,8 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         records.mapNotNull { record ->
             recordAsJson(record)?.let { json ->
                 val (unformattedId, formattedKey) = parser.generateKeyFromRecordBody(json)
-                if (formattedKey.isNotEmpty()) hbasePayload(json, unformattedId, formattedKey, record) else null
+                val qualifiedId = if (unformattedId == null) "" else unformattedId
+                if (formattedKey.isNotEmpty()) hbasePayload(json, qualifiedId, formattedKey, record) else null
             }
         }
 

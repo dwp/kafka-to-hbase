@@ -65,7 +65,7 @@ class ArchiveAwsS3ServiceTest : StringSpec() {
                     on { offset() } doReturn index.toLong()
                     on { partition() } doReturn 10
                 }
-                HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), payloadTime(index), consumerRecord)
+                HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "testId1", payloadTime(index), consumerRecord)
             }
 
     private fun messageBody(index: Int) =

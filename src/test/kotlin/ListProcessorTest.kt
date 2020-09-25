@@ -143,8 +143,8 @@ class ListProcessorTest : StringSpec() {
 
     private fun messageParser() =
             mock<MessageParser> {
-                val hbaseKeys = (0..1000000).map { Bytes.toBytes("$it") }
-                on { generateKeyFromRecordBody(any()) } doReturnConsecutively ("id", hbaseKeys)
+                val hbaseKeys = (0..1000000).map { Pair("id", Bytes.toBytes("$it")) }
+                on { generateKeyFromRecordBody(any()) } doReturnConsecutively hbaseKeys
             }
 
     private fun kafkaConsumer() =
