@@ -31,10 +31,12 @@ import com.beust.klaxon.JsonObject
 
 open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
 
-    open suspend fun putManifestForBatch(hbaseTable: String, payloads: List<HbasePayload>) {
+    open suspend fun putManifestFile(hbaseTable: String, payloads: List<HbasePayload>) {
         if (payloads.isNotEmpty()) {
             val (database, collection) = hbaseTable.split(Regex(":"))
-            val key = dateStampedKey(database, collection, "TEMPORARY_UNIQUE_ID")
+            val prefix = dateStampedPrefix(database, collection)
+            val fileName = manifestFileName(payloads)
+            val key = "${prefix}/${fileName}"
             logger.info("Putting manifest into s3", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
             val timeTaken = measureTimeMillis { putManifest(database, collection, key, manifestBody(database, collection, payloads)) }
             logger.info("Put manifest into s3", "time_taken", "$timeTaken", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
@@ -61,9 +63,19 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
                 MANIFEST_RECORD_SOURCE, MANIFEST_RECORD_COMPONENT, MANIFEST_RECORD_TYPE, payload.id)
 
     // K2HB_MANIFEST_FILE_PATH: s3://manifest/streamed/<yyyy>/<mm>/<dd>/<db>_<collection>_<uniqueid>.json
-    private fun dateStampedKey(database: String, collection: String, uniqueId: String)
-            = "${Config.ManifestS3.manifestDirectory}/${dateNowPath()}/${database}_${collection}_${uniqueId}.json"
+    private fun dateStampedPrefix(database: String, collection: String)
+            = "${Config.ManifestS3.manifestDirectory}/${dateNowPath()}"
 
+    private fun manifestFileName(payloads: List<HbasePayload>): String {
+        val firstRecord = payloads.first().record
+        val last = payloads.last().record
+        val partition = firstRecord.partition()
+        val firstOffset = firstRecord.offset()
+        val lastOffset =  last.offset()
+        val topic = firstRecord.topic()
+        return "${topic}_${partition}_$firstOffset-$lastOffset.csv"
+    }
+    
     private fun dateNowPath() = simpleDateFormatter().format(Calendar.getInstance().getTime())
 
     private fun objectMetadata(body: ByteArray, database: String, collection: String)
@@ -76,11 +88,11 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
             }.format(Date()))
 
             addUserMetadata("database", database.replace('_', '-'))
-            addUserMetadata("collection", collection.replace('_', '-'))
+            addUserMetadata("collection", collection)
         }
 
     private fun csv(manifestRecord: ManifestRecord) =
-            "${escape(manifestRecord.id)}|${escape(manifestRecord.timestamp.toString())}|${escape(manifestRecord.db)}|${escape(manifestRecord.collection)}|${escape(manifestRecord.source)}|${escape(manifestRecord.externalOuterSource)}|${escape(manifestRecord.originalId)}|${escape(manifestRecord.externalInnerSource)}\n"
+            "${escape(manifestRecord.id)}|${escape(manifestRecord.timestamp.toString())}|${escape(manifestRecord.db.replace('_', '-'))}|${escape(manifestRecord.collection)}|${escape(manifestRecord.source)}|${escape(manifestRecord.externalOuterSource)}|${escape(manifestRecord.originalId)}|${escape(manifestRecord.externalInnerSource)}\n"
 
     private fun escape(value: String) = StringEscapeUtils.escapeCsv(value)
 
