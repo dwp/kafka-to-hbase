@@ -32,7 +32,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                             consumer.commitSync(mapOf(partition to OffsetAndMetadata(lastPosition + 1)))
                             logSuccessfulPuts(table, payloads)
                             if (Config.ManifestS3.writeManifests) {
-                                putManifest(table, payloads)
+                                putManifest(manifestService, table, payloads)
                             }
                         } else {
                             lastCommittedOffset(consumer, partition)?.let { consumer.seek(partition, it) }
@@ -93,7 +93,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
             )
         }
 
-    private fun putManifest(manifestService: ManifestAwsS3Service, table: String, payloads: List<HbasePayload>) =
+    private suspend fun putManifest(manifestService: ManifestAwsS3Service, table: String, payloads: List<HbasePayload>) =
         withContext(Dispatchers.IO) {
             try {
                 manifestService.putManifestFile(table, payloads)
