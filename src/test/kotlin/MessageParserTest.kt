@@ -7,15 +7,22 @@ class MessageParserTest : StringSpec({
 
     val convertor = Converter()
 
-    "generated keys are consistent for identical inputs" {
+    fun validateKeys(jsonOne: JsonObject, jsonTwo: JsonObject, contentShouldBeEqual: Boolean) {
         val parser = MessageParser()
         val json: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(json)
-        val (idTwo, keyTwo) = parser.generateKey(json)
+        val (idOne, keyOne) = parser.generateKey(jsonOne)
+        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
 
-        keyOne.contentEquals(keyTwo) shouldBe true
-        idOne.contentEquals(idTwo) shouldBe true
+        keyOne.contentEquals(keyTwo) shouldBe contentShouldBeEqual
+        idOne.contentEquals(idTwo) shouldBe contentShouldBeEqual
+    }
+
+    "generated keys are consistent for identical inputs" {
+        val parser = MessageParser()
+        val json: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
+        
+        validateKeys(json, json, true)
     }
 
     "generated keys are different for different inputs" {
@@ -23,11 +30,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":3}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe false
-        idOne.contentEquals(idTwo) shouldBe false
+        validateKeys(jsonOne, jsonTwo, false)
     }
 
     "generated keys are consistent for identical inputs regardless of order" {
@@ -35,11 +38,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testTwo\":2, \"testOne\":\"test1\"}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe true
-        idOne.contentEquals(idTwo) shouldBe true
+        validateKeys(jsonOne, jsonTwo, true)
     }
 
     "generated keys are consistent for identical inputs regardless of whitespace" {
@@ -47,11 +46,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{    \"testOne\":              \"test1\",            \"testTwo\":  2}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe true
-        idOne.contentEquals(idTwo) shouldBe true
+        validateKeys(jsonOne, jsonTwo, true)
     }
 
     "generated keys are consistent for identical inputs regardless of order and whitespace" {
@@ -59,11 +54,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{    \"testTwo\":              2,            \"testOne\":  \"test1\"}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe true
-        idOne.contentEquals(idTwo) shouldBe true
+        validateKeys(jsonOne, jsonTwo, true)
     }
 
     "generated keys will vary given values with different whitespace" {
@@ -71,11 +62,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test 1\", \"testTwo\":2}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe false
-        idOne.contentEquals(idTwo) shouldBe false
+        validateKeys(jsonOne, jsonTwo, false)
     }
 
     "generated keys will vary given values that are string and int in each input" {
@@ -83,11 +70,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2\"}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe false
-        idOne.contentEquals(idTwo) shouldBe false
+        validateKeys(jsonOne, jsonTwo, false)
     }
 
     "generated keys will vary given values that are string and float in each input" {
@@ -95,11 +78,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2.0}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2.0\"}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe false
-        idOne.contentEquals(idTwo) shouldBe false
+        validateKeys(jsonOne, jsonTwo, false)
     }
 
     "generated keys will vary given values that are string and boolean in each input" {
@@ -107,11 +86,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":false}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"false\"}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe false
-        idOne.contentEquals(idTwo) shouldBe false
+        validateKeys(jsonOne, jsonTwo, false)
     }
 
     "generated keys will vary given values that are string and null in each input" {
@@ -119,11 +94,7 @@ class MessageParserTest : StringSpec({
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":null}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"null\"}".toByteArray())
 
-        val (idOne, keyOne) = parser.generateKey(jsonOne)
-        val (idTwo, keyTwo) = parser.generateKey(jsonTwo)
-
-        keyOne.contentEquals(keyTwo) shouldBe false
-        idOne.contentEquals(idTwo) shouldBe false
+        validateKeys(jsonOne, jsonTwo, false)
     }
 
     "id is returned from valid json" {

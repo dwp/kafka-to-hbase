@@ -10,7 +10,14 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 import java.util.regex.Pattern
+import com.amazonaws.ClientConfiguration
+import com.amazonaws.Protocol
+import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 
 fun getEnv(envVar: String): String? {
     val value = System.getenv(envVar)
