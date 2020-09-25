@@ -1,10 +1,9 @@
 
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.amazonaws.services.s3.model.ListObjectsV2Request
 import com.amazonaws.services.s3.model.ListObjectsV2Result
 import com.amazonaws.services.s3.model.S3ObjectSummary
-import com.amazonaws.services.s3.AmazonS3
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.kotest.core.spec.style.StringSpec
@@ -115,10 +114,9 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
 
     private fun verifyManifests() {
         val contentsList = allManifestObjectContentsAsString()
-        contentsList.size shouldBe TOPIC_COUNT * BATCHES_PER_TOPIC
         contentsList.forEach {
             val manifestLines = it.split("\n")
-            manifestLines.forEach {
+            manifestLines.filter(String::isNotBlank).forEach {
                 val fields = it.split("|")
                 fields.size shouldBe 8
                 fields.get(0) shouldNotBe ""
@@ -150,7 +148,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
 
     private fun allManifestObjectContentsAsString(): List<String> =
             objectSummaries(Config.ManifestS3.manifestBucket, Config.ManifestS3.manifestDirectory, ManifestAwsS3Service.s3)
-                .filter { it.key.endsWith("csv") && it.key.contains("load_test") }
+                .filter { it.key.endsWith("csv") && it.key.contains("load-test") }
                 .map(S3ObjectSummary::getKey)
                 .map(this@Kafka2hbIntegrationLoadSpec::manifestObjectContents)
                 .map(::String)
