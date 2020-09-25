@@ -10,7 +10,7 @@ import org.apache.kafka.common.TopicPartition
 class ListProcessor(validator: Validator, private val converter: Converter) : BaseProcessor(validator, converter) {
 
     fun processRecords(hbase: HbaseClient, consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: MetadataStoreClient,
-        s3Service: AwsS3Service, parser: MessageParser, records: ConsumerRecords<ByteArray, ByteArray>) {
+        s3Service: ArchiveAwsS3Service, parser: MessageParser, records: ConsumerRecords<ByteArray, ByteArray>) {
         runBlocking {
             records.partitions().forEach { partition ->
                 val partitionRecords = records.records(partition)
@@ -54,10 +54,10 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
             }
         }
 
-    private suspend fun putInS3(s3Service: AwsS3Service, table: String, payloads: List<HbasePayload>) =
+    private suspend fun putInS3(s3Service: ArchiveAwsS3Service, table: String, payloads: List<HbasePayload>) =
         withContext(Dispatchers.IO) {
             try {
-                if (Config.AwsS3.batchPuts) {
+                if (Config.ArchiveS3.batchPuts) {
                     s3Service.putObjectsAsBatch(table, payloads)
                 } else {
                     s3Service.putObjects(table, payloads)
@@ -109,13 +109,14 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
     ): List<HbasePayload> =
         records.mapNotNull { record ->
             recordAsJson(record)?.let { json ->
-                val formattedKey = parser.generateKeyFromRecordBody(json)
-                if (formattedKey.isNotEmpty()) hbasePayload(json, formattedKey, record) else null
+                val (unformattedId, formattedKey) = parser.generateKeyFromRecordBody(json)
+                if (formattedKey.isNotEmpty()) hbasePayload(json, unformattedId, formattedKey, record) else null
             }
         }
 
     private fun hbasePayload(
         json: JsonObject,
+        unformattedId: String,
         formattedKey: ByteArray,
         record: ConsumerRecord<ByteArray, ByteArray>
     ): HbasePayload {
@@ -123,7 +124,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         val message = json["message"] as JsonObject
         message["timestamp_created_from"] = source
         val version = converter.getTimestampAsLong(timestamp)
-        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), version, record)
+        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, record)
     }
 
     companion object {

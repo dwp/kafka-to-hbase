@@ -38,7 +38,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
 
             val body = wellFormedValidPayloadEquality()
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
-            val hbaseKey = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
+            val (recordId, hbaseKey) = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
             println("Sending well-formed record to kafka topic '$topic'.")
             producer.sendRecord(topic.toByteArray(), "key1".toByteArray(), body, timestamp)
             println("Sent well-formed record to kafka topic '$topic'.")
@@ -67,7 +67,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val tableName = matcher.groupValues[2]
             val qualifiedTableName = sampleQualifiedTableName(namespace, tableName)
             val kafkaTimestamp1 = converter.getTimestampAsLong(getISO8601Timestamp())
-            val key = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
+            val (id, key) = parser.generateKey(converter.convertToJson(getEqualityId().toByteArray()))
             val body1 = wellFormedValidPayloadEquality()
             hbase.putVersion(qualifiedTableName, key, body1, kafkaTimestamp1)
 

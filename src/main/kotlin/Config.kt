@@ -137,16 +137,25 @@ object Config {
     }
 
     object AwsS3 {
-        val maxConnections: Int = (getEnv("K2HB_AWS_S3_MAX_CONNECTIONS") ?: "1000").toInt()
+        val maxConnections: Int = (getEnv("K2HB_AWS_S3_MAX_CONNECTIONS") ?: "2000").toInt()
         val useLocalStack = (getEnv("K2HB_AWS_S3_USE_LOCALSTACK") ?: "false").toBoolean()
         val region = getEnv("K2HB_AWS_S3_REGION") ?: dataworksRegion
-        val archiveBucket = getEnv("K2HB_AWS_S3_ARCHIVE_BUCKET") ?: "ucarchive"
-        val archiveDirectory = getEnv("K2HB_AWS_S3_ARCHIVE_DIRECTORY") ?: "ucdata_main"
-        val parallelPuts = (getEnv("K2HB_AWS_S3_PARALLEL_PUTS") ?: "false").toBoolean()
-        val batchPuts = (getEnv("K2HB_AWS_S3_BATCH_PUTS") ?: "false").toBoolean()
 
         const val localstackServiceEndPoint = "http://aws-s3:4566/"
         const val localstackAccessKey = "AWS_ACCESS_KEY_ID"
         const val localstackSecretKey = "AWS_SECRET_ACCESS_KEY"
+    }
+
+    object ArchiveS3 {
+        val archiveBucket = getEnv("K2HB_AWS_S3_ARCHIVE_BUCKET") ?: "ucarchive"
+        val archiveDirectory = getEnv("K2HB_AWS_S3_ARCHIVE_DIRECTORY") ?: "ucdata_main"
+        val parallelPuts = (getEnv("K2HB_AWS_S3_PARALLEL_PUTS") ?: "false").toBoolean()
+        val batchPuts = (getEnv("K2HB_AWS_S3_BATCH_PUTS") ?: "false").toBoolean()
+    }
+
+    object ManifestS3 {
+        val manifestBucket = getEnv("K2HB_AWS_S3_MANIFEST_BUCKET") ?: "manifests"
+        val manifestDirectory = getEnv("K2HB_AWS_S3_MANIFEST_DIRECTORY") ?: "streamed"
+        val batchManifests = (getEnv("K2HB_AWS_S3_BATCH_MANIFESTS") ?: "true").toBoolean()
     }
 }

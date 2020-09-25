@@ -120,21 +120,21 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
                 .map { Gson().fromJson(it, JsonObject::class.java) }
 
     private fun objectContents(key: String) =
-            GZIPInputStream(AwsS3Service.s3.getObject(GetObjectRequest(Config.AwsS3.archiveBucket, key)).objectContent).use {
+            GZIPInputStream(ArchiveAwsS3Service.s3.getObject(GetObjectRequest(Config.ArchiveS3.archiveBucket, key)).objectContent).use {
                 ByteArrayOutputStream().also { output -> it.copyTo(output) }
             }.toByteArray()
 
     private fun objectSummaries(): MutableList<S3ObjectSummary> {
         val objectSummaries = mutableListOf<S3ObjectSummary>()
         val request = ListObjectsV2Request().apply {
-            bucketName = Config.AwsS3.archiveBucket
-            prefix = Config.AwsS3.archiveDirectory
+            bucketName = Config.ArchiveS3.archiveBucket
+            prefix = Config.ArchiveS3.archiveDirectory
         }
 
         var objectListing: ListObjectsV2Result?
 
         do {
-            objectListing = AwsS3Service.s3.listObjectsV2(request)
+            objectListing = ArchiveAwsS3Service.s3.listObjectsV2(request)
             objectSummaries.addAll(objectListing.objectSummaries)
             request.continuationToken = objectListing.nextContinuationToken
         } while (objectListing != null && objectListing.isTruncated)
