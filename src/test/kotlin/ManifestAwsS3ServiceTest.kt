@@ -25,7 +25,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
             verifyNoMoreInteractions(amazonS3)
             val request = requestCaptor.firstValue
             request.bucketName shouldBe "manifests"
-            request.key shouldBe "streamed/${today()}/database_one/collection_one/db.database-one.collection_one-10_1-100.csv"
+            request.key shouldBe "streamed/${today()}/db.database-one.collection_one-10_1-100.csv"
             val lineReader = LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream)))
 
             lineReader.forEachLine {
@@ -37,7 +37,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
             val amazonS3 = mock<AmazonS3>()
             val manifestAwsS3Service = ManifestAwsS3Service(amazonS3)
             val payloads = hbasePayloads()
-            manifestAwsS3Service.putManifestFile("database_one:collection", payloads)
+            manifestAwsS3Service.putManifestFile("database_one:collection_one", payloads)
             val requestCaptor = argumentCaptor<PutObjectRequest>()
             verify(amazonS3, times(1)).putObject(requestCaptor.capture())
             verifyNoMoreInteractions(amazonS3)

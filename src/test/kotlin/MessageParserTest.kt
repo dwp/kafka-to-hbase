@@ -19,14 +19,12 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys are consistent for identical inputs" {
-        val parser = MessageParser()
         val json: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         
         validateKeys(json, json, true)
     }
 
     "generated keys are different for different inputs" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":3}".toByteArray())
 
@@ -34,7 +32,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys are consistent for identical inputs regardless of order" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testTwo\":2, \"testOne\":\"test1\"}".toByteArray())
 
@@ -42,7 +39,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys are consistent for identical inputs regardless of whitespace" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{    \"testOne\":              \"test1\",            \"testTwo\":  2}".toByteArray())
 
@@ -50,7 +46,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys are consistent for identical inputs regardless of order and whitespace" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{    \"testTwo\":              2,            \"testOne\":  \"test1\"}".toByteArray())
 
@@ -58,7 +53,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys will vary given values with different whitespace" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test 1\", \"testTwo\":2}".toByteArray())
 
@@ -66,7 +60,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys will vary given values that are string and int in each input" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2\"}".toByteArray())
 
@@ -74,7 +67,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys will vary given values that are string and float in each input" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":2.0}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"2.0\"}".toByteArray())
 
@@ -82,7 +74,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys will vary given values that are string and boolean in each input" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":false}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"false\"}".toByteArray())
 
@@ -90,7 +81,6 @@ class MessageParserTest : StringSpec({
     }
 
     "generated keys will vary given values that are string and null in each input" {
-        val parser = MessageParser()
         val jsonOne: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":null}".toByteArray())
         val jsonTwo: JsonObject = convertor.convertToJson("{\"testOne\":\"test1\", \"testTwo\":\"null\"}".toByteArray())
 
