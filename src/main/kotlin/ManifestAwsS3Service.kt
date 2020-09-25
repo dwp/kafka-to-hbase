@@ -34,7 +34,7 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
     open suspend fun putManifestFile(hbaseTable: String, payloads: List<HbasePayload>) {
         if (payloads.isNotEmpty()) {
             val (database, collection) = hbaseTable.split(Regex(":"))
-            val prefix = dateStampedPrefix(database, collection)
+            val prefix = dateStampedPrefix()
             val fileName = manifestFileName(payloads)
             val key = "${prefix}/${fileName}"
             logger.info("Putting manifest into s3", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
@@ -63,7 +63,7 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
                 MANIFEST_RECORD_SOURCE, MANIFEST_RECORD_COMPONENT, MANIFEST_RECORD_TYPE, payload.id)
 
     // K2HB_MANIFEST_FILE_PATH: s3://manifest/streamed/<yyyy>/<mm>/<dd>/<db>_<collection>_<uniqueid>.json
-    private fun dateStampedPrefix(database: String, collection: String)
+    private fun dateStampedPrefix()
             = "${Config.ManifestS3.manifestDirectory}/${dateNowPath()}"
 
     private fun manifestFileName(payloads: List<HbasePayload>): String {
