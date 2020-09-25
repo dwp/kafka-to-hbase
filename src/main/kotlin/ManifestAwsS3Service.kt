@@ -55,7 +55,7 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
             = ManifestRecord(payload.id, payload.version, database, collection, 
                 MANIFEST_RECORD_SOURCE, MANIFEST_RECORD_COMPONENT, MANIFEST_RECORD_TYPE, payload.id)
 
-    // K2HB_MANIFEST_FILE_PATH: s3://manifest/streamed/<yyyy>/<mm>/<dd>/<db>_<collection>_<uniqueid>.json
+    // K2HB_MANIFEST_FILE_PATH: s3://manifest/streaming/<yyyy>/<mm>/<dd>/<db>_<collection>_<uniqueid>.json
     private fun dateStampedPrefix()
             = "${Config.ManifestS3.manifestDirectory}/${dateNowPath()}"
 
