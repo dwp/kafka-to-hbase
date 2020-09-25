@@ -17,7 +17,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
     init {
         "Put manifest file set request parameters correctly" {
             val amazonS3 = mock<AmazonS3>()
-            val manifestAwsS3Service = manifestAwsS3Service(amazonS3)
+            val manifestAwsS3Service = ManifestAwsS3Service(amazonS3)
             val payloads = hbasePayloads()
             manifestAwsS3Service.putManifestFile("database_one:collection", payloads)
             val requestCaptor = argumentCaptor<PutObjectRequest>()
