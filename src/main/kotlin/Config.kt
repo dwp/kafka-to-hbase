@@ -144,6 +144,30 @@ object Config {
         const val localstackServiceEndPoint = "http://aws-s3:4566/"
         const val localstackAccessKey = "AWS_ACCESS_KEY_ID"
         const val localstackSecretKey = "AWS_SECRET_ACCESS_KEY"
+
+        val s3: AmazonS3 by lazy {
+            if (Config.AwsS3.useLocalStack) {
+                AmazonS3ClientBuilder.standard()
+                    .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, dataworksRegion))
+                    .withClientConfiguration(ClientConfiguration().apply {
+                        withProtocol(Protocol.HTTP)
+                        maxConnections = Config.AwsS3.maxConnections
+                    })
+                    .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
+                    .withPathStyleAccessEnabled(true)
+                    .disableChunkedEncoding()
+                    .build()
+            }
+            else {
+                AmazonS3ClientBuilder.standard()
+                    .withCredentials(DefaultAWSCredentialsProviderChain())
+                    .withRegion(Config.AwsS3.region)
+                    .withClientConfiguration(ClientConfiguration().apply {
+                        maxConnections = Config.AwsS3.maxConnections
+                    })
+                    .build()
+            }
+        }
     }
 
     object ArchiveS3 {

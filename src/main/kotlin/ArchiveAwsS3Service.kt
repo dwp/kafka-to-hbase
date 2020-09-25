@@ -134,28 +134,6 @@ open class ArchiveAwsS3Service(private val amazonS3: AmazonS3) {
         fun connect() = ArchiveAwsS3Service(s3)
         val textUtils = TextUtils()
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(ArchiveAwsS3Service::class.toString())
-        val s3: AmazonS3 by lazy {
-            if (Config.AwsS3.useLocalStack) {
-                AmazonS3ClientBuilder.standard()
-                    .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, dataworksRegion))
-                    .withClientConfiguration(ClientConfiguration().apply {
-                        withProtocol(Protocol.HTTP)
-                        maxConnections = Config.AwsS3.maxConnections
-                    })
-                    .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
-                    .withPathStyleAccessEnabled(true)
-                    .disableChunkedEncoding()
-                    .build()
-            }
-            else {
-                AmazonS3ClientBuilder.standard()
-                    .withCredentials(DefaultAWSCredentialsProviderChain())
-                    .withRegion(Config.AwsS3.region)
-                    .withClientConfiguration(ClientConfiguration().apply {
-                        maxConnections = Config.AwsS3.maxConnections
-                    })
-                    .build()
-            }
-        }
+        val s3 = Config.AwsS3.s3
     }
 }

@@ -102,29 +102,7 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
         fun connect() = ManifestAwsS3Service(s3)
         val textUtils = TextUtils()
         val logger: JsonLoggerWrapper = JsonLoggerWrapper.getLogger(ManifestAwsS3Service::class.toString())
-        val s3: AmazonS3 by lazy {
-            if (Config.AwsS3.useLocalStack) {
-                AmazonS3ClientBuilder.standard()
-                    .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackServiceEndPoint, dataworksRegion))
-                    .withClientConfiguration(ClientConfiguration().apply {
-                        withProtocol(Protocol.HTTP)
-                        maxConnections = Config.AwsS3.maxConnections
-                    })
-                    .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(localstackAccessKey, localstackSecretKey)))
-                    .withPathStyleAccessEnabled(true)
-                    .disableChunkedEncoding()
-                    .build()
-            }
-            else {
-                AmazonS3ClientBuilder.standard()
-                    .withCredentials(DefaultAWSCredentialsProviderChain())
-                    .withRegion(Config.AwsS3.region)
-                    .withClientConfiguration(ClientConfiguration().apply {
-                        maxConnections = Config.AwsS3.maxConnections
-                    })
-                    .build()
-            }
-        }
+        val s3 = Config.AwsS3.s3
         val MANIFEST_RECORD_SOURCE = "STREAMED"
         val MANIFEST_RECORD_COMPONENT = "K2HB"
         val MANIFEST_RECORD_TYPE = "KAFKA_RECORD"
