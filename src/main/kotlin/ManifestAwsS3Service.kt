@@ -42,7 +42,7 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
 
     private fun manifestBody(database: String, collection: String, payloads: List<HbasePayload>) =
         ByteArrayOutputStream().also {
-            BufferedOutputStream(GZIPOutputStream(it)).use { bufferedOutputStream ->
+            BufferedOutputStream(it).use { bufferedOutputStream ->
                 payloads.forEach { payload ->
                     val manifestRecord = manifestRecordForPayload(database, collection, payload)
                     val body = csv(manifestRecord)
