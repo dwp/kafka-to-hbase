@@ -28,9 +28,12 @@ class ManifestAwsS3ServiceTest : StringSpec() {
             request.key shouldBe "streamed/${today()}/db.database-one.collection_one_10_1-100.csv"
             val lineReader = LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream)))
 
+            var lineCount = 0
             lineReader.forEachLine {
                 it shouldBe messageBody(lineReader.lineNumber).replace('\n', ' ')
+                lineCount++
             }
+            lineCount shouldBe payloads.count()
         }
 
         "Put manifest file set user metadata correctly" {
