@@ -36,16 +36,14 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
             val (database, collection) = hbaseTable.split(Regex(":"))
             val key = dateStampedKey(database, collection, "TEMPORARY_UNIQUE_ID")
             logger.info("Putting manifest into s3", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
-            val timeTaken = measureTimeMillis { putManifest(key, manifestBody(database, collection, payloads)) }
+            val timeTaken = measureTimeMillis { putManifest(database, collection, key, manifestBody(database, collection, payloads)) }
             logger.info("Put manifest into s3", "time_taken", "$timeTaken", "size", "${payloads.size}", "hbase_table", hbaseTable, "key", key)
         }
     }
 
-    private fun putManifest(key: String, body: ByteArray) =
+    private fun putManifest(database: String, collection: String, key: String, body: ByteArray) =
         amazonS3.putObject(PutObjectRequest(Config.ManifestS3.manifestBucket, key,
-                ByteArrayInputStream(body), ObjectMetadata().apply {
-            contentLength = body.size.toLong()
-        }))
+                ByteArrayInputStream(body), objectMetadata(body, database, collection)))
 
     private fun manifestBody(database: String, collection: String, payloads: List<HbasePayload>) =
         ByteArrayOutputStream().also {
@@ -62,26 +60,18 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
             = ManifestRecord(payload.id, payload.version, database, collection, 
                 MANIFEST_RECORD_SOURCE, MANIFEST_RECORD_COMPONENT, MANIFEST_RECORD_TYPE, payload.id)
 
-    private suspend fun putObject(key: String, payload: HbasePayload, database: String, collection: String)
-            = withContext(Dispatchers.IO) { amazonS3.putObject(putObjectRequest(key, payload, database, collection)) }
-
     // K2HB_MANIFEST_FILE_PATH: s3://manifest/streamed/<yyyy>/<mm>/<dd>/<db>_<collection>_<uniqueid>.json
     private fun dateStampedKey(database: String, collection: String, uniqueId: String)
             = "${Config.ManifestS3.manifestDirectory}/${dateNowPath()}/${database}_${collection}_${uniqueId}.json"
 
     private fun dateNowPath() = simpleDateFormatter().format(Calendar.getInstance().getTime())
 
-    private fun putObjectRequest(key: String, payload: HbasePayload, database: String, collection: String) =
-            PutObjectRequest(Config.ManifestS3.manifestBucket,
-                    key, ByteArrayInputStream(payload.body), objectMetadata(payload, database, collection))
-
-    private fun objectMetadata(payload: HbasePayload, database: String, collection: String)
+    private fun objectMetadata(body: ByteArray, database: String, collection: String)
         = ObjectMetadata().apply {
-            contentLength = payload.body.size.toLong()
-            contentType = "application/json"
-            addUserMetadata("kafka_message_id", String(payload.record.key()))
+            contentLength = body.size.toLong()
+            contentType = "application/text"
 
-            addUserMetadata("receipt_time", SimpleDateFormat("yyyy/MM/dd HH:mm:ss").apply {
+            addUserMetadata("batch_receipt_time", SimpleDateFormat("yyyy/MM/dd HH:mm:ss").apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }.format(Date()))
 

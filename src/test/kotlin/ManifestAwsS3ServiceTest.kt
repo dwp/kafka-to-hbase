@@ -79,12 +79,8 @@
 //         """.trimIndent()
 
 //     private fun validateUserMetadata(userMetadata: MutableMap<String, String>, index: Int) {
-//         userMetadata["kafka_message_id"] shouldBe "${index + 1}"
-//         userMetadata["hbase_id"] shouldBe "\\x6B\\x65\\x79\\x2D${index + 1}"
 //         userMetadata["database"] shouldBe "database"
 //         userMetadata["collection"] shouldBe "collection"
-//         userMetadata["id"] shouldBe "${index + 1}"
-//         userMetadata["timestamp"] shouldBe payloadTime(index + 1).toString()
 //     }
 
 //     private fun today() = dateFormat().format(Date())
