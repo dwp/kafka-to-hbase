@@ -393,7 +393,7 @@ or if it might already exist
    ./kafka-topics.sh --if-not-exists --create --topic my-topic --zookeeper zookeeper:2181 --replication-factor 1 --partitions 20
    ```
 
-Describe the new topic
+### Describe the new topic
    ```shell script
    ./kafka-topics.sh --describe --topic my-topic --zookeeper zookeeper:2181
    ```
