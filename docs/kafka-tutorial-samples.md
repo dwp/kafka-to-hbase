@@ -159,5 +159,5 @@ This example uses fixed partition consumers as a proxy for this.
 
 0. Publish new messages in the form `key:value`
 0. You will see that a given key always goes to the same consumer in the other terminals.
-0. This is beacuse with two consumers each is assigned one partition by the Lead Broker
+0. This is because with two consumers each is assigned one partition by the Lead Broker.
 0. For example, `a-key:value-1` to partition `0` and `b-key:value-2` to partition `1`.
