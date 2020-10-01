@@ -73,7 +73,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
             "position": $index 
         }
         """.trimIndent()
-        
+
     private fun manifestBody(index: Int) =
         if(index % 2 == 0) {
             """
