@@ -60,11 +60,21 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
     private fun stripId(id: String): String {
         try {
             val parser: Parser = Parser.default()
-            val stringBuilder: StringBuilder = StringBuilder(String(body))
-            JsonObject json = parser.parse(stringBuilder) as JsonObject
+            val stringBuilder: StringBuilder = StringBuilder(id)
+            val json = parser.parse(stringBuilder) as JsonObject
             val id_value = json["id"]
             if (id_value != null) {
-                return id_value
+                when (id_value) {
+                    is String -> {
+                        return id_value
+                    }
+                    is Int -> {
+                        return "$id_value"
+                    }
+                    else -> {
+                        return id
+                    }
+                }
             } else {
                 return id
             }
