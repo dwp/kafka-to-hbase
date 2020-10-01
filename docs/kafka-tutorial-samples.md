@@ -122,16 +122,16 @@ This example uses fixed partition consumers as a proxy for this.
 0. Run `make tutorial-list-all` to show all the topics thus far created.
 0. Run `make tutorial-list-topic tutorial_topic=my-multi` to show this one is not there.
 0. Run `make tutorial-create-topic tutorial_topic=my-multi tutorial_partition=2` to create a new one with partitions 0 and 1.
-0. Run `make ttutorial-describe-topic tutorial_topic=my-multi` to create a new one with partitions 0 and 1.
+0. Run `make tutorial-describe-topic tutorial_topic=my-multi` to create a new one with partitions 0 and 1.
 
 ### In a second terminal
 
-0. Run `make tutorial-subscribe-by-parition tutorial_topic=my-multi tutorial_partition=0` subscribe to partition 0.
+0. Run `make tutorial-subscribe-by-partition tutorial_topic=my-multi tutorial_partition=0` subscribe to partition 0.
 0. Leave this running.
 
 ### In a third terminal
 
-0. Run `make tutorial-subscribe-by-parition tutorial_topic=my-multi tutorial_partition=1` subscribe to partition 1.
+0. Run `make tutorial-subscribe-by-partition tutorial_topic=my-multi tutorial_partition=1` subscribe to partition 1.
 0. Leave this running.
 
 ### Back in the first terminal
@@ -140,4 +140,24 @@ This example uses fixed partition consumers as a proxy for this.
 0. This will open a terminal prompt `>`.
 0. Enter values in the form `key:value`
 0. You will see that a given key always goes to the same partition consumer in the other terminals.
+0. For example, `a-key:value-1` to partition `0` and `b-key:value-2` to partition `1`.
+
+### In terminal two
+
+0. Stop the consumer with CTRL-C
+0. Run `make tutorial-subscribe-by-group tutorial_topic=my-multi`
+0. Observe as it is currently the only consumer in thr group, it takes all the messages.
+
+### In terminal three
+
+0. Stop the consumer with CTRL-C
+0. Run `make tutorial-subscribe-by-group tutorial_topic=my-multi`
+0. Now both consumers are in one group.
+0. As they between them are now at the Head Offset, the second consumer receives no messages.
+
+### Back in the first terminal
+
+0. Publish new messages in the form `key:value`
+0. You will see that a given key always goes to the same consumer in the other terminals.
+0. This is beacuse with two consumers each is assigned one partition by the Lead Broker
 0. For example, `a-key:value-1` to partition `0` and `b-key:value-2` to partition `1`.
