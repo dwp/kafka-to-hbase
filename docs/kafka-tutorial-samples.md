@@ -17,9 +17,16 @@
    make services
    # or
    make integration-all
-   # then
-   make kafka-shell
    ```
+
+then 
+
+   ```shell script
+   make kafka-shell
+   # or
+   docker exec -it kafka sh
+   ```
+
 
 ### Inside the shell, find all the utility scripts
 
@@ -68,5 +75,5 @@ This starts an interactive prompt, these are separated by you hitting Return
 ...note that this interacts with the Broker rather than going through it to ZooKeeper
 
    ```shell script
-   ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic --from-beginning
+   ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my-topic --from-beginning --group my-consumer-group
    ```
