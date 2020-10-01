@@ -1,9 +1,23 @@
 # Sample 101 Kafka command lines for practice
 
+## See also
+
+| **Topic** | **Type** | **Link to Document** |
+| --------- | -------- | -------------------- |
+| K2hb: Kafka, Broker and Consumer, Kotlin | Pubic Git Repo | https://github.com/dwp/kafka-to-hbase.git  | 
+| Reconciliation, Kotlin | Public Git Repo | https://github.com/dwp/kafka-to-hbase-reconciliation.git  | 
+| Kafka | All-About | https://www.tutorialspoint.com/apache_kafka/apache_kafka_fundamentals.htm  | 
+| Kafka Command Line | Tutorial | https://docs.cloudera.com/documentation/kafka/latest/topics/kafka_command_line.html  | 
+
+## Begin!
+
 ### Bring up all the service containers and get a shell in the kafka box
 
    ```shell script
    make services
+   # or
+   make integration-all
+   # then
    make kafka-shell
    ```
 
