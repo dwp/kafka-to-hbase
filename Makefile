@@ -160,25 +160,19 @@ tutorial-list-topic: ## List only tutorial_topic in the kafka server
 	make kafka-command command="./kafka-topics.sh --zookeeper zookeeper:2181 --list | fgrep $(tutorial_topic)"
 
 tutorial-create-topic: ## Create tutorial_topic in the kafka server
-	make kafka-command command="./kafka-topics.sh --if-not-exists --create --topic $(tutorial_topic) --zookeeper zookeeper:2181 --replication-factor 1 --partitions $(tutorial_partitions)"
-
-tutorial-create-topic-partitioned: ## Create tutorial_topic in the kafka server with two partitions
-	make tutorial-create-topic tutorial_partitions=2"
+	make kafka-command command="./kafka-topics.sh --if-not-exists --create --topic $(tutorial_topic) --zookeeper zookeeper:2181 --replication-factor 1 --partitions $(tutorial_partition)"
 
 tutorial-describe-topic: ## Describe tutorial_topic in the kafka server
 	make kafka-command command="./kafka-topics.sh --describe --topic $(tutorial_topic) --zookeeper zookeeper:2181"
 
-tutorial-publish-simple: ## Publish to tutorial_topic in the kafka server with just a key. Starts a shell where we can type commands.
+tutorial-publish-simple: ## Publish to tutorial_topic in the kafka server with just a value, and null key. Starts a shell where we can type commands.
 	make kafka-command command="./kafka-console-producer.sh --broker-list localhost:9092 --topic $(tutorial_topic)"
 
 tutorial-publish-with-key: ## Publish to tutorial_topic in the kafka server with a key:value. Starts a shell where we can type commands.
 	make kafka-command command="./kafka-console-producer.sh --broker-list localhost:9092 --topic $(tutorial_topic) --property parse.key=true --property key.separator=:"
 
-tutorial-subscribe-all-partitions: ## Subscribe to tutorial_topic in the kafka server. Starts a shell where we can observe.
+tutorial-subscribe-by-group: ## Subscribe to tutorial_topic:all in the kafka server. Starts a shell where we can observe.
 	make kafka-command command="./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $(tutorial_topic) --group my-consumer-group --from-beginning --property print.key=true --property print.value=true"
 
-tutorial-subscribe-parition-0: ## Subscribe to tutorial_topic in the kafka server. Starts a shell where we can observe.
-	make kafka-command command="./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $(tutorial_topic) --from-beginning --partition 0 --property print.key=true --property print.value=true"
-
-tutorial-subscribe-parition-1: ## Subscribe to tutorial_topic in the kafka server. Starts a shell where we can observe.
-	make kafka-command command="./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $(tutorial_topic) --from-beginning --partition 1 --property print.key=true --property print.value=true"
+tutorial-subscribe-by-parition: ## Subscribe to tutorial_topic:tutorial_partition in the kafka server. Starts a shell where we can observe.
+	make kafka-command command="./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $(tutorial_topic) --from-beginning --partition $(tutorial_partition) --property print.key=true --property print.value=true"
