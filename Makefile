@@ -125,7 +125,7 @@ kafka-shell: ## Open an shell in the running kafka broker container
 build: build-base ## build main images
 	docker-compose build
 
-build-base: ## build the base images which certain images extend.
+build-base: ## Build the base images which certain images extend.
 	@{ \
 		pushd docker; \
 		docker build --tag dwp-java:latest --file .java/Dockerfile . ; \
@@ -136,7 +136,7 @@ build-base: ## build the base images which certain images extend.
 		popd; \
 	}
 
-push-local-to-ecr: #Push a temp version of k2hb to AWS DEV ECR
+push-local-to-ecr: ## Push a temp version of k2hb to AWS DEV ECR
 	@{ \
 		export AWS_DEV_ACCOUNT=$(aws_dev_account); \
 		export TEMP_IMAGE_NAME=$(temp_image_name); \
@@ -146,8 +146,8 @@ push-local-to-ecr: #Push a temp version of k2hb to AWS DEV ECR
 		docker push ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}; \
 	}
 
-kafka-command: run an arbitary command in the kafka server
-	docker exec -it kafka sh -c 'cd /opt/kafka/bin && $(command)'
+kafka-command: ## Run an arbitrary command in the kafka server
+	docker exec -w "/opt/kafka/bin" -it kafka sh -c '$(command)'
 
-tutorial-list-topics
-	make kafka-command command="./kafka-topics.sh --zookeeper zookeeper:2181 --list"
+tutorial-list-topics: ## List topics in the kafka server
+	make kafka-command command='./kafka-topics.sh --zookeeper zookeeper:2181 --list'
