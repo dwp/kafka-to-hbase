@@ -4,6 +4,7 @@ RDBMS_READY_REGEX='mysqld: ready for connections'
 aws_dev_account=NOT_SET
 temp_image_name=NOT_SET
 aws_default_region=NOT_SET
+tutorial_topic=my-topic
 
 .PHONY: help
 help:
@@ -144,3 +145,9 @@ push-local-to-ecr: #Push a temp version of k2hb to AWS DEV ECR
 		docker tag kafka2hbase ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}; \
 		docker push ${AWS_DEV_ACCOUNT}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${TEMP_IMAGE_NAME}; \
 	}
+
+kafka-command: run an arbitary command in the kafka server
+	docker exec -it kafka sh -c 'cd /opt/kafka/bin && $(command)'
+
+tutorial-list-topics
+	make kafka-command command="./kafka-topics.sh --zookeeper zookeeper:2181 --list"
