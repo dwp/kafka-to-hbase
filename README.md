@@ -4,7 +4,7 @@
 
 1. [Application Configurations](docs/k2hb-configurations.md)
 1. [Local Development](docs/local-development.md)
-1. [Kafka samples and tutorial](docs/kafka-samples.md)
+1. [Kafka samples and tutorial](docs/kafka-tutorial-samples.md)
 
 ## Summary
 
