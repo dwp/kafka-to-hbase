@@ -136,8 +136,8 @@ This example uses fixed partition consumers as a proxy for this.
 
 ### Back in the first terminal
 
-0. Run `make tutorial-publish-with-key tutorial_topic=my-multi` to publish to the topic
-0. This will open a terminal 
-0. Enter values in the form "key:value"
+0. Run `make tutorial-publish-with-key tutorial_topic=my-multi` to publish to the topic.
+0. This will open a terminal prompt `>`.
+0. Enter values in the form `key:value`
 0. You will see that a given key always goes to the same partition consumer.
-0. For example, `a-key:value-1` to partition `0` and `b-key:value-2` to partition `1`
+0. For example, `a-key:value-1` to partition `0` and `b-key:value-2` to partition `1`.
