@@ -58,7 +58,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
                     on { partition() } doReturn 10
                 }
                 if(index % 2 == 0) {
-                    HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "{\"id\": \"id-$index\"}", payloadTime(index), consumerRecord)
+                    HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "{\"id\":\"id-$index\"}", payloadTime(index), consumerRecord)
                 } else {
                     HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "id-$index", payloadTime(index), consumerRecord)
                 }
@@ -77,7 +77,7 @@ class ManifestAwsS3ServiceTest : StringSpec() {
     private fun manifestBody(index: Int) =
         if(index % 2 == 0) {
             """
-            id-$index|${payloadTime(index)}|database-one|collection_one|STREAMED|K2HB|{\"id\": \"id-$index\"}|KAFKA_RECORD
+            id-$index|${payloadTime(index)}|database-one|collection_one|STREAMED|K2HB|"{""id"":""id-2""}"|KAFKA_RECORD
             """.trimIndent()
         } else {
             """
