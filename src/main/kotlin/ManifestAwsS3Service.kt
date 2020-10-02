@@ -111,8 +111,6 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
 
     private fun escape(value: String) = StringEscapeUtils.escapeCsv(value)
 
-    private fun simpleDateFormatter() = SimpleDateFormat("yyyy/MM/dd").apply { timeZone = TimeZone.getTimeZone("UTC") }
-
     companion object {
         fun connect() = ManifestAwsS3Service(s3)
         val textUtils = TextUtils()
