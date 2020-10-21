@@ -88,7 +88,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                 "key", textUtils.printableKey(it.key), 
                 "version", "${it.version}",
                 "version_created_from", "${it.versionCreatedFrom}",
-                "raw_version", "${getDateTime(it.version)}"
+                "version_raw", "${it.versionRaw}"
             )
         }
 
@@ -115,15 +115,9 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
                 "key", textUtils.printableKey(it.key), 
                 "version", "${it.version}",
                 "version_created_from", "${it.versionCreatedFrom}",
-                "raw_version", "${getDateTime(it.version)}"
+                "version_raw", "${it.versionRaw}"
             )
         }
-
-    private fun getDateTime(timestamp: Long): String? {
-        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
-        val netDate = Date(timestamp)
-        return sdf.format(netDate)
-    }
 
     private fun lastCommittedOffset(consumer: KafkaConsumer<ByteArray, ByteArray>, partition: TopicPartition): Long? =
         consumer.committed(partition)?.let { it.offset() }
@@ -153,7 +147,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         val message = json["message"] as JsonObject
         message["timestamp_created_from"] = source
         val version = converter.getTimestampAsLong(timestamp)
-        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, source, record)
+        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, source, timestamp, record)
     }
 
     companion object {
