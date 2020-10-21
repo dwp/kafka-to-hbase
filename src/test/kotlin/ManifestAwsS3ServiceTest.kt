@@ -58,9 +58,9 @@ class ManifestAwsS3ServiceTest : StringSpec() {
                     on { partition() } doReturn 10
                 }
                 if(index % 2 == 0) {
-                    HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "{\"id\":\"id-$index\"}", payloadTime(index), consumerRecord)
+                    HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "{\"id\":\"id-$index\"}", payloadTime(index), "_lastModifiedDateTime", consumerRecord)
                 } else {
-                    HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "id-$index", payloadTime(index), consumerRecord)
+                    HbasePayload(Bytes.toBytes("key-$index"), messageBody(index).toByteArray(), "id-$index", payloadTime(index), "_lastModifiedDateTime", consumerRecord)
                 }
             }
 

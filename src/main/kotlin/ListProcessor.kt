@@ -6,6 +6,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ListProcessor(validator: Validator, private val converter: Converter) : BaseProcessor(validator, converter) {
 
@@ -83,7 +85,10 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         payloads.forEach {
             logger.error(
                 "Failed to put record", "table", table,
-                "key", textUtils.printableKey(it.key), "version", "${it.version}"
+                "key", textUtils.printableKey(it.key), 
+                "version", "${it.version}",
+                "version_created_from", "${it.versionCreatedFrom}",
+                "raw_version", "${getDateTime(it.version)}"
             )
         }
 
@@ -104,9 +109,21 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
 
     private fun logSuccessfulPuts(table: String, payloads: List<HbasePayload>) =
         payloads.forEach {
-            logger.info("Put record", "table", table, "key", textUtils.printableKey(it.key), "version", "${it.version}")
+            logger.info(
+                "Put record", 
+                "table", table, 
+                "key", textUtils.printableKey(it.key), 
+                "version", "${it.version}",
+                "version_created_from", "${it.versionCreatedFrom}",
+                "raw_version", "${getDateTime(it.version)}"
+            )
         }
 
+    private fun getDateTime(timestamp: Long): String? {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+        val netDate = Date(timestamp)
+        return sdf.format(netDate)
+    }
 
     private fun lastCommittedOffset(consumer: KafkaConsumer<ByteArray, ByteArray>, partition: TopicPartition): Long? =
         consumer.committed(partition)?.let { it.offset() }
@@ -136,7 +153,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         val message = json["message"] as JsonObject
         message["timestamp_created_from"] = source
         val version = converter.getTimestampAsLong(timestamp)
-        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, record)
+        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, source, record)
     }
 
     companion object {
