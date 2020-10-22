@@ -45,8 +45,6 @@ class ValidatorBusinessTest : StringSpec() {
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
 			|   "@type" : "V4",
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000",
             |   "message": {
             |       "@type": "hello",
             |       "_id": {
@@ -78,8 +76,6 @@ class ValidatorBusinessTest : StringSpec() {
 			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
 			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
 			|   "@type" : "V4",
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000",
             |   "message": {
             |       "@type": "hello",
             |       "_id": {

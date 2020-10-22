@@ -337,7 +337,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
+            exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
         }
 
         "Equality schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
