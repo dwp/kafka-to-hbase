@@ -153,6 +153,39 @@ class ValidatorAuditTest : StringSpec() {
             )
         }
 
+        "Audit Schema: Incorrect _id field fails validation" {
+            TestUtils.auditMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
+            |{
+            |  "traceId" : "1806eb69-a7be-4ade-8306-00f46e6852c5",
+            |  "unitOfWorkId" : "ff041e1f-67bb-4013-a00f-3ea787da4864",
+            |  "@type" : "V4",
+            |  "message" : {
+            |    "dbObject" : "xxx",
+            |    "encryption" : {
+            |      "keyEncryptionKeyId" : "cloudhsm:262152,262151",
+            |      "encryptedEncryptionKey" : "xxx",
+            |      "encryptionKeyId" : "ff001d09-0da3-408f-a257-fdcd8052bdcd",
+            |      "initialisationVector" : "xxx"
+            |    },
+            |    "_lastModifiedDateTime" : "2020-08-05T07:07:00.105+0000",
+            |    "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
+            |    "_id" : {
+            |      "OTHER_ID" : "9e181ca2-2d11-4703-928a-841f7be57c17"
+            |    }
+            |  },
+            |  "version" : "core-4.release_152.16",
+            |  "timestamp" : "2020-08-05T07:07:00.105+0000"
+            |}
+        """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
+        }
+
         "Audit Schema: Missing '#/message/@type' field causes validation failure." {
             TestUtils.auditMessageValidator()
 
