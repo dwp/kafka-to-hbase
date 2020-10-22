@@ -153,7 +153,7 @@ class ValidatorAuditTest : StringSpec() {
             )
         }
 
-        "Audit Schema: Incorrect _id field fails validation" {
+        "Audit Schema: Incorrect _id sub-field fails validation" {
             TestUtils.auditMessageValidator()
 
             val exception = shouldThrow<InvalidMessageException> {
