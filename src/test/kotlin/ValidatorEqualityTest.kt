@@ -30,7 +30,7 @@ class ValidatorEqualityTest : StringSpec() {
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706+0000"
             |}
-        """.trimMargin()
+            """.trimMargin()
             )
         }
 
@@ -59,7 +59,7 @@ class ValidatorEqualityTest : StringSpec() {
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706"
             |}
-        """.trimMargin()
+            """.trimMargin()
             )
         }
 
@@ -88,7 +88,7 @@ class ValidatorEqualityTest : StringSpec() {
             |   "version" : "core-4.release_147.3",
             |   "timestamp" : "2020-05-21T17:18:15.706Z"
             |}
-        """.trimMargin()
+            """.trimMargin()
             )
         }
 
@@ -118,7 +118,7 @@ class ValidatorEqualityTest : StringSpec() {
             |  "version" : "core-4.release_152.16",
             |  "timestamp" : "2020-08-05T07:07:39.768+0000"
             |}
-        """.trimMargin()
+            """.trimMargin()
             )
         }
 
@@ -148,7 +148,7 @@ class ValidatorEqualityTest : StringSpec() {
             |  "version" : "core-4.release_152.16",
             |  "timestamp" : "2020-08-05T07:07:00.105+0000"
             |}
-        """.trimMargin()
+            """.trimMargin()
             )
         }
 
@@ -158,26 +158,26 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-            |{
-            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-            |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-            |   "@type" : "V4",
-            |   "message" : {
-            |       "dbObject" : "xxxxxx",
-            |       "encryption" : {
-            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-            |           "encryptedEncryptionKey" : "xxxxxx",
-            |           "initialisationVector" : "xxxxxxxx=="
-            |       },
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-            |       "_id" : {
-            |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-            |       }
-            |   },
-            |   "version" : "core-4.release_147.3",
-            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
-            |}
-            """.trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message: required key [@type] not found'."
@@ -189,27 +189,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-            |{
-            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-            |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-            |   "@type" : "V4",
-            |   "message" : {
-            |       "dbObject" : "xxxxxx",
-            |       "encryption" : {
-            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-            |           "encryptedEncryptionKey" : "xxxxxx",
-            |           "initialisationVector" : "xxxxxxxx=="
-            |       },
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-            |       "@type" : 1,
-            |       "_id" : {
-            |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-            |       }
-            |   },
-            |   "version" : "core-4.release_147.3",
-            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
-            |}
-            """.trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
+                |       "@type" : 1,
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
@@ -221,27 +221,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-            |{
-            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-            |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-            |   "@type" : "V4",
-            |   "message" : {
-            |       "dbObject" : "xxxxxx",
-            |       "encryption" : {
-            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-            |           "encryptedEncryptionKey" : "xxxxxx",
-            |           "initialisationVector" : "xxxxxxxx=="
-            |       },
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-            |       "@type" : 1,
-            |       "_id" : {
-            |           "messageId" : ""
-            |       }
-            |   },
-            |   "version" : "core-4.release_147.3",
-            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
-            |}
-            """.trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
+                |       "@type" : 1,
+                |       "_id" : {
+                |           "messageId" : ""
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
 
@@ -254,25 +254,25 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-            |{
-            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-            |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-            |   "@type" : "V4",
-            |   "message" : {
-            |       "dbObject" : "xxxxxx",
-            |       "encryption" : {
-            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-            |           "encryptedEncryptionKey" : "xxxxxx",
-            |           "initialisationVector" : "xxxxxxxx=="
-            |       },
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-            |       "@type" : 1,
-            |       "_id" : [1, 2, 3, 4, 5, 6, 7 ,8 , 9]
-            |   },
-            |   "version" : "core-4.release_147.3",
-            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
-            |}
-            """.trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
+                |       "@type" : 1,
+                |       "_id" : [1, 2, 3, 4, 5, 6, 7 ,8 , 9]
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
@@ -284,25 +284,57 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-            |{
-            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-            |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-            |   "@type" : "V4",
-            |   "message" : {
-            |       "dbObject" : "xxxxxx",
-            |       "encryption" : {
-            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-            |           "encryptedEncryptionKey" : "xxxxxx",
-            |           "initialisationVector" : "xxxxxxxx=="
-            |       },
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-            |       "@type" : 1,
-            |       "_id" : {}
-            |   },
-            |   "version" : "core-4.release_147.3",
-            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
-            |}
-            """.trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
+                |       "@type" : 1,
+                |       "_id" : {}
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
+        }
+
+        "Equality schema: Incorrect '#/message/_id/messageId' subfield type causes validation failure." {
+            TestUtils.equalityMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
+                |       "@type" : 1,
+                |       "_id" : {
+                |           "OTHER_ID" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
@@ -401,27 +433,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : 42,
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : 42,
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
@@ -433,27 +465,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2013-03-13",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2013-03-13",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/_lastModifiedDateTime: #: no subschema matched out of the total 2 subschemas'."
@@ -465,26 +497,26 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message: required key [dbObject] not found'."
@@ -496,27 +528,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : {},
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : {},
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected type: String, found: JSONObject'."
@@ -528,27 +560,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/dbObject: expected minLength: 1, actual: 0'."
@@ -560,22 +592,22 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message: required key [encryption] not found'."
@@ -587,23 +619,23 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : "abc",
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : "abc",
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption: expected type: JSONObject, found: String'."
@@ -615,26 +647,26 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [keyEncryptionKeyId] not found'."
@@ -646,26 +678,26 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx"
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx"
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [initialisationVector] not found'."
@@ -677,26 +709,26 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption: required key [encryptedEncryptionKey] not found'."
@@ -708,27 +740,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:.*$'."
@@ -740,27 +772,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : ""
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : ""
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected minLength: 1, actual: 0'."
@@ -772,27 +804,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected minLength: 1, actual: 0'."
@@ -804,27 +836,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : 42,
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : 42,
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: expected type: String, found: Integer'."
@@ -836,27 +868,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : "xxxxxx",
-			|           "initialisationVector" : {}
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : {}
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/initialisationVector: expected type: String, found: JSONObject'."
@@ -868,27 +900,27 @@ class ValidatorEqualityTest : StringSpec() {
             val exception = shouldThrow<InvalidMessageException> {
                 Validator().validate(
                     """
-			|{
-			|   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-			|   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
-			|   "@type" : "V4",
-			|   "message" : {
-			|       "dbObject" : "xxxxxx",
-			|       "encryption" : {
-			|           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-			|           "encryptedEncryptionKey" : ["answer", 42],
-			|           "initialisationVector" : "xxxxxxxx=="
-			|       },
-			|       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
-            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
-			|       "_id" : {
-			|           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
-			|       }
-			|   },
-			|   "version" : "core-4.release_147.3",
-			|   "timestamp" : "2020-05-21T17:18:15.706+0000"
-			|}
-			""".trimMargin()
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : ["answer", 42],
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "messageId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
                 )
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
