@@ -275,7 +275,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation:xxx"
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
         }
 
         "Equality schema: Empty '#/message/_id' type causes validation failure." {
@@ -305,7 +305,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: xxx"
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
         }
 
         "Equality schema: Incorrect '#/message/_id/messageId' subfield type causes validation failure." {
@@ -337,7 +337,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message:xxx."
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
         }
 
         "Equality schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {

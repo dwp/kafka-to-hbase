@@ -24,7 +24,8 @@
           "minLength": 1,
           "properties": {
             "messageId": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "required": [
