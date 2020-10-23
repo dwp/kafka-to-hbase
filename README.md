@@ -66,7 +66,7 @@ All the schemas are found in [src/main/resources](src/main/resources)
 ### UC Equality Data Schema
 
 * Equality messages will always have exactly `$.message._id.messageId="non-zero-string"` so we can inist on `messageId` always exisiting and being >1 in length.
-* Equality message do not have `$.message.db` or `$.message.collection` as this is non-specific Equality Act data like demographic spreads.
+* Equality messages do not have `$.message.db` or `$.message.collection` as this is non-specific Equality Act data like demographic spreads.
 * These are sourced from a single static collection.
 
 ### UC Audit Data Schema
