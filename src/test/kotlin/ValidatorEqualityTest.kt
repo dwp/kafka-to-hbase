@@ -955,7 +955,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [cloudhsm:aaa,bbbb] does not match pattern ^cloudhsm:\\d+,\\d+\$'."
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [cloudhsm:aaa,bbbb] does not match pattern ^cloudhsm:\\d+,\\d+\\$'."
         }
 
         "Equality schema: '#/message/unitOfWorkId' is required" {
