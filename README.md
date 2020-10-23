@@ -65,6 +65,7 @@ All the schemas are found in [src/main/resources](src/main/resources)
 * Sample kafka message: [business-message-sample.json](docs/business-message-sample.json)
 * Sample unencrypted message payload from `dbObject`: [business-message-sample-unencrypted-payload.json](docs/business-message-sample-unencrypted-payload.json)
   * Note that k2hb does not decrypt this, it is for reference only
+  * Note that the payloads of each collection differ wildly.
 
 ### UC Equality Data Schema
 
