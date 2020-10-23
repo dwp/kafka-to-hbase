@@ -149,6 +149,22 @@ class ConverterTest : StringSpec({
         }
     }
 
+    "Kafka message date time returned when record type is MONGO_DELETE" {
+        val jsonString = """{
+            "timestamp": "2020-10-23T14:08:02.000+0000"
+            "message": {
+                "@type": "MONGO_DELETE",
+                "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+                "createdDateTime": "2019-11-13T14:02:03.001+0000",
+            }
+        }"""
+
+        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2020-10-23T14:08:02.000+0000"
+        fieldName shouldBe "kafkaMessageDateTime"
+    }
+
     "Last modified date time returned when valid created date time" {
         val jsonString = """{
             "message": {
