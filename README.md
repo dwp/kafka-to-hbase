@@ -71,6 +71,6 @@ All the schemas are found in [src/main/resources](src/main/resources)
 
 ### UC Audit Data Schema
 
-* Audit messages will always have exactly `$.message._id.auditId="non-zero-string"` so we can insit on it always exisiting and being >1 in length.
+* Audit messages will always have exactly `$.message._id.auditId="non-zero-string"` so we can insist on it always existing and being >1 in length.
 * Audit messages do not have `$.message.db` or `$.message.collection` as this is non-specific Audit information like which user logged on to the system, or which type of update was performed.
 * These are sourced from a single static collection.
