@@ -4,10 +4,10 @@
   "type": "object",
   "properties": {
     "traceId": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "unitOfWorkId": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "@type": {
       "type": "string"

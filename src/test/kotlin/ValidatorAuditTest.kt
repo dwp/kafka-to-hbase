@@ -927,5 +927,126 @@ class ValidatorAuditTest : StringSpec() {
             }
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
         }
-    }
+
+        "Audit Schema: '#/message/unitOfWorkId' is required" {
+            TestUtils.auditMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : ["answer", 42],
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "auditId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/unitOfWorkId: required."
+        }
+
+        "Audit Schema: '#/message/unitOfWorkId' can be null" {
+            TestUtils.auditMessageValidator()
+
+            Validator().validate(
+                """
+            |{
+            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+            |   "unitOfWorkId" : "",
+            |   "@type" : "V4",
+            |   "message" : {
+            |       "dbObject" : "xxxxxx",
+            |       "encryption" : {
+            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+            |           "encryptedEncryptionKey" : ["answer", 42],
+            |           "initialisationVector" : "xxxxxxxx=="
+            |       },
+            |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+            |       "_id" : {
+            |           "auditId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+            |       }
+            |   },
+            |   "version" : "core-4.release_147.3",
+            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+            |}
+            """.trimMargin()
+            )
+        }
+
+        "Audit Schema: '#/message/traceId' is required" {
+            TestUtils.auditMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
+                    |{
+                    |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                    |   "@type" : "V4",
+                    |   "message" : {
+                    |       "dbObject" : "xxxxxx",
+                    |       "encryption" : {
+                    |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                    |           "encryptedEncryptionKey" : ["answer", 42],
+                    |           "initialisationVector" : "xxxxxxxx=="
+                    |       },
+                    |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                    |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                    |       "_id" : {
+                    |           "auditId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                    |       }
+                    |   },
+                    |   "version" : "core-4.release_147.3",
+                    |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                    |}
+                    """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#/message/unitOfWorkId: required."
+        }
+
+        "Audit Schema: '#/message/traceId' can be null" {
+            TestUtils.auditMessageValidator()
+
+            Validator().validate(
+                """
+                |{
+                |   "traceId" : "",
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : ["answer", 42],
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "auditId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
+            )
+        }
+
+    } //end init
 }

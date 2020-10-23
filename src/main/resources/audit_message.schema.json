@@ -4,7 +4,7 @@
   "type": "object",
   "properties": {
     "traceId": {
-      "type": "string"
+      "type": ["string", "null"]
     },
     "unitOfWorkId": {
       "type": ["string", "null"]

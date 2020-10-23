@@ -1212,6 +1212,5 @@ class ValidatorBusinessTest : StringSpec() {
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
         }
 
-    }
-
+    }  //end init
 }
