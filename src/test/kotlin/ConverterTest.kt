@@ -165,7 +165,67 @@ class ConverterTest : StringSpec({
         fieldName shouldBe "kafkaMessageDateTime"
     }
 
-    "Last modified date time returned when valid created date time" {
+    "Kafka message date time not set if no timestamp present in message" {
+        val jsonString = """{
+            "message": {
+                "@type": "MONGO_DELETE",
+                "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+                "createdDateTime": "2019-11-13T14:02:03.001+0000",
+            }
+        }"""
+
+        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2018-12-14T15:01:02.000+0000"
+        fieldName shouldBe "_lastModifiedDateTime"
+    }
+
+    "Last modified date time returned when type field is blank" {
+        val jsonString = """{
+            "message": {
+                "@type": "",
+                "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+                "createdDateTime": "2019-11-13T14:02:03.001+0000",
+            }
+        }"""
+
+        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2018-12-14T15:01:02.000+0000"
+        fieldName shouldBe "_lastModifiedDateTime"
+    }
+
+    "Last modified date time returned when type field is null" {
+        val jsonString = """{
+            "message": {
+                "@type": null,
+                "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+                "createdDateTime": "2019-11-13T14:02:03.001+0000",
+            }
+        }"""
+
+        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2018-12-14T15:01:02.000+0000"
+        fieldName shouldBe "_lastModifiedDateTime"
+    }
+
+    "Last modified date time returned when type field is valid but not mongo_delete" {
+        val jsonString = """{
+            "message": {
+                "@type": "MONGO_INSERT",
+                "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
+                "createdDateTime": "2019-11-13T14:02:03.001+0000",
+            }
+        }"""
+
+        val json: JsonObject = converter.convertToJson(jsonString.toByteArray())
+        val (timestamp, fieldName) = converter.getLastModifiedTimestamp(json)
+        timestamp shouldBe "2018-12-14T15:01:02.000+0000"
+        fieldName shouldBe "_lastModifiedDateTime"
+    }
+
+    "Last modified date time returned when valid last modified date time" {
         val jsonString = """{
             "message": {
                 "_lastModifiedDateTime": "2018-12-14T15:01:02.000+0000",
