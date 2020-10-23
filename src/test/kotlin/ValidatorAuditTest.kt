@@ -141,7 +141,7 @@ class ValidatorAuditTest : StringSpec() {
             |      "initialisationVector" : "xxx"
             |    },
             |    "_lastModifiedDateTime" : "2020-08-05T07:07:00.105+0000",
-            |    "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
+            |    "@type" : "AUDIT",
             |    "_id" : {
             |      "auditId" : "9e181ca2-2d11-4703-928a-841f7be57c17"
             |    }
@@ -172,7 +172,7 @@ class ValidatorAuditTest : StringSpec() {
                 |      "initialisationVector" : "xxx"
                 |    },
                 |    "_lastModifiedDateTime" : "2020-08-05T07:07:00.105+0000",
-                |    "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
+                |    "@type" : "AUDIT",
                 |    "_id" : {
                 |      "OTHER_ID" : "9e181ca2-2d11-4703-928a-841f7be57c17"
                 |    }
@@ -267,7 +267,7 @@ class ValidatorAuditTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "AUDIT",
                 |       "_id" : {
                 |           "auditId" : ""
                 |       }
@@ -279,7 +279,7 @@ class ValidatorAuditTest : StringSpec() {
                 )
             }
 
-            exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
+            exception.message shouldBe "Message failed schema validation: '#/message/_id/auditId: xxxxx"
         }
 
         "Audit Schema: Incorrect '#/message/_id' type causes validation failure." {
@@ -300,7 +300,7 @@ class ValidatorAuditTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "AUDIT",
                 |       "_id" : [1, 2, 3, 4, 5, 6, 7 ,8 , 9]
                 |   },
                 |   "version" : "core-4.release_147.3",
@@ -309,7 +309,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
+            exception.message shouldBe "Message failed schema validation: '#/message:xxx"
         }
 
         "Audit Schema: Empty '#/message/_id' type causes validation failure." {
@@ -330,7 +330,7 @@ class ValidatorAuditTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "AUDIT",
                 |       "_id" : {}
                 |   },
                 |   "version" : "core-4.release_147.3",
@@ -339,7 +339,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
+            exception.message shouldBe "Message failed schema validation: '#/message: xxx"
         }
 
         "Audit Schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
@@ -765,7 +765,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:.*$'."
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:\\d+,\\d+$'."
         }
 
         "Audit Schema: Empty initialisationVector from '#/message/encryption' type causes validation failure." {

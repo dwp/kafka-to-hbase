@@ -92,7 +92,7 @@ class ValidatorEqualityTest : StringSpec() {
             )
         }
 
-        "Equality schema: Valid message - UCFS prod sample 1 passes validation" {
+        "Equality schema: Valid message - Redacted UCFS prod sample 1 passes validation" {
             TestUtils.equalityMessageValidator()
 
             Validator().validate(
@@ -122,7 +122,7 @@ class ValidatorEqualityTest : StringSpec() {
             )
         }
 
-        "Equality schema: Valid message - UCFS prod sample 2 passes validation" {
+        "Equality schema: Valid message - Redacted UCFS prod sample 2 passes validation" {
             TestUtils.equalityMessageValidator()
 
             Validator().validate(
@@ -233,7 +233,7 @@ class ValidatorEqualityTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
                 |       "_id" : {
                 |           "messageId" : ""
                 |       }
@@ -245,7 +245,7 @@ class ValidatorEqualityTest : StringSpec() {
                 )
             }
 
-            exception.message shouldBe "Message failed schema validation: '#/message/@type: expected type: String, found: Integer'."
+            exception.message shouldBe "Message failed schema validation: xxx"
         }
 
         "Equality schema: Incorrect '#/message/_id' type causes validation failure." {
@@ -266,7 +266,7 @@ class ValidatorEqualityTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
                 |       "_id" : [1, 2, 3, 4, 5, 6, 7 ,8 , 9]
                 |   },
                 |   "version" : "core-4.release_147.3",
@@ -275,7 +275,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
+            exception.message shouldBe "Message failed schema validation:xxx"
         }
 
         "Equality schema: Empty '#/message/_id' type causes validation failure." {
@@ -296,7 +296,7 @@ class ValidatorEqualityTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
                 |       "_id" : {}
                 |   },
                 |   "version" : "core-4.release_147.3",
@@ -305,7 +305,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: 3 schema violations found'."
+            exception.message shouldBe "Message failed schema validation: '#/message: xxx"
         }
 
         "Equality schema: Incorrect '#/message/_id/messageId' subfield type causes validation failure." {
@@ -326,7 +326,7 @@ class ValidatorEqualityTest : StringSpec() {
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.693+0000",
-                |       "@type" : 1,
+                |       "@type" : "EQUALITY_QUESTIONS_NOT_ANSWERED",
                 |       "_id" : {
                 |           "OTHER_ID" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
                 |       }
@@ -337,7 +337,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: 2 schema violations found'."
+            exception.message shouldBe "Message failed schema validation: '#/message:xxx."
         }
 
         "Equality schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
@@ -763,7 +763,7 @@ class ValidatorEqualityTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:.*$'."
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [] does not match pattern ^cloudhsm:\\d+,\\d+$'."
         }
 
         "Equality schema: Empty initialisationVector from '#/message/encryption' type causes validation failure." {
