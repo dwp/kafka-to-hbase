@@ -24,7 +24,7 @@
           "properties": {
             "keyEncryptionKeyId": {
               "type": "string",
-              "pattern": "^cloudhsm:.*$"
+              "pattern": "^cloudhsm:\\d+,\\d+$"
             },
             "encryptedEncryptionKey": {
               "type": "string",
