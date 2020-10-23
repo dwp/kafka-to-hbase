@@ -1243,7 +1243,7 @@ class ValidatorBusinessTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: xxxxx"
+            exception.message shouldBe "Message failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [cloudhsm:aaa,bbbb] does not match pattern ^cloudhsm:\\d+,\\d+\$'."
         }
 
         "Default business schema: '#/message/unitOfWorkId' is required" {

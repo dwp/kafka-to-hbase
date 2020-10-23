@@ -957,7 +957,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: xxxxx"
+            exception.message shouldBe "Message failed schema validation: xxxxxMessage failed schema validation: '#/message/encryption/keyEncryptionKeyId: string [cloudhsm:aaa,bbbb] does not match pattern ^cloudhsm:\\d+,\\d+\$'."
         }
 
         "Audit Schema: '#/message/unitOfWorkId' is required" {
