@@ -1212,5 +1212,133 @@ class ValidatorBusinessTest : StringSpec() {
             exception.message shouldBe "Message failed schema validation: '#/message/encryption/encryptedEncryptionKey: expected type: String, found: JSONArray'."
         }
 
+        "Default business schema: '#/message/unitOfWorkId' is required" {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
+                |{
+                |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "db": "address",
+                |       "collection": "collection",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "_id" : {
+                |           "anyId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#: required key [unitOfWorkId] not found'."
+        }
+
+        "Default business schema: '#/message/unitOfWorkId' can be null" {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
+            |{
+            |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
+            |   "unitOfWorkId" : null,
+            |   "@type" : "V4",
+            |   "message" : {
+            |       "dbObject" : "xxxxxx",
+            |       "encryption" : {
+            |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+            |           "encryptedEncryptionKey" : "xxxxxx",
+            |           "initialisationVector" : "xxxxxxxx=="
+            |       },
+            |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+            |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+            |       "db": "address",
+            |       "collection": "collection",
+            |       "_id" : {
+            |           "anyId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+            |       }
+            |   },
+            |   "version" : "core-4.release_147.3",
+            |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+            |}
+            """.trimMargin()
+            )
+        }
+
+        "Default business schema: '#/message/traceId' is required" {
+            TestUtils.defaultMessageValidator()
+
+            val exception = shouldThrow<InvalidMessageException> {
+                Validator().validate(
+                    """
+                    |{
+                    |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                    |   "@type" : "V4",
+                    |   "message" : {
+                    |       "dbObject" : "xxxxxx",
+                    |       "encryption" : {
+                    |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                    |           "encryptedEncryptionKey" : "xxxxxx",
+                    |           "initialisationVector" : "xxxxxxxx=="
+                    |       },
+                    |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                    |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                    |       "db": "address",
+                    |       "collection": "collection",
+                    |       "_id" : {
+                    |           "anyId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                    |       }
+                    |   },
+                    |   "version" : "core-4.release_147.3",
+                    |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                    |}
+                    """.trimMargin()
+                )
+            }
+            exception.message shouldBe "Message failed schema validation: '#: required key [traceId] not found'."
+        }
+
+        "Default business schema: '#/message/traceId' can be null" {
+            TestUtils.defaultMessageValidator()
+
+            Validator().validate(
+                """
+                |{
+                |   "traceId" : null,
+                |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
+                |   "@type" : "V4",
+                |   "message" : {
+                |       "dbObject" : "xxxxxx",
+                |       "encryption" : {
+                |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
+                |           "encryptedEncryptionKey" : "xxxxxx",
+                |           "initialisationVector" : "xxxxxxxx=="
+                |       },
+                |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
+                |       "_lastModifiedDateTime" : "2020-05-21T17:18:15.706+0000",
+                |       "db": "address",
+                |       "collection": "collection",
+                |       "_id" : {
+                |           "anyId" : "f1d4723b-fdaa-4123-8e20-e6eca6c03645"
+                |       }
+                |   },
+                |   "version" : "core-4.release_147.3",
+                |   "timestamp" : "2020-05-21T17:18:15.706+0000"
+                |}
+                """.trimMargin()
+            )
+        }
+
     }  //end init
 }

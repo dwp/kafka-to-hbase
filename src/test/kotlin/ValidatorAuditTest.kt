@@ -941,7 +941,7 @@ class ValidatorAuditTest : StringSpec() {
                 |       "dbObject" : "xxxxxx",
                 |       "encryption" : {
                 |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-                |           "encryptedEncryptionKey" : ["answer", 42],
+                |           "encryptedEncryptionKey" : "xxxxxx",
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
@@ -956,7 +956,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message/unitOfWorkId: required."
+            exception.message shouldBe "Message failed schema validation: '#: required key [unitOfWorkId] not found'."
         }
 
         "Audit Schema: '#/message/unitOfWorkId' can be null" {
@@ -966,13 +966,13 @@ class ValidatorAuditTest : StringSpec() {
                 """
             |{
             |   "traceId" : "091f29ab-b6c5-411c-851e-15683ce53c40",
-            |   "unitOfWorkId" : "",
+            |   "unitOfWorkId" : null,
             |   "@type" : "V4",
             |   "message" : {
             |       "dbObject" : "xxxxxx",
             |       "encryption" : {
             |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-            |           "encryptedEncryptionKey" : ["answer", 42],
+            |           "encryptedEncryptionKey" : "xxxxxx",
             |           "initialisationVector" : "xxxxxxxx=="
             |       },
             |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
@@ -1001,7 +1001,7 @@ class ValidatorAuditTest : StringSpec() {
                     |       "dbObject" : "xxxxxx",
                     |       "encryption" : {
                     |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-                    |           "encryptedEncryptionKey" : ["answer", 42],
+                    |           "encryptedEncryptionKey" : "xxxxxx",
                     |           "initialisationVector" : "xxxxxxxx=="
                     |       },
                     |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
@@ -1016,7 +1016,7 @@ class ValidatorAuditTest : StringSpec() {
                     """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message/unitOfWorkId: required."
+            exception.message shouldBe "Message failed schema validation: '#: required key [traceId] not found'."
         }
 
         "Audit Schema: '#/message/traceId' can be null" {
@@ -1025,14 +1025,14 @@ class ValidatorAuditTest : StringSpec() {
             Validator().validate(
                 """
                 |{
-                |   "traceId" : "",
+                |   "traceId" : null,
                 |   "unitOfWorkId" : "31faa55f-c5e8-4581-8973-383db31ddd77",
                 |   "@type" : "V4",
                 |   "message" : {
                 |       "dbObject" : "xxxxxx",
                 |       "encryption" : {
                 |           "keyEncryptionKeyId" : "cloudhsm:aaaa,bbbb",
-                |           "encryptedEncryptionKey" : ["answer", 42],
+                |           "encryptedEncryptionKey" : "xxxxxx",
                 |           "initialisationVector" : "xxxxxxxx=="
                 |       },
                 |       "@type" : "EQUALITY_QUESTIONS_ANSWERED",
