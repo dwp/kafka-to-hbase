@@ -62,15 +62,24 @@ All the schemas are found in [src/main/resources](src/main/resources)
 * Business messages always have `$.message.db`.
 * Business messages always have `$.message.collection`.
 * These are sourced from many topics, the name of which is deterministically related to the `db` and `collection`.
+* Sample kafka message: [business-message-sample.json](docs/business-message-sample.json)
+* Sample unencrypted message payload from `dbObject`: [business-message-sample-unencrypted-payload.json](docs/business-message-sample-unencrypted-payload.json)
+  * Note that k2hb does not decrypt this, it is for reference only
 
 ### UC Equality Data Schema
 
 * Equality messages will always have exactly `$.message._id.messageId="non-zero-string"` so we can insist on `messageId` always existing and being >1 in length.
 * Equality messages do not have `$.message.db` or `$.message.collection` as this is non-specific Equality Act data like demographic spreads.
 * These are sourced from a single static collection.
+* Sample kafka message: [equality-message-sample.json](docs/equality-message-sample.json)
+* Sample unencrypted message payload from `dbObject`: [equality-message-sample-unencrypted-payload.json](docs/equality-message-sample-unencrypted-payload.json)
+  * Note that k2hb does not decrypt this, it is for reference only
 
 ### UC Audit Data Schema
 
 * Audit messages will always have exactly `$.message._id.auditId="non-zero-string"` so we can insist on it always existing and being >1 in length.
 * Audit messages do not have `$.message.db` or `$.message.collection` as this is non-specific Audit information like which user logged on to the system, or which type of update was performed.
 * These are sourced from a single static collection.
+* Sample kafka message: [audit-message-sample.json](docs/audit-message-sample.json)
+* Sample unencrypted message payload from `dbObject`: [audit-message-sample-unencrypted-payload.json](docs/audit-message-sample-unencrypted-payload.json)
+  * Note that k2hb does not decrypt this, it is for reference only
