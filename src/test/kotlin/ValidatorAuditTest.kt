@@ -279,7 +279,7 @@ class ValidatorAuditTest : StringSpec() {
                 )
             }
 
-            exception.message shouldBe "Message failed schema validation: '#/message/_id/auditId: xxxxx"
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
         }
 
         "Audit Schema: Incorrect '#/message/_id' type causes validation failure." {
@@ -309,7 +309,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message:xxx"
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
         }
 
         "Audit Schema: Empty '#/message/_id' type causes validation failure." {
@@ -339,7 +339,7 @@ class ValidatorAuditTest : StringSpec() {
                 """.trimMargin()
                 )
             }
-            exception.message shouldBe "Message failed schema validation: '#/message: xxx"
+            exception.message shouldBe "Message failed schema validation: '#/message/_id: #: only 1 subschema matches out of 2'."
         }
 
         "Audit Schema: Missing '#/message/_lastModifiedDateTime' does not cause validation failure." {
