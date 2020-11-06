@@ -20,8 +20,6 @@ import kotlin.time.seconds
 @ExperimentalTime
 class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
-    private val log = Logger.getLogger(Kafka2hbUcfsIntegrationSpec::class.toString())
-
     init {
         "UCFS Messages with new identifiers are written to hbase but not to dlq" {
             val hbase = HbaseClient.connect()
@@ -242,4 +240,5 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
         }
     }
 
+    private val log = Logger.getLogger(Kafka2hbUcfsIntegrationSpec::class.toString())
 }
