@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import lib.*
@@ -51,11 +52,18 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val storedValue =
                 waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
-            String(storedValue!!) shouldBe Gson().fromJson(String(body), JsonObject::class.java).toString()
+
+            storedValue shouldNotBe null
+            val jsonObject = Gson().fromJson(String(storedValue!!), JsonObject::class.java)
+            val putTime = jsonObject["put_time"].asJsonPrimitive.asString
+            putTime shouldNotBe null
+            val expected = Gson().fromJson(String(body), JsonObject::class.java)
+            expected.addProperty("put_time", putTime)
+            String(storedValue!!) shouldBe expected.toString()
 
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
-            val summariesManifests1 = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
+            val summariesManifests1 = s3Client.listObjectsV2("manifests", "streaming").objectSummaries
             summariesManifests1.size shouldBe 1
 
             verifyMetadataStore(1, topic, true)
