@@ -47,7 +47,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             String(storedValue!!) shouldBe Gson().fromJson(String(body), JsonObject::class.java).toString()
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
-            val summariesManifests1 = s3Client.listObjectsV2("manifests", "streaming").objectSummaries
+            val summariesManifests1 = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
             summariesManifests1.size shouldBe 0
 
 

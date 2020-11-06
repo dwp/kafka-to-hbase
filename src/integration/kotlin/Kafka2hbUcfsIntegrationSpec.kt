@@ -63,7 +63,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
-            val summariesManifests1 = s3Client.listObjectsV2("manifests", "streaming").objectSummaries
+            val summariesManifests1 = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
             summariesManifests1.size shouldBe 1
 
             verifyMetadataStore(1, topic, true)
@@ -88,8 +88,13 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             log.info("Sent well-formed record to kafka topic '$topic'.")
             val referenceTimestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val storedValue = waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
-            String(storedValue!!) shouldBe Gson().fromJson(String(body), JsonObject::class.java).toString()
 
+            val jsonObject = Gson().fromJson(String(storedValue!!), JsonObject::class.java)
+            val putTime = jsonObject["put_time"].asJsonPrimitive.asString
+            putTime shouldNotBe null
+            val expected = Gson().fromJson(String(body), JsonObject::class.java)
+            expected.addProperty("put_time", putTime)
+            String(storedValue!!) shouldBe expected.toString()
             verifyMetadataStore(1, topic, true)
         }
 
@@ -128,10 +133,12 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
             val storedNewValue =
                 waitFor { hbase.getCellAfterTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
-            Gson().fromJson(
-                String(storedNewValue!!),
-                JsonObject::class.java
-            ) shouldBe Gson().fromJson(String(body2), JsonObject::class.java)
+            val jsonObject = Gson().fromJson(String(storedNewValue!!), JsonObject::class.java)
+            val putTime = jsonObject["put_time"].asJsonPrimitive.asString
+            putTime shouldNotBe null
+            val expected = Gson().fromJson(String(body2), JsonObject::class.java)
+            expected.addProperty("put_time", putTime)
+            String(storedNewValue!!) shouldBe expected.toString()
 
             val storedPreviousValue =
                 waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
