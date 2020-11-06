@@ -56,7 +56,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
 
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
-            val summariesManifests1 = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
+            val summariesManifests1 = s3Client.listObjectsV2("manifests", "streaming").objectSummaries
             summariesManifests1.size shouldBe 0
 
 
