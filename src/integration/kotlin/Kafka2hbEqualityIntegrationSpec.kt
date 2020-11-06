@@ -108,13 +108,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val storedPreviousValue =
                 waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
 
-
-            val previousJsonObject = Gson().fromJson(String(storedPreviousValue!!), JsonObject::class.java)
-            val previousPutTime = previousJsonObject["put_time"].asJsonPrimitive.asString
-            previousPutTime shouldNotBe null
-            val previousExpected = Gson().fromJson(String(body1), JsonObject::class.java)
-            previousExpected.addProperty("put_time", putTime)
-            String(storedPreviousValue!!) shouldBe expected.toString()
+            String(storedPreviousValue!!) shouldBe String(body1)
 
             verifyMetadataStore(1, topic, true)
         }
