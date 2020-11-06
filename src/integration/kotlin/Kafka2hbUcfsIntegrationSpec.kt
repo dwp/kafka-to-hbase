@@ -232,7 +232,12 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             }
 
             log.info("storedValue: $storedValue")
-            String(storedValue) shouldBe Gson().fromJson(String(body), JsonObject::class.java).toString()
+            val jsonObject = Gson().fromJson(String(storedValue!!), JsonObject::class.java)
+            val putTime = jsonObject["put_time"].asJsonPrimitive.asString
+            putTime shouldNotBe null
+            val expected = Gson().fromJson(String(body), JsonObject::class.java)
+            expected.addProperty("put_time", putTime)
+            String(storedValue!!) shouldBe expected.toString()
 
             val summaries1 = s3Client.listObjectsV2("kafka2s3", "prefix").objectSummaries
             summaries1.size shouldBe 0
