@@ -119,3 +119,5 @@ fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, exactMatc
             }
         }
     }
+
+fun testTables(): MutableSet<String> = HbaseClient.connect().tables.keys

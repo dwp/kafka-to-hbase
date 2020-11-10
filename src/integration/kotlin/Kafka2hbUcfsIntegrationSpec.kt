@@ -61,6 +61,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             val summariesManifests1 = s3Client.listObjectsV2("manifests", "manifest_prefix").objectSummaries
             summariesManifests1.size shouldBe 1
 
+            verifyHbaseRegions()
             verifyMetadataStore(1, topic, true)
         }
 
@@ -235,12 +236,8 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
         var waitSoFarSecs = 0
         val longInterval = 5
-        val expectedTablesSorted = expectedTablesToRegions.keys.sorted()
 
-        logger.info(
-            "Waiting for ${expectedTablesSorted.size} hbase tables to appear with given regions",
-            "expected_tables_sorted", "$expectedTablesSorted"
-        )
+        logger.info("Waiting for $expectedTablesToRegions hbase tables to appear with given regions")
 
         val foundTablesToRegions = mutableMapOf<String, Int>()
 
@@ -248,14 +245,13 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             withTimeout(10.minutes) {
                 do {
                     val foundTablesSorted = testTables()
-                    logger.info(
-                        "Waiting for ${expectedTablesSorted.size} hbase tables to appear",
+                    logger.info("Waiting for $expectedTablesToRegions hbase tables to appear",
                         "found_tables_so_far", "${foundTablesSorted.size}",
-                        "total_seconds_elapsed", "$waitSoFarSecs"
-                    )
+                        "total_seconds_elapsed", "$waitSoFarSecs")
                     delay(longInterval.seconds)
                     waitSoFarSecs += longInterval
-                } while (expectedTablesSorted.toSet() != foundTablesSorted.toSet())
+                }
+                while (expectedTablesToRegions != foundTablesSorted.size)
 
                 testTables().forEach { tableName ->
                     launch(Dispatchers.IO) {
@@ -270,18 +266,14 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
                 }
             }
         }
-        foundTablesToRegions.toSortedMap() shouldBe expectedTablesToRegions
+
+        logger.info(foundTablesToRegions.toString())
+
+        foundTablesToRegions.values.contains(regionReplication * regionServers) shouldBe true
+        foundTablesToRegions.values.toSet().size shouldBe 1
     }
 }
 
-
-private fun testTables(): MutableSet<String> {
-    val tables = HbaseClient.connect().tables.keys
-    logger.info("...hbase tables", "number", "${tables.size}", "all_tables", "$tables")
-    return tables
-}
-
-private const val regionReplication = 2
-private val expectedTablesToRegions = mapOf(
-    "data:equality" to 1 * regionReplication
-).toSortedMap()
+private const val regionReplication = 3
+private const val regionServers = 2
+private const val expectedTablesToRegions = 1
