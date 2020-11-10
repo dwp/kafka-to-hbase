@@ -58,7 +58,7 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
             val summariesManifests1 = s3Client.listObjectsV2("manifests", "streaming").objectSummaries
             summariesManifests1.size shouldBe 0
 
-            verifyHbaseRegions()
+            verifyHbaseRegions(expectedTablesToRegions, regionReplication, regionServers)
             verifyMetadataStore(1, topic, true)
         }
 
@@ -153,47 +153,6 @@ class Kafka2hbEqualityIntegrationSpec : StringSpec() {
 
             verifyMetadataStore(0, topic, true)
         }
-    }
-
-    private suspend fun verifyHbaseRegions() {
-
-        var waitSoFarSecs = 0
-        val longInterval = 5
-
-        logger.info("Waiting for $expectedTablesToRegions hbase tables to appear with given regions")
-
-        val foundTablesToRegions = mutableMapOf<String, Int>()
-
-        HbaseClient.connect().use { hbase ->
-            withTimeout(10.minutes) {
-                do {
-                    val foundTablesSorted = testTables()
-                    logger.info("Waiting for $expectedTablesToRegions hbase tables to appear",
-                        "found_tables_so_far", "${foundTablesSorted.size}",
-                        "total_seconds_elapsed", "$waitSoFarSecs")
-                    delay(longInterval.seconds)
-                    waitSoFarSecs += longInterval
-                }
-                while (expectedTablesToRegions != foundTablesSorted.size)
-
-                testTables().forEach { tableName ->
-                    launch(Dispatchers.IO) {
-                        val regionsWithReplication = hbase.getTableRegions(TableName.valueOf(tableName)).size
-                        logger.info(
-                            "Found table",
-                            "table_name", tableName,
-                            "regions_with_replication", "$regionsWithReplication",
-                        )
-                        foundTablesToRegions[tableName] = regionsWithReplication
-                    }
-                }
-            }
-        }
-
-        logger.info(foundTablesToRegions.toString())
-
-        foundTablesToRegions.values.contains(regionReplication * regionServers) shouldBe true
-        foundTablesToRegions.values.toSet().size shouldBe 1
     }
 }
 

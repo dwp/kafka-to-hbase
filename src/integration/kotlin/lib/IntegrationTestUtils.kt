@@ -19,6 +19,7 @@ import java.sql.DriverManager
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
+import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
 import kotlin.time.seconds
 
@@ -119,5 +120,34 @@ fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, exactMatc
             }
         }
     }
+
+@ExperimentalTime
+suspend fun verifyHbaseRegions(expectedTablesToRegions: Int, regionReplication: Int, regionServers: Int) {
+
+    var waitSoFarSecs = 0
+    val longInterval = 5
+
+    val foundTablesToRegions = mutableMapOf<String, Int>()
+
+    HbaseClient.connect().use { hbase ->
+        withTimeout(10.minutes) {
+            do {
+                val foundTablesSorted = testTables()
+                delay(longInterval.seconds)
+                waitSoFarSecs += longInterval
+            }
+            while (expectedTablesToRegions != foundTablesSorted.size)
+
+            testTables().forEach { tableName ->
+                launch(Dispatchers.IO) {
+                    val regionsWithReplication = hbase.getTableRegions(TableName.valueOf(tableName)).size
+                    foundTablesToRegions[tableName] = regionsWithReplication
+                }
+            }
+        }
+    }
+    foundTablesToRegions.values.contains(regionReplication * regionServers) shouldBe true
+    foundTablesToRegions.values.toSet().size shouldBe 1
+}
 
 fun testTables(): MutableSet<String> = HbaseClient.connect().tables.keys
