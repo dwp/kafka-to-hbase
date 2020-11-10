@@ -93,7 +93,7 @@ object Config {
                 put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, pollInterval.toInt())
             }
             put(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, getEnv("K2HB_KAFKA_MAX_FETCH_BYTES") ?: 50_000_000)
-            put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, getEnv("K2HB_KAFKA_MAX_FETCH_BYTES") ?: 50_000_000)
+            put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, getEnv("K2HB_KAFKA_MAX_PARTITION_FETCH_BYTES") ?: 50_000_000)
         }
 
         val producerProps = Properties().apply {
