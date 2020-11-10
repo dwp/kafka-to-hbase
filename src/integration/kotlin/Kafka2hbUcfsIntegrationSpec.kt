@@ -1,12 +1,14 @@
-
 import com.beust.klaxon.Klaxon
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import lib.*
+import org.apache.hadoop.hbase.TableName
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.Logger
 import java.io.BufferedReader
@@ -23,6 +25,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
 
     init {
         "UCFS Messages with new identifiers are written to hbase but not to dlq" {
+
             val hbase = HbaseClient.connect()
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             val parser = MessageParser()
@@ -129,6 +132,7 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
                 waitFor { hbase.getCellBeforeTimestamp(qualifiedTableName, hbaseKey, referenceTimestamp) }
             String(storedPreviousValue!!) shouldBe String(body1)
 
+//            verifyHbaseRegions()
             verifyMetadataStore(1, topic, true)
         }
 
@@ -227,4 +231,57 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
         }
     }
 
+    private suspend fun verifyHbaseRegions() {
+
+        var waitSoFarSecs = 0
+        val longInterval = 5
+        val expectedTablesSorted = expectedTablesToRegions.keys.sorted()
+
+        logger.info(
+            "Waiting for ${expectedTablesSorted.size} hbase tables to appear with given regions",
+            "expected_tables_sorted", "$expectedTablesSorted"
+        )
+
+        val foundTablesToRegions = mutableMapOf<String, Int>()
+
+        HbaseClient.connect().use { hbase ->
+            withTimeout(10.minutes) {
+                do {
+                    val foundTablesSorted = testTables()
+                    logger.info(
+                        "Waiting for ${expectedTablesSorted.size} hbase tables to appear",
+                        "found_tables_so_far", "${foundTablesSorted.size}",
+                        "total_seconds_elapsed", "$waitSoFarSecs"
+                    )
+                    delay(longInterval.seconds)
+                    waitSoFarSecs += longInterval
+                } while (expectedTablesSorted.toSet() != foundTablesSorted.toSet())
+
+                testTables().forEach { tableName ->
+                    launch(Dispatchers.IO) {
+                        val regionsWithReplication = hbase.getTableRegions(TableName.valueOf(tableName)).size
+                        logger.info(
+                            "Found table",
+                            "table_name", tableName,
+                            "regions_with_replication", "$regionsWithReplication",
+                        )
+                        foundTablesToRegions[tableName] = regionsWithReplication
+                    }
+                }
+            }
+        }
+        foundTablesToRegions.toSortedMap() shouldBe expectedTablesToRegions
+    }
 }
+
+
+private fun testTables(): MutableSet<String> {
+    val tables = HbaseClient.connect().tables.keys
+    logger.info("...hbase tables", "number", "${tables.size}", "all_tables", "$tables")
+    return tables
+}
+
+private const val regionReplication = 2
+private val expectedTablesToRegions = mapOf(
+    "data:equality" to 1 * regionReplication
+).toSortedMap()

@@ -76,7 +76,6 @@ open class HbaseClient(
         }
     }
 
-
     private fun attemptPut(tableName: String, key: ByteArray, version: Long, body: ByteArray) {
 
         connection.getTable(TableName.valueOf(tableName)).use { table ->
@@ -175,7 +174,7 @@ open class HbaseClient(
         try {
             logger.info("Creating table",
                 "table_name", hbaseTable.nameAsString,
-                "region_splits", "$splits")
+                "region_splits", "$regionSplits")
 
             connection.admin.createTable(hbaseTable, splits.toTypedArray())
         } catch (e: TableExistsException) {
@@ -188,6 +187,8 @@ open class HbaseClient(
         }
     }
 
+    open fun getTableRegions(tableName: TableName): MutableList<HRegionInfo> = connection.admin.getTableRegions(tableName)
+
     private val namespaces by lazy {
         val extantNamespaces = mutableMapOf<String, Boolean>()
 
@@ -199,7 +200,7 @@ open class HbaseClient(
         extantNamespaces
     }
 
-    private val tables by lazy {
+    val tables by lazy {
         val names = mutableMapOf<String, Boolean>()
 
         connection.admin.listTableNames().forEach {
