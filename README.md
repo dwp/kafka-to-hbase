@@ -99,9 +99,11 @@ All the schemas are found in [src/main/resources](src/main/resources)
 | K2HB_KAFKA_DLQ_TOPIC | The topic to listen for on the kafka dlq, e.g. `test-dlq-topic` |                                                                                                                                                       
 | K2HB_RDS_USER | The user to use when connecting to the metadatastore e.g. `k2hbwriter` |                                                                                                                                                                      
 | K2HB_RDS_PASSWORD_SECRET_NAME | The name of the secret manager secret used to store the database users password  |                                                                                                                                                      
-| K2HB_RDS_DATABASE_NAME | The database that holds the reconciler table e.g. `metadatastore` |                                                                                                                                                             
+| K2HB_RDS_DATABASE_NAME | The database that holds the reconciler table e.g. `metadatastore` |                                                                                                                                                   
+| K2HB_METADATA_STORE_TABLE | The database table that holds the reconciler table we want to write to e.g. `ucfs` |                                                                                                                                                                        
 | K2HB_RDS_ENDPOINT | The reconciler database host or endpoint |                                                                                                                                                                  
-| K2HB_RDS_PORT | The port to connect to when establishing metadata store connection, e.g. `3306` |                                                                                                                                                                    
+| K2HB_RDS_PORT | The port to connect to when establishing metadata store connection, e.g. `3306` |                                                                                                                                
+| K2HB_RDS_CA_CERT_PATH | The certification location that is needed for authenticating with the rds database, e.g. `/certs/AmazonRootCA1.pem` |                                                                                                                                                                    
 | K2HB_USE_AWS_SECRETS | Whether to look up the metadatastore password in aws secret manager |                                                                                                                                                           
 | K2HB_KAFKA_INSECURE | A toggle for whether the connection for kafka is insecure |                                                                                                                                                
 | K2HB_KAFKA_MAX_POLL_RECORDS | The number of unreconciled records to read at a time. |                                                                                                                                                      
@@ -112,5 +114,10 @@ All the schemas are found in [src/main/resources](src/main/resources)
 | K2HB_VALIDATOR_SCHEMA | A json file that encompasses the validator schema, e.g. `business_message.schema.json` |
 | K2HB_KAFKA_TOPIC_REGEX | The regex for getting the Kafka topic name, e.g. `(db[.]{1}[-\w]+[.]{1}[-.\w]+)` |
 | K2HB_QUALIFIED_TABLE_PATTERN | The regex pattern for getting the table name from the topic, e.g. `\w+\.([-\w]+)\.([-.\w]+)` |
-| K2HB_AWS_S3_MANIFEST_DIRECTORY | The name of the directory for the AWS S3 manifest, e.g. `manifest_prefix` |                                                                                                                                                                                            
+| K2HB_AWS_S3_MANIFEST_DIRECTORY | The name of the directory for the AWS S3 manifest, e.g. `manifest_prefix` |            
+| K2HB_TRUSTSTORE_PATH | The SSL truststore location which is needed if Insecure Kafka is not true |         
+| K2HB_TRUSTSTORE_PASSWORD | The SSL truststore password which is needed if Insecure Kafka is not true |       
+| K2HB_KEYSTORE_PATH | The SSL keystore path which is needed if Insecure Kafka is not true |     
+| K2HB_KEYSTORE_PASSWORD | The SSL keystore password which is needed if Insecure Kafka is not true |     
+| K2HB_PRIVATE_KEY_PASSWORD | The SSL private key password which is needed if Insecure Kafka is not true |                                                                                                                                                                                            
  
