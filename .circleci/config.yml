@@ -109,7 +109,7 @@ jobs:
           path: test-results
           destination: test-results
 
- snyk-pr:
+  snyk-pr:
    docker:
      - image: circleci/openjdk:8-jdk
    environment:
@@ -139,7 +139,7 @@ jobs:
          monitor-on-build: false
          project: '${CIRCLE_PROJECT_REPONAME}/pr-docker'
 
- snyk-master:
+  snyk-master:
    docker:
      - image: circleci/openjdk:8-jdk
    environment:
