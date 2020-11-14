@@ -12,7 +12,6 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import io.kotest.matchers.longs.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
 import org.apache.hadoop.hbase.TableName
 import java.sql.Connection
 import java.sql.DriverManager
@@ -20,7 +19,6 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.*
 import kotlin.time.ExperimentalTime
-import kotlin.time.minutes
 import kotlin.time.seconds
 
 fun getId() = """{ "exampleId": "aaaa1111-abcd-4567-1234-1234567890ab"}"""
@@ -107,25 +105,19 @@ fun metadataStoreConnection(): Connection {
 }
 
 @ExperimentalTime
-suspend fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, exactMatch: Boolean = true) =
-        withTimeout(10.minutes) {
-            while (true) {
-                metadataStoreConnection().use { connection ->
-                    connection.createStatement().use { statement ->
-                        val results =
-                                statement.executeQuery("SELECT count(*) FROM ucfs WHERE topic_name like '%$expectedTopicName%'")
-                        results.next() shouldBe true
-                        val count = results.getLong(1)
-                        if (exactMatch && count > 0 && expectedCount > 0) {
-                            count shouldBe expectedCount.toLong()
-                        } else {
-                            count shouldBeGreaterThanOrEqual expectedCount.toLong()
-                        }
-                        return@withTimeout
-                    }
+fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, exactMatch: Boolean = true) =
+        metadataStoreConnection().use { connection ->
+            connection.createStatement().use { statement ->
+                val results =
+                        statement.executeQuery("SELECT count(*) FROM ucfs WHERE topic_name like '%$expectedTopicName%'")
+                results.next() shouldBe true
+                val count = results.getLong(1)
+                if (exactMatch && count > 0 && expectedCount > 0) {
+                    count shouldBe expectedCount.toLong()
+                } else {
+                    count shouldBeGreaterThanOrEqual expectedCount.toLong()
                 }
             }
-
         }
 
 @ExperimentalTime
