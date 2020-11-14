@@ -119,15 +119,11 @@ suspend fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, e
                         if (exactMatch) {
                             if (count > 0 && expectedCount > 0) {
                                 count shouldBe expectedCount.toLong()
-                                return@withTimeout
-                            }
-                            else {
-                                return@withTimeout
                             }
                         } else {
                             count shouldBeGreaterThanOrEqual expectedCount.toLong()
-                            return@withTimeout
                         }
+                        return@withTimeout
                     }
                 }
             }

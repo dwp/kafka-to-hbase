@@ -164,14 +164,14 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
                     try {
                         val s3Object = s3Client.getObject(
                                 "kafka2s3",
-                                "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key3"
+                                "prefix/test-dlq-topic/${SimpleDateFormat(dateFormat).format(Date())}/key3"
                         ).objectContent
                         val actual = s3Object.bufferedReader().use(BufferedReader::readText)
                         actual shouldBe expected
                         break
                     }
                     catch (e: Exception) {
-                        // try again
+                        delay(5.seconds)
                     }
                 }
             }
@@ -187,14 +187,14 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
             val timestamp = converter.getTimestampAsLong(getISO8601Timestamp())
             val producer = KafkaProducer<ByteArray, ByteArray>(Config.Kafka.producerProps)
             producer.sendRecord(topic.toByteArray(), "key4".toByteArray(), body, timestamp)
-            val key = "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key4"
+            val key = "prefix/test-dlq-topic/${SimpleDateFormat(dateFormat).format(Date())}/key4"
             log.info("key: $key")
             withTimeout(15.minutes) {
                 while (true) {
                     try {
                         val s3Object = s3Client.getObject(
                                 "kafka2s3",
-                                "prefix/test-dlq-topic/${SimpleDateFormat("YYYY-MM-dd").format(Date())}/key4"
+                                "prefix/test-dlq-topic/${SimpleDateFormat(dateFormat).format(Date())}/key4"
                         ).objectContent
                         val actual = s3Object.bufferedReader().use(BufferedReader::readText)
                         val malformedRecord = MalformedRecord(
@@ -267,7 +267,8 @@ class Kafka2hbUcfsIntegrationSpec : StringSpec() {
     }
   
     private val log = Logger.getLogger(Kafka2hbUcfsIntegrationSpec::class.toString())
+    private val dateFormat = "YYYY-MM-dd"
+    private val regionReplication = 3
+    private val regionServers = 2
 }
 
-private const val regionReplication = 3
-private const val regionServers = 2
