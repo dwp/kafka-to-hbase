@@ -106,8 +106,8 @@ integration-test-ucfs-and-equality: ## Run the integration tests in a Docker con
 
 integration-tests:
 	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test
-#	docker-compose -f docker-compose.yaml run --name integration-test-equality integration-test gradle --no-daemon --rerun-tasks integration-test-equality
-#	docker-compose -f docker-compose.yaml run --name integration-load-test integration-test gradle --no-daemon --rerun-tasks integration-load-test
+	docker-compose -f docker-compose.yaml run --name integration-test-equality integration-test gradle --no-daemon --rerun-tasks integration-test-equality
+	docker-compose -f docker-compose.yaml run --name integration-load-test integration-test gradle --no-daemon --rerun-tasks integration-load-test
 
 integration-load-test: ## Run the integration load tests in a Docker container
 	@{ \
