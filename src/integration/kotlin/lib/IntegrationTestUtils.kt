@@ -116,10 +116,8 @@ suspend fun verifyMetadataStore(expectedCount: Int, expectedTopicName: String, e
                                 statement.executeQuery("SELECT count(*) FROM ucfs WHERE topic_name like '%$expectedTopicName%'")
                         results.next() shouldBe true
                         val count = results.getLong(1)
-                        if (exactMatch) {
-                            if (count > 0 && expectedCount > 0) {
-                                count shouldBe expectedCount.toLong()
-                            }
+                        if (exactMatch && count > 0 && expectedCount > 0) {
+                            count shouldBe expectedCount.toLong()
                         } else {
                             count shouldBeGreaterThanOrEqual expectedCount.toLong()
                         }
