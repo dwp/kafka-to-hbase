@@ -124,6 +124,7 @@ services:
       K2HB_USE_AWS_SECRETS: "false"
       K2HB_VALIDATOR_SCHEMA: "equality_message.schema.json"
       K2HB_KAFKA_TOPIC_REGEX: (data[.][-\w]+)
+      K2HB_KAFKA_TOPIC_EXCLUSION_REGEX: "NOT_SET"
       K2HB_QUALIFIED_TABLE_PATTERN: ([-\w]+)\.([-\w]+)
       K2HB_AWS_S3_WRITE_MANIFESTS: "false"
 
