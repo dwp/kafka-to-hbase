@@ -131,6 +131,12 @@ kafka-shell: ## Open an shell in the running kafka broker container in root
 kafka-shell-bin: ## Open an shell in the running kafka broker container in /opt/kafka/bin
 	docker exec -w "/opt/kafka/bin" -it kafka sh -c 'ls'
 
+k2hb-main-logs: ## Follow the k2hb main logs
+	docker exec -it kafka2hbase tail -f /var/log/k2hb/k2hb.log
+
+k2hb-equality-logs: ## Follow the k2hb main logs
+	docker exec -it kafka2hbaseequality tail -f /var/log/k2hb/k2hb.log
+
 build: build-base ## build main images
 	docker-compose build
 
