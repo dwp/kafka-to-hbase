@@ -63,7 +63,11 @@ class Shovel(private val consumer: KafkaConsumer<ByteArray, ByteArray>) {
         consumer.metrics().filter { it.key.group() == "consumer-fetch-manager-metrics" }
             .filter { it.key.name() == "records-lag-max" }
             .map { it.value }
-            .forEach { logger.info("Max record lag", "lag" to it.metricValue().toString()) }
+            .forEach {
+                var baseLag = it.metricValue().toString()
+                var adjustedLag = if (NAN_TEXT.equals(baseLag)) "0" else baseLag
+                logger.info("Max record lag", "lag" to adjustedLag, "base_lag" to baseLag)
+            }
 
         consumer.listTopics()
             .filter { (topic, _) -> Config.Kafka.topicRegex.matches(topic) }
@@ -76,6 +80,7 @@ class Shovel(private val consumer: KafkaConsumer<ByteArray, ByteArray>) {
     fun batchCountIsMultipleOfReportFrequency(batchCount: Int): Boolean = (batchCount % Config.Shovel.reportFrequency) == 0
 
     companion object {
+        private val NAN_TEXT = "NaN"
         private val logger = DataworksLogger.getLogger(Shovel::class.java.toString())
         private val closed: AtomicBoolean = AtomicBoolean(false)
     }
