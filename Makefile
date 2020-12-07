@@ -111,8 +111,19 @@ integration-tests:
 		docker rm integration-test ;\
 		set -e ;\
 	}
-	docker-compose -f docker-compose.yaml build integration-test
-	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test integration-test-equality integration-load-test
+	docker-compose -f docker-compose.yaml build populate-for-integration
+	docker-compose -f docker-compose.yaml run --name populate-for-integration populate-for-integration
+
+# Old Kotlin integration cmd
+#integration-tests:
+#	@{ \
+#		set +e ;\
+#		docker stop integration-test ;\
+#		docker rm integration-test ;\
+#		set -e ;\
+#	}
+#	docker-compose -f docker-compose.yaml build integration-test
+#	docker-compose -f docker-compose.yaml run --name integration-test integration-test gradle --no-daemon --rerun-tasks integration-test integration-test-equality integration-load-test
 
 integration-load-test: ## Run the integration load tests in a Docker container
 	@{ \
