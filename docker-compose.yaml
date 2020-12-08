@@ -178,8 +178,8 @@ services:
       MYSQL_USER: "k2hbwriter"
       MYSQL_PASSWORD: "password"
 
-  populate-for-integration:
-    container_name: populate-for-integration
+  publish-for-integration:
+    container_name: publish-for-integration
     build:
       context: ./docker/integration
       dockerfile: DockerFile

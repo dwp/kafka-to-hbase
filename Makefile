@@ -107,12 +107,12 @@ integration-test-ucfs-and-equality: ## Run the integration tests in a Docker con
 integration-tests:
 	@{ \
 		set +e ;\
-		docker stop integration-test ;\
-		docker rm integration-test ;\
+		docker stop publish-for-integration ;\
+		docker rm publish-for-integration ;\
 		set -e ;\
 	}
-	docker-compose -f docker-compose.yaml build populate-for-integration
-	docker-compose -f docker-compose.yaml run --name populate-for-integration populate-for-integration
+	docker-compose -f docker-compose.yaml build publish-for-integration
+	docker-compose -f docker-compose.yaml run --name publish-for-integration publish-for-integration
 
 # Old Kotlin integration cmd
 #integration-tests:

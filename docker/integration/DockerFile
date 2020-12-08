@@ -18,6 +18,8 @@ RUN chown -R $SERVICE_USER.$SERVICE_USER $INSTALL_DIR
 
 USER $SERVICE_USER
 
-COPY populate.py .
+COPY ./* ./
 
-ENTRYPOINT ["python", "./populate.py"]
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["python", "./publish.py"]
