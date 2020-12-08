@@ -14,10 +14,10 @@ RUN chown -R $SERVICE_USER.$SERVICE_USER $INSTALL_DIR
 
 USER $SERVICE_USER
 
-COPY ./publish.py ./
-COPY ./util.py ./
-COPY ./requirements.txt ./
+COPY ./features ./
+COPY ./requirements_integration.txt ./
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements_integration.txt
 
-ENTRYPOINT ["python", "./publish.py"]
+ENTRYPOINT ["python"]
+CMD ["-m", "behave"]

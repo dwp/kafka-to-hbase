@@ -181,19 +181,18 @@ services:
   publish-for-integration:
     container_name: publish-for-integration
     build:
-      context: ./docker/integration
       dockerfile: DockerFile
+      context: ./docker/integration
 
   integration-test:
     image: kafka2hbase-integration:latest
     container_name: integration-test
     build:
-      dockerfile: Dockerfile_integration
-      context: ./
+      dockerfile: DockerFile_integration
+      context: ./docker/integration
     depends_on:
       - kafka2hbase
       - kafka2s3
-    command: "true"
     environment:
       AWS_ACCESS_KEY_ID: "aws-access-key"
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"

@@ -108,11 +108,13 @@ integration-tests:
 	@{ \
 		set +e ;\
 		docker stop publish-for-integration ;\
+		docker stop integration-test ;\
 		docker rm publish-for-integration ;\
+		docker rm integration-test ;\
 		set -e ;\
 	}
-	docker-compose -f docker-compose.yaml build publish-for-integration
 	docker-compose -f docker-compose.yaml run --name publish-for-integration publish-for-integration
+	docker-compose -f docker-compose.yaml run --name integration-test integration-test
 
 # Old Kotlin integration cmd
 #integration-tests:
