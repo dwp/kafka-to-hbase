@@ -1,7 +1,6 @@
 from time import sleep
 
 import happybase
-import requests
 
 from util import table_name
 
@@ -14,7 +13,7 @@ def step_impl(context):
 
     while not connected:
         try:
-            context.connection = happybase.Connection("hbase")
+            context.connection = happybase.Connection("zookeeper", 2181)
             context.connection.open()
 
             connected = True
@@ -27,6 +26,14 @@ def step_impl(context):
 
 @then(u'HBase will have {num_of_tables} tables')
 def step_impl(context, num_of_tables):
+    num_of_tables = int(num_of_tables)
     expected_tables_sorted = [table_name(i) for i in range(0, num_of_tables)]
+    expected_tables_sorted.sort()
 
-    print(expected_tables_sorted)
+    # print(expected_tables_sorted)
+
+    context.connection: happybase.connection.Connection
+    print(context.connection.__dict__)
+    tables = context.connection.tables()
+
+    print(tables)
