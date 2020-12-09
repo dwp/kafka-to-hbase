@@ -9,6 +9,9 @@ gradlew.bat
 
 .DS_Store
 
+*.pyc
+venv/
+
 out/
 .gitsecret/keys/random_seed
 !*.secret

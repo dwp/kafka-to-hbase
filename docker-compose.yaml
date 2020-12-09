@@ -29,8 +29,13 @@ services:
 
   hbase:
     image: hbase:latest
-    build: ./docker/hbase
     container_name: hbase
+    ports:
+      - 9090:9090
+      - 9095:9095
+      - 16010:16010
+      - 16201:16201
+    build: ./docker/hbase
     depends_on:
       - zookeeper
     environment:
@@ -193,6 +198,8 @@ services:
     depends_on:
       - kafka2hbase
       - kafka2s3
+      - zookeeper
+      - hbase
     environment:
       AWS_ACCESS_KEY_ID: "aws-access-key"
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"

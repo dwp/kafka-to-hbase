@@ -20,4 +20,4 @@ COPY ./requirements_integration.txt ./
 RUN pip install -r requirements_integration.txt
 
 ENTRYPOINT ["python"]
-CMD ["-m", "behave"]
+CMD ["-m", "behave", "--no-capture"]
