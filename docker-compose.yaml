@@ -6,9 +6,9 @@ services:
     image: confluentinc/cp-zookeeper:4.1.0
     container_name: zookeeper
     ports:
-      - "2181:2181"
+      - "2182:2182"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_CLIENT_PORT: 2182
 
   kafka:
     image: wurstmeister/kafka:2.12-2.5.0
@@ -18,7 +18,7 @@ services:
     depends_on:
       - zookeeper
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2182"
       KAFKA_ADVERTISED_HOST_NAME: "kafka"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -28,18 +28,14 @@ services:
       KAFKA_CREATE_TOPICS: "db.test.collection:20:1"
 
   hbase:
-    image: hbase:latest
-    container_name: hbase
+    image: harisekhon/hbase:1.4
     ports:
       - 9090:9090
       - 9095:9095
+      - 2181:2181
       - 16010:16010
       - 16201:16201
-    build: ./docker/hbase
-    depends_on:
-      - zookeeper
-    environment:
-      ZOOKEEPER_QUORUM: zookeeper
+    container_name: hbase
 
   kafka2hbase:
     image: kafka2hbase:latest
@@ -56,7 +52,7 @@ services:
       APPLICATION: "k2hb-main"
       ENVIRONMENT: "local-dev"
       COMPONENT: "jar-file"
-      LOG_LEVEL: "DEBUG"
+      LOG_LEVEL: "INFO"
       AWS_ACCESS_KEY_ID: "aws-access-key"
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
       DUMMY_SECRET_METASTORE_PASSWORD: "password"
@@ -64,6 +60,8 @@ services:
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
       K2HB_AWS_S3_BATCH_PUTS: "true"
       K2HB_AWS_S3_USE_LOCALSTACK: "true"
+      K2HB_HBASE_ZOOKEEPER_QUORUM: "hbase"
+      K2HB_HBASE_ZOOKEEPER_PORT: "2181"
       K2HB_HBASE_OPERATION_TIMEOUT_MILLISECONDS": "1800"
       K2HB_HBASE_PAUSE_MILLISECONDS: "50"
       K2HB_HBASE_RETRIES": "3"
@@ -85,6 +83,7 @@ services:
       K2HB_USE_AWS_SECRETS: "false"
       K2HB_WRITE_TO_METADATA_STORE: "true"
       K2HB_VALIDATOR_SCHEMA: "business_message.schema.json"
+      K2HB_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       K2HB_KAFKA_TOPIC_REGEX: (db[.]{1}[-\w]+[.]{1}[-.\w]+)
       K2HB_KAFKA_TOPIC_EXCLUSION_REGEX: db\.excluded\.[-\w]+
       K2HB_QUALIFIED_TABLE_PATTERN: \w+\.([-\w]+)\.([-.\w]+)
@@ -105,13 +104,15 @@ services:
       APPLICATION: "k2hb-equality"
       ENVIRONMENT: "local-dev"
       COMPONENT: "jar-file"
-      LOG_LEVEL: "DEBUG"
+      LOG_LEVEL: "INFO"
       AWS_ACCESS_KEY_ID: "aws-access-key"
       AWS_SECRET_ACCESS_KEY: "aws-secret-access-key"
       DUMMY_SECRET_METASTORE_PASSWORD: "password"
       INSTANCE_ID: "localhost"
       JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
       K2HB_AWS_S3_USE_LOCALSTACK: "true"
+      K2HB_HBASE_ZOOKEEPER_QUORUM: "hbase"
+      K2HB_HBASE_ZOOKEEPER_PORT: "2181"
       K2HB_HBASE_OPERATION_TIMEOUT_MILLISECONDS": "1800"
       K2HB_HBASE_PAUSE_MILLISECONDS: "50"
       K2HB_HBASE_RETRIES": "3"
@@ -132,6 +133,7 @@ services:
       K2HB_RETRY_MAX_ATTEMPTS: "3"
       K2HB_USE_AWS_SECRETS: "false"
       K2HB_VALIDATOR_SCHEMA: "equality_message.schema.json"
+      K2HB_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       K2HB_KAFKA_TOPIC_REGEX: (data[.][-\w]+)
       K2HB_KAFKA_TOPIC_EXCLUSION_REGEX: "NOT_SET"
       K2HB_QUALIFIED_TABLE_PATTERN: ([-\w]+)\.([-\w]+)
@@ -147,6 +149,7 @@ services:
       K2HB_ENVIRONMENT: "local-dev"
       K2HB_APPLICATION_NAME: "k2h3"
       K2HB_APP_VERSION: "test"
+      K2HB_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
       INSTANCE_ID: "localhost"
       K2S3_KAFKA_INSECURE: "true"
       K2S3_DEAD_LETTER_QUEUE: "test-dlq-topic"

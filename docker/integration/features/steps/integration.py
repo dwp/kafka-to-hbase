@@ -13,7 +13,7 @@ def step_impl(context):
 
     while not connected:
         try:
-            context.connection = happybase.Connection("zookeeper", 2181)
+            context.connection = happybase.Connection("hbase")
             context.connection.open()
 
             connected = True
@@ -33,7 +33,9 @@ def step_impl(context, num_of_tables):
     # print(expected_tables_sorted)
 
     context.connection: happybase.connection.Connection
-    print(context.connection.__dict__)
+    # print(context.connection.__dict__)
     tables = context.connection.tables()
 
+    print("-"*20)
     print(tables)
+    print("-"*20)
