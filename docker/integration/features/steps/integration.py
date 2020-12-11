@@ -79,7 +79,7 @@ def step_impl(context, num_of_rows):
 
         # Looping over all table names
         for table_name in context.tables:
-            assert "excluded" not in table_name, f"Found 'excluded' in {table_name}"
+            assert "excluded" not in table_name.decode("utf-8"), f"Found 'excluded' in {table_name}"
 
             table = happybase.Table(table_name, context.connection)
             table_count = 0
