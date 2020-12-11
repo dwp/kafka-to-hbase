@@ -22,7 +22,7 @@ def publish_records():
             timestamp = int(time())
 
             logger.debug(f"Sending record {message_num}/{records_per_topic} to kafka topic {topic} "
-                        f"& excluded topic '{excluded_topic}'.")
+                         f"& excluded topic '{excluded_topic}'.")
 
             producer.send(
                 topic=topic,
@@ -38,7 +38,9 @@ def publish_records():
             )
 
             logger.debug(f"Sent record {message_num}/{records_per_topic} to kafka topic '{topic}' "
-                        f"& excluded topic '{excluded_topic}'.")
+                         f"& excluded topic '{excluded_topic}'.")
+
+        logger.info(f"Published collection {collection_num}")
 
     logger.info("The kafka record publisher has finished.")
 

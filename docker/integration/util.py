@@ -1,6 +1,8 @@
 import json
 import logging
+import time
 
+from datetime import tzinfo
 from datetime import datetime
 
 db_name = "load-test-database"
@@ -44,7 +46,7 @@ def body(record_number: int) -> bytes:
             "_id": {
                 "id": f"{db_name}/{collection_name}/{record_number}"
             },
-            "_lastModifiedDateTime": f"{datetime.now().isoformat()}",
+            "_lastModifiedDateTime": f"{datetime.now().isoformat()[:-3]}+0000",
             "encryption": {
                 "encryptionKeyId": "cloudhsm:1,2",
                 "encryptedEncryptionKey": "bHJjhg2Jb0uyidkl867gtFkjl4fgh9Ab",
