@@ -1,6 +1,9 @@
+import gzip
+import json
 from datetime import datetime, timedelta
 from time import sleep
 
+import boto3
 import happybase
 
 import util
@@ -9,7 +12,11 @@ from behave import given, then
 
 logger = util.get_logger(__name__)
 
+s3_bucket = "ucarchive"
+s3_dir = "ucdata_main"
 
+
+# HBase step implementations
 @given(u'HBase is up and accepting connections')
 def step_impl(context):
     connected = False
@@ -101,3 +108,38 @@ def step_impl(context, num_of_rows):
                 sleep(5)
             else:
                 tables_with_rows.append(table_name)
+
+
+# S3 step implementations
+@given(u'all objects can be retrieved from S3')
+def step_impl(context):
+    s3 = boto3.resource("s3", endpoint_url="http://aws-s3:4566")
+    bucket = s3.Bucket(s3_bucket)
+
+    context.s3_contents_list = []
+
+    for i in bucket.objects.all():
+        if i.key.endswith("jsonl.gz") and "load_test" in i.key:
+            body = i.get().get("Body")
+            body = gzip.decompress(body.read()).decode("utf-8")
+            body = body.split("\n")
+
+            for item in body:
+                # Strips whitespace & checks if string is empty
+                if not item.strip():
+                    continue
+
+                context.s3_contents_list.append(json.loads(item))
+
+
+@then(u'the total size of the retrieved data should be {topic_count} * {records_per_topic}')
+def step_impl(context, topic_count, records_per_topic):
+    # logger.info(context.s3_contents_list)
+    expected = int(topic_count) * int(records_per_topic)
+    actual = len(context.s3_contents_list)
+    assert actual == expected, f"expected: {expected}, actual: {actual}"
+
+
+@then(u'each of the objects should have the correct data')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: Then each of the objects should have the correct data')
