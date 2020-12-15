@@ -92,7 +92,7 @@ def step_impl(context, num_of_rows):
             table_count = 0
 
             while table_count < num_of_rows:
-                # .scan returns a generator so its easiest to convert to list for len
+                # .scan returns a generator so its easiest to convert to list to get the length
                 table_count = len(list(table.scan()))
 
                 logger.info(
@@ -101,7 +101,7 @@ def step_impl(context, num_of_rows):
                     f"Total of {time_waited} seconds elapsed"
                 )
 
-                if table_count == 1000:
+                if table_count == num_of_rows:
                     continue
 
                 time_waited += 5
@@ -131,10 +131,11 @@ def step_impl(context):
 
                 context.s3_contents_list.append(json.loads(item))
 
+    assert len(context.s3_contents_list) > 1, "s3_contents_list is empty"
 
-@then(u'the total size of the retrieved data should be {topic_count} * {records_per_topic}')
+
+@then(u'the total size of the retrieved data should be {topic_count} topics * {records_per_topic} records')
 def step_impl(context, topic_count, records_per_topic):
-    # logger.info(context.s3_contents_list)
     expected = int(topic_count) * int(records_per_topic)
     actual = len(context.s3_contents_list)
     assert actual == expected, f"expected: {expected}, actual: {actual}"
@@ -142,4 +143,20 @@ def step_impl(context, topic_count, records_per_topic):
 
 @then(u'each of the objects should have the correct data')
 def step_impl(context):
-    raise NotImplementedError(u'STEP: Then each of the objects should have the correct data')
+    for obj in context.s3_contents_list:
+        try:
+            trace_id = obj.get("traceId")
+            message = obj.get("message")
+            db_object = message.get("dbObject")
+
+            assert trace_id == "00002222-abcd-4567-1234-1234567890ab", \
+                f"expected: '00002222-abcd-4567-1234-1234567890ab', actual: '{trace_id}'"
+
+            assert message is not None, f"expected message to not be None, message: {message}"
+
+            assert db_object is not None and db_object == "bubHJjhg2Jb0uyidkl867gtFkjl4fgh9AbubHJjhg2Jb0uyidkl867gtFkjl4fg" \
+                                                          "h9AbubHJjhg2Jb0uyidkl867gtFkjl4fgh9A", \
+                f"expected db_object to not be None, message: {db_object}"
+        except Exception as e:
+            logger.error(f"failing object: {obj}")
+            raise e
