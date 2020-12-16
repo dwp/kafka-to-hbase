@@ -12,9 +12,6 @@ from behave import given, then
 
 logger = util.get_logger(__name__)
 
-s3_bucket = "ucarchive"
-s3_dir = "ucdata_main"
-
 
 # HBase step implementations
 @given(u'HBase is up and accepting connections')
@@ -37,7 +34,7 @@ def step_impl(context):
 @then(u'HBase will have {num_of_tables} tables')
 def step_impl(context, num_of_tables):
     num_of_tables = int(num_of_tables)
-    expected_tables_sorted = [util.table_name(i) for i in range(1, num_of_tables + 1)]
+    expected_tables_sorted = [util.table_name(i) for i in range(0, num_of_tables)]
 
     timeout_time = datetime.now() + timedelta(minutes=15)
     time_waited = 0
@@ -110,11 +107,11 @@ def step_impl(context, num_of_rows):
                 tables_with_rows.append(table_name)
 
 
-# S3 step implementations
-@given(u'all objects can be retrieved from S3')
+# S3 ucarchive step implementations
+@given(u'all objects can be retrieved from the ucarchive S3 bucket')
 def step_impl(context):
     s3 = boto3.resource("s3", endpoint_url="http://aws-s3:4566")
-    bucket = s3.Bucket(s3_bucket)
+    bucket = s3.Bucket("ucarchive")
 
     context.s3_contents_list = []
 
@@ -160,3 +157,43 @@ def step_impl(context):
         except Exception as e:
             logger.error(f"failing object: {obj}")
             raise e
+
+
+# S3 manifests step implementations
+@given(u'all objects can be retrieved from the manifests S3 bucket')
+def step_impl(context):
+    s3 = boto3.resource("s3", endpoint_url="http://aws-s3:4566")
+    bucket = s3.Bucket("manifests")
+
+    context.s3_contents_list = []
+
+    for i in bucket.objects.all():
+        if i.key.endswith("txt") and "load-test" in i.key:
+            body = i.get().get("Body").read()
+            body = body.decode("utf-8")
+
+            context.s3_contents_list.append(body)
+
+    assert len(context.s3_contents_list) > 1, "s3_contents_list is empty"
+
+
+@then(u'each of the objects should have the correct fields')
+def step_impl(context):
+    for obj in context.s3_contents_list:
+        obj = obj.split("|")
+
+        assert len(obj) == 8, f"expected object size of 8, actual: {len(obj)}"
+        assert obj[0] != ""
+        assert obj[0] is not None
+        assert obj[1] != ""
+        assert obj[1] is not None
+        assert obj[2] != ""
+        assert obj[2] is not None
+        assert obj[3] != ""
+        assert obj[3] is not None
+        assert obj[4] == "STREAMED"
+        assert obj[5] == "K2HB"
+        assert obj[6] != ""
+        assert obj[6] is not None
+        assert obj[7] == "KAFKA_RECORD"
+
