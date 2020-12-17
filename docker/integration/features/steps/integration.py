@@ -34,7 +34,7 @@ def step_impl(context):
 @then(u'HBase will have {num_of_tables} tables')
 def step_impl(context, num_of_tables):
     num_of_tables = int(num_of_tables)
-    expected_tables_sorted = [util.table_name(i) for i in range(0, num_of_tables)]
+    expected_tables_sorted = [util.table_name(i) for i in range(1, num_of_tables + 1)]
 
     timeout_time = datetime.now() + timedelta(minutes=15)
     time_waited = 0
@@ -131,7 +131,7 @@ def step_impl(context):
     assert len(context.s3_contents_list) > 1, "s3_contents_list is empty"
 
 
-@then(u'the total size of the retrieved data should be {topic_count} topics * {records_per_topic} records')
+@then(u'the total size of the retrieved data should be {topic_count} topics with {records_per_topic} records')
 def step_impl(context, topic_count, records_per_topic):
     expected = int(topic_count) * int(records_per_topic)
     actual = len(context.s3_contents_list)

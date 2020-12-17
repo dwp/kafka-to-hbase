@@ -5,8 +5,8 @@ from kafka import KafkaProducer
 
 logger = util.get_logger(__name__)
 
-topic_count = 10
-records_per_topic = 1000
+topic_count = 5
+records_per_topic = 250
 
 
 def publish_records():
