@@ -6,7 +6,7 @@ from kafka import KafkaProducer
 logger = util.get_logger(__name__)
 
 topic_count = 5
-records_per_topic = 250
+records_per_topic = 500
 
 
 def publish_records():
@@ -14,7 +14,7 @@ def publish_records():
 
     logger.info("Starting kafka record publisher...")
 
-    for collection_num in range(1, topic_count + 1):
+    for collection_num in range(0, topic_count):
         topic = util.topic_name(collection_num)
         excluded_topic = util.excluded_topic_name(collection_num)
 

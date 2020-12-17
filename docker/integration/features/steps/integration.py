@@ -5,6 +5,7 @@ from time import sleep
 
 import boto3
 import happybase
+import mysql.connector
 
 import util
 
@@ -20,8 +21,8 @@ def step_impl(context):
 
     while not connected:
         try:
-            context.connection = happybase.Connection("hbase")
-            context.connection.open()
+            context.hbase = happybase.Connection("hbase")
+            context.hbase.open()
 
             connected = True
         except Exception as e:
@@ -34,14 +35,14 @@ def step_impl(context):
 @then(u'HBase will have {num_of_tables} tables')
 def step_impl(context, num_of_tables):
     num_of_tables = int(num_of_tables)
-    expected_tables_sorted = [util.table_name(i) for i in range(1, num_of_tables + 1)]
+    expected_tables_sorted = [util.table_name(i) for i in range(0, num_of_tables)]
 
     timeout_time = datetime.now() + timedelta(minutes=15)
     time_waited = 0
 
     # Checking for table count & names
     while timeout_time > datetime.now():
-        tables = context.connection.tables()
+        tables = context.hbase.tables()
         table_count = len(tables)
 
         logger.info(
@@ -85,7 +86,7 @@ def step_impl(context, num_of_rows):
         for table_name in context.tables:
             assert "excluded" not in table_name.decode("utf-8"), f"Found 'excluded' in {table_name}"
 
-            table = happybase.Table(table_name, context.connection)
+            table = happybase.Table(table_name, context.hbase)
             table_count = 0
 
             while table_count < num_of_rows:
@@ -170,19 +171,25 @@ def step_impl(context):
     for i in bucket.objects.all():
         if i.key.endswith("txt") and "load-test" in i.key:
             body = i.get().get("Body").read()
-            body = body.decode("utf-8")
+            lines = body.decode("utf-8")
 
-            context.s3_contents_list.append(body)
+            for line in lines.split("\n"):
+                # Strips whitespace & checks if string is empty
+                if not line.strip():
+                    continue
+
+                context.s3_contents_list.append(line)
 
     assert len(context.s3_contents_list) > 1, "s3_contents_list is empty"
 
 
 @then(u'each of the objects should have the correct fields')
 def step_impl(context):
+
     for obj in context.s3_contents_list:
         obj = obj.split("|")
 
-        assert len(obj) == 8, f"expected object size of 8, actual: {len(obj)}"
+        assert len(obj) == 8, f"expected object size of 8, obj: {obj}"
         assert obj[0] != ""
         assert obj[0] is not None
         assert obj[1] != ""
@@ -196,4 +203,33 @@ def step_impl(context):
         assert obj[6] != ""
         assert obj[6] is not None
         assert obj[7] == "KAFKA_RECORD"
+
+
+@given(u'the metadatastore is up and accepting connections')
+def step_impl(context):
+    context.metadatastore_connection = mysql.connector.connect(
+        host="metadatastore", user="root", password="password", database="metadatastore"
+    )
+
+
+@then(u'the metadatastore {table_name} table will have {num_of_rows} rows')
+def step_impl(context, table_name, num_of_rows):
+    num_of_rows = int(num_of_rows)
+
+    cursor = context.metadatastore_connection.cursor()
+    cursor.execute(f"SELECT count(*) FROM {table_name}")
+
+    for count in cursor:
+        assert count[0] == num_of_rows, f"expected: {num_of_rows}, actual: {count[0]}"
+
+    cursor.close()
+
+
+@then(u'for each record in the {table_name} table the hbase_timestamp will be populated')
+def step_impl(context, table_name):
+    cursor = context.metadatastore_connection.cursor()
+    cursor.execute(f"SELECT hbase_timestamp FROM {table_name}")
+
+    for hbase_timestamp in cursor:
+        assert hbase_timestamp[0] is not None, f"expected hbase_timestamp to not be None, actual: {hbase_timestamp[0]}"
 
