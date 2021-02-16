@@ -228,7 +228,7 @@ open class HbaseClient(
             )
         }
 
-        private val logger = DataworksLogger.getLogger(HbaseClient::class.toString())
+        private val logger = DataworksLogger.getLogger(HbaseClient::class)
         private val textUtils = TextUtils()
     }
 

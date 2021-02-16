@@ -84,7 +84,7 @@ open class MetadataStoreClient(private val connection: Connection): AutoCloseabl
             return Pair(jdbcUrl, propertiesWithPassword)
         }
 
-        val logger = DataworksLogger.getLogger(MetadataStoreClient::class.toString())
+        val logger = DataworksLogger.getLogger(MetadataStoreClient::class)
         val textUtils = TextUtils()
     }
 

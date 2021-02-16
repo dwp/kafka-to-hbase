@@ -5,6 +5,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.mockk.every
 import io.mockk.mockkObject
+import org.apache.kafka.clients.consumer.ConsumerGroupMetadata
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.clients.producer.Callback
@@ -86,7 +87,7 @@ class RecordProcessorTest : StringSpec() {
 
         "valid record is sent to hbase successfully" {
             reset()
-            val (messageBody, persistedBody, record) = getValidMessages()
+            val (_, persistedBody, record) = getValidMessages()
             processor.processRecord(record, hbaseClient, metadataStoreClient, mockMessageParser)
             verify(hbaseClient).putVersion("database:collection", testByteArray, persistedBody.toByteArray(), 1544799662000)
             verify(metadataStoreClient).recordProcessingAttempt(TextUtils().printableKey(testByteArray), record, 1544799662000)
@@ -145,6 +146,13 @@ class RecordProcessorTest : StringSpec() {
                 override fun metrics(): MutableMap<MetricName, out Metric> {
                     throw Exception("")
                 }
+
+                override fun sendOffsetsToTransaction(
+                    offsets: MutableMap<TopicPartition, OffsetAndMetadata>?,
+                    groupMetadata: ConsumerGroupMetadata?
+                ) {
+
+                }
             }
             every { DlqProducer.getInstance() } returns obj
             val processor = RecordProcessor(mockValidator, mockConverter)
@@ -177,7 +185,7 @@ class RecordProcessorTest : StringSpec() {
 
         "exception in hbase communication causes severe log message" {
             reset()
-            val (messageBody, persistedBody, record) = getValidMessages()
+            val (_, persistedBody, record) = getValidMessages()
             whenever(hbaseClient.putVersion("database:collection", testByteArray, persistedBody.toByteArray(), 1544799662000)).doThrow(RuntimeException("testException"))
 
             try {

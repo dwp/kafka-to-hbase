@@ -109,7 +109,7 @@ open class ManifestAwsS3Service(private val amazonS3: AmazonS3) {
     companion object {
         fun connect() = ManifestAwsS3Service(s3)
         val textUtils = TextUtils()
-        val logger = DataworksLogger.getLogger(ManifestAwsS3Service::class.toString())
+        val logger = DataworksLogger.getLogger(ManifestAwsS3Service::class)
         val s3 = Config.AwsS3.s3
         const val MANIFEST_RECORD_SOURCE = "STREAMED"
         const val MANIFEST_RECORD_COMPONENT = "K2HB"

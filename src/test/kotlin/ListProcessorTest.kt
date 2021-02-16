@@ -3,6 +3,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.nhaarman.mockitokotlin2.*
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.runBlocking
@@ -29,8 +30,8 @@ class ListProcessorTest : StringSpec() {
             processor.processRecords(hbaseClient, consumer, metadataStoreClient, s3Service, manifestService, messageParser(), consumerRecords())
             verifyS3Interactions(s3Service)
             verifyHbaseInteractions(hbaseClient)
-            verifyKafkaInteractions(consumer)
             verifyMetadataStoreInteractions(metadataStoreClient)
+            verifyKafkaInteractions(consumer)
         }
     }
 
@@ -43,7 +44,7 @@ class ListProcessorTest : StringSpec() {
     private fun verifyS3Interactions(s3Service: ArchiveAwsS3Service) = runBlocking {
         val tableCaptor = argumentCaptor<String>()
         val payloadCaptor = argumentCaptor<List<HbasePayload>>()
-        verify(s3Service, times(10)).putObjects(tableCaptor.capture(), payloadCaptor.capture())
+        verify(s3Service, times(10)).putBatch(tableCaptor.capture(), payloadCaptor.capture())
         validateTableNames(tableCaptor)
         validateHbasePayloads(payloadCaptor)
     }
@@ -109,21 +110,17 @@ class ListProcessorTest : StringSpec() {
     }
 
     private fun verifyFailures(consumer: KafkaConsumer<ByteArray, ByteArray>) {
-        val topicPartitionCaptor = argumentCaptor<TopicPartition>()
-        val committedCaptor = argumentCaptor<TopicPartition>()
-        val positionCaptor = argumentCaptor<Long>()
-        verify(consumer, times(5)).committed(committedCaptor.capture())
-
-        committedCaptor.allValues.forEachIndexed { index, topicPartition ->
-            val topic = topicPartition.topic()
-            val partition = topicPartition.partition()
-            val topicNumber = (index * 2 + 1)
-            partition shouldBe 10 - topicNumber
-            topic shouldBe topicName(topicNumber)
+        argumentCaptor<Set<TopicPartition>> {
+            verify(consumer, times(5)).committed(capture())
+            allValues.forEachIndexed { index, topicPartitionSet ->
+                val topicNumber = (index * 2 + 1)
+                topicPartitionSet shouldContainExactly setOf(TopicPartition(topicName(topicNumber), 10 - topicNumber))
+            }
         }
 
+        val positionCaptor = argumentCaptor<Long>()
+        val topicPartitionCaptor = argumentCaptor<TopicPartition>()
         verify(consumer, times(5)).seek(topicPartitionCaptor.capture(), positionCaptor.capture())
-
         topicPartitionCaptor.allValues.zip(positionCaptor.allValues).forEachIndexed { index, pair ->
             val topicNumber = index * 2 + 1
             val topicPartition = pair.first
@@ -158,8 +155,8 @@ class ListProcessorTest : StringSpec() {
             mock<KafkaConsumer<ByteArray, ByteArray>> {
                 repeat(10) { topicNumber ->
                     on {
-                        committed(TopicPartition(topicName(topicNumber), 10 - topicNumber))
-                    } doReturn OffsetAndMetadata((topicNumber * 10).toLong(), "")
+                        committed(setOf(TopicPartition(topicName(topicNumber), 10 - topicNumber)))
+                    } doReturn mapOf(TopicPartition(topicName(topicNumber), 10 - topicNumber) to OffsetAndMetadata((topicNumber * 10).toLong(), ""))
                 }
             }
 
@@ -197,7 +194,7 @@ class ListProcessorTest : StringSpec() {
                 }
             })
 
-    private fun archiveAwsS3Service(): ArchiveAwsS3Service = mock { on { runBlocking { putObjects(any(), any()) } } doAnswer { } }
+    private fun archiveAwsS3Service(): ArchiveAwsS3Service = mock { on { runBlocking { putBatch(any(), any()) } } doAnswer { } }
     private fun manifestAwsS3Service(): ManifestAwsS3Service = mock { on { runBlocking { putManifestFile(any()) } } doAnswer { } }
     
     private fun json(id: Any) = """{ "message": { "_id": { "id": "$id" } } }"""

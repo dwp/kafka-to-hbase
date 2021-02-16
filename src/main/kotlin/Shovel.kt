@@ -76,7 +76,7 @@ class Shovel(private val consumer: KafkaConsumer<ByteArray, ByteArray>) {
     fun batchCountIsMultipleOfReportFrequency(batchCount: Int): Boolean = (batchCount % Config.Shovel.reportFrequency) == 0
 
     companion object {
-        private val logger = DataworksLogger.getLogger(Shovel::class.java.toString())
+        private val logger = DataworksLogger.getLogger(Shovel::class)
         private val closed: AtomicBoolean = AtomicBoolean(false)
     }
 }

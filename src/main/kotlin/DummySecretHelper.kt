@@ -3,7 +3,7 @@ import uk.gov.dwp.dataworks.logging.DataworksLogger
 class DummySecretHelper: SecretHelperInterface {
 
     companion object {
-        val logger = DataworksLogger.getLogger(DummySecretHelper::class.toString())
+        val logger = DataworksLogger.getLogger(DummySecretHelper::class)
     }
 
     override fun getSecret(secretName: String): String? {

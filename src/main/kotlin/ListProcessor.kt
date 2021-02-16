@@ -1,4 +1,3 @@
-
 import com.beust.klaxon.JsonObject
 import kotlinx.coroutines.*
 import org.apache.hadoop.hbase.util.Bytes
@@ -11,10 +10,15 @@ import uk.gov.dwp.dataworks.logging.DataworksLogger
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ListProcessor(validator: Validator, private val converter: Converter) : BaseProcessor(validator, converter) {
+class ListProcessor(validator: Validator, private val converter: Converter): BaseProcessor(validator, converter) {
 
-    fun processRecords(hbase: HbaseClient, consumer: KafkaConsumer<ByteArray, ByteArray>, metadataClient: MetadataStoreClient,
-        s3Service: ArchiveAwsS3Service, manifestService: ManifestAwsS3Service, parser: MessageParser, records: ConsumerRecords<ByteArray, ByteArray>) {
+    fun processRecords(hbase: HbaseClient,
+                       consumer: KafkaConsumer<ByteArray, ByteArray>,
+                       metadataClient: MetadataStoreClient,
+                       s3Service: ArchiveAwsS3Service,
+                       manifestService: ManifestAwsS3Service,
+                       parser: MessageParser,
+                       records: ConsumerRecords<ByteArray, ByteArray>) {
         runBlocking {
             val successfulPayloads = mutableListOf<HbasePayload>()
             records.partitions().forEach { partition ->
@@ -60,11 +64,7 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
     private suspend fun putInS3(s3Service: ArchiveAwsS3Service, table: String, payloads: List<HbasePayload>) =
         withContext(Dispatchers.IO) {
             try {
-                if (Config.ArchiveS3.batchPuts) {
-                    s3Service.putObjectsAsBatch(table, payloads)
-                } else {
-                    s3Service.putObjects(table, payloads)
-                }
+                s3Service.putBatch(table, payloads)
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -114,29 +114,26 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
     private fun logSuccessfulPuts(table: String, payloads: List<HbasePayload>) {
         payloads.forEach {
             logger.info(
-                    "Put record",
-                    "table" to table,
-                    "key" to textUtils.printableKey(it.key),
-                    "version" to "${it.version}",
-                    "version_created_from" to it.versionCreatedFrom,
-                    "version_raw" to it.versionRaw,
-                    "size" to "${it.record.serializedValueSize()}",
-                    "time_since_last_modified" to "${(it.putTime - it.timeOnQueue) / 1000}"
-
+                "Put record",
+                "table" to table,
+                "key" to textUtils.printableKey(it.key),
+                "version" to "${it.version}",
+                "version_created_from" to it.versionCreatedFrom,
+                "version_raw" to it.versionRaw,
+                "size" to "${it.record.serializedValueSize()}",
+                "time_since_last_modified" to "${(it.putTime - it.timeOnQueue) / 1000}"
             )
         }
     }
 
     private fun lastCommittedOffset(consumer: KafkaConsumer<ByteArray, ByteArray>, partition: TopicPartition): Long? =
-            consumer.committed(partition)?.offset()
+        consumer.committed(setOf(partition))?.get(partition)?.offset()
 
     private fun lastPosition(partitionRecords: MutableList<ConsumerRecord<ByteArray, ByteArray>>) =
         partitionRecords[partitionRecords.size - 1].offset()
 
-    private fun payloads(
-        records: List<ConsumerRecord<ByteArray, ByteArray>>,
-        parser: MessageParser
-    ): List<HbasePayload> =
+    private fun payloads(records: List<ConsumerRecord<ByteArray, ByteArray>>,
+                         parser: MessageParser): List<HbasePayload> =
         records.mapNotNull { record ->
             recordAsJson(record)?.let { json ->
                 val (unformattedId, formattedKey) = parser.generateKeyFromRecordBody(json)
@@ -145,12 +142,10 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
             }
         }
 
-    private fun hbasePayload(
-        json: JsonObject,
-        unformattedId: String,
-        formattedKey: ByteArray,
-        record: ConsumerRecord<ByteArray, ByteArray>
-    ): HbasePayload {
+    private fun hbasePayload(json: JsonObject,
+                             unformattedId: String,
+                             formattedKey: ByteArray,
+                             record: ConsumerRecord<ByteArray, ByteArray>): HbasePayload {
         val (timestamp, source) = converter.getLastModifiedTimestamp(json)
         val message = json["message"] as JsonObject
         message["timestamp_created_from"] = source
@@ -160,12 +155,14 @@ class ListProcessor(validator: Validator, private val converter: Converter) : Ba
         val version = converter.getTimestampAsLong(timestamp)
         val timeOnQueue = json.string("timestamp")?.let { converter.getTimestampAsLong(it) } ?: version
 
-        return HbasePayload(formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, source,
-                timestamp, record, putTime.time, timeOnQueue)
+        return HbasePayload(
+            formattedKey, Bytes.toBytes(json.toJsonString()), unformattedId, version, source,
+            timestamp, record, putTime.time, timeOnQueue
+        )
     }
 
     companion object {
         private val textUtils = TextUtils()
-        private val logger = DataworksLogger.getLogger(ListProcessor::class.toString())
+        private val logger = DataworksLogger.getLogger(ListProcessor::class)
     }
 }

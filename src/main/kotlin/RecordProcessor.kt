@@ -58,7 +58,7 @@ open class RecordProcessor(validator: Validator, private val converter: Converte
     }
 
     companion object {
-        val logger = DataworksLogger.getLogger(RecordProcessor::class.toString())
+        val logger = DataworksLogger.getLogger(RecordProcessor::class)
     }
 
 }

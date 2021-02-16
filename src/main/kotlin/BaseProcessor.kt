@@ -25,8 +25,8 @@ open class BaseProcessor(private val validator: Validator, private val converter
 
     open fun sendMessageToDlq(record: ConsumerRecord<ByteArray, ByteArray>, reason: String) {
         val body = record.value()
-        val originalTopic = record.topic().toString()
-        val originalOffset = record.offset().toString()
+        val originalTopic = record.topic()
+        val originalOffset = record.offset()
         val recordKey: ByteArray? = if (record.key() != null) record.key() else null
         val stringKey = if (recordKey != null) String(recordKey) else "UNKNOWN"
         logger.warn("Error processing record, sending to dlq", "reason" to reason, "key" to stringKey)
@@ -37,13 +37,11 @@ open class BaseProcessor(private val validator: Validator, private val converter
             val producerRecord =
                 ProducerRecord(dlqTopic, null, null, recordKey, jsonString.toByteArray(), null)
 
-            logger.info(
-                "Sending message to dlq", "key" to stringKey, "original_topic" to originalTopic,
-                "original_offset" to originalOffset
-            )
+            logger.info("Sending message to dlq", "key" to stringKey, "original_topic" to originalTopic,
+                "original_offset" to "$originalOffset")
             val metadata = DlqProducer.getInstance().send(producerRecord)?.get()
             logger.info(
-                "Sent message to dlq", "key" to stringKey, "dlq_topic" to metadata?.topic().toString(),
+                "Sent message to dlq", "key" to stringKey, "dlq_topic" to "${metadata?.topic()}",
                 "dlq_offset" to "${metadata?.offset()}"
             )
         } catch (e: Exception) {
@@ -59,6 +57,6 @@ open class BaseProcessor(private val validator: Validator, private val converter
         "${String(record.key() ?: ByteArray(0))}:${record.topic()}:${record.partition()}:${record.offset()}"
 
     companion object {
-        private val logger = DataworksLogger.getLogger(BaseProcessor::class.java.toString())
+        private val logger = DataworksLogger.getLogger(BaseProcessor::class)
     }
 }

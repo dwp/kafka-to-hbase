@@ -7,7 +7,7 @@ import uk.gov.dwp.dataworks.logging.DataworksLogger
 class AWSSecretHelper: SecretHelperInterface {
 
     companion object {
-        val logger = DataworksLogger.getLogger(AWSSecretHelper::class.toString())
+        val logger = DataworksLogger.getLogger(AWSSecretHelper::class)
     }
 
     override fun getSecret(secretName: String): String? {
@@ -15,7 +15,7 @@ class AWSSecretHelper: SecretHelperInterface {
         logger.info("Getting value from aws secret manager", "secret_name" to secretName)
 
         try {
-            val region = Config.SecretManager.properties["region"].toString()
+            val region: String = Config.SecretManager.properties.getProperty("region")
             val client = AWSSecretsManagerClientBuilder.standard().withRegion(region).build()
             val getSecretValueRequest = GetSecretValueRequest().withSecretId(secretName)
 

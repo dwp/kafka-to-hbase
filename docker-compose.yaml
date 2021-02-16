@@ -2,6 +2,11 @@
 version: "2.2"
 
 services:
+  prometheus:
+    build:
+      context: images/prometheus
+    container_name: prometheus
+
   zookeeper:
     image: confluentinc/cp-zookeeper:4.1.0
     container_name: zookeeper

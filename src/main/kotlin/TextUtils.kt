@@ -38,7 +38,7 @@ class TextUtils {
             }
 
     companion object {
-        private val logger = DataworksLogger.getLogger(TextUtils::class.toString())
+        private val logger = DataworksLogger.getLogger(TextUtils::class)
     }
 
 }
