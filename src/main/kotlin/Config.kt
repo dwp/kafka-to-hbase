@@ -36,6 +36,11 @@ object Config {
     const val equalitySchemaFile = "equality_message.schema.json"
     const val auditSchemaFile = "audit_message.schema.json"
     const val dataworksRegion = "eu-west-2"
+
+    object Metrics {
+        val instanceName = getEnv("K2HB_INSTANCE_NAME") ?: ""
+    }
+
     object Shovel {
         val reportFrequency = getEnv("K2HB_KAFKA_REPORT_FREQUENCY")?.toInt() ?: 100
     }
@@ -194,8 +199,6 @@ object Config {
     object ArchiveS3 {
         val archiveBucket = getEnv("K2HB_AWS_S3_ARCHIVE_BUCKET") ?: "ucarchive"
         val archiveDirectory = getEnv("K2HB_AWS_S3_ARCHIVE_DIRECTORY") ?: "ucdata_main"
-        val parallelPuts = (getEnv("K2HB_AWS_S3_PARALLEL_PUTS") ?: "false").toBoolean()
-        val batchPuts = (getEnv("K2HB_AWS_S3_BATCH_PUTS") ?: "false").toBoolean()
     }
 
     object ManifestS3 {

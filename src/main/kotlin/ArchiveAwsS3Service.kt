@@ -2,7 +2,6 @@
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectRequest
-import io.micrometer.core.instrument.Counter
 import uk.gov.dwp.dataworks.logging.DataworksLogger
 import java.io.BufferedOutputStream
 import java.io.ByteArrayInputStream
@@ -13,7 +12,7 @@ import java.util.*
 import java.util.zip.GZIPOutputStream
 import kotlin.system.measureTimeMillis
 
-open class ArchiveAwsS3Service(private val amazonS3: AmazonS3, private val failedBatchPutCounter: Counter) {
+open class ArchiveAwsS3Service(private val amazonS3: AmazonS3) {
 
     open suspend fun putBatch(hbaseTable: String, payloads: List<HbasePayload>) {
         if (payloads.isNotEmpty()) {
@@ -59,7 +58,7 @@ open class ArchiveAwsS3Service(private val amazonS3: AmazonS3, private val faile
     private fun simpleDateFormatter() = SimpleDateFormat("yyyy/MM/dd").apply { timeZone = TimeZone.getTimeZone("UTC") }
 
     companion object {
-        fun connect() = ArchiveAwsS3Service(s3, MetricsClient.failedBatchPutCounter)
+        fun connect() = ArchiveAwsS3Service(s3)
         val textUtils = TextUtils()
         val logger = DataworksLogger.getLogger(ArchiveAwsS3Service::class)
         val s3 = Config.AwsS3.s3

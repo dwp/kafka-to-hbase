@@ -11,13 +11,12 @@ open class RecordProcessor(validator: Validator, private val converter: Converte
     open fun processRecord(record: ConsumerRecord<ByteArray, ByteArray>, hbase: HbaseClient,
                            metadataStoreClient: MetadataStoreClient, parser: MessageParser) {
         recordAsJson(record)?.let { json ->
-            val (unformattedId, formattedKey) = parser.generateKeyFromRecordBody(json)
+            val (_, formattedKey) = parser.generateKeyFromRecordBody(json)
             if (formattedKey.isEmpty()) {
                 logger.warn("Empty key for record", "record" to getDataStringForRecord(record))
                 return
             }
             writeRecordToHbase(json, record, hbase, metadataStoreClient, formattedKey)
-
         }
     }
 
@@ -36,7 +35,7 @@ open class RecordProcessor(validator: Validator, private val converter: Converte
                 val tableName = matcher.groupValues[2]
                 val qualifiedTableName = targetTable(namespace, tableName)
                 val recordBodyJson = json.toJsonString()
-                hbase.put(qualifiedTableName!!, formattedKey, recordBodyJson.toByteArray(), lastModifiedTimestampLong)
+                hbase.put(qualifiedTableName, formattedKey, recordBodyJson.toByteArray(), lastModifiedTimestampLong)
             } else {
                 logger.error("Could not derive table name from topic", "topic" to record.topic())
             }
@@ -47,7 +46,7 @@ open class RecordProcessor(validator: Validator, private val converter: Converte
     }
 
     private fun targetTable(namespace: String, tableName: String) =
-            textUtils.coalescedName("$namespace:$tableName")?.replace("-", "_")
+            textUtils.coalescedName("$namespace:$tableName").replace("-", "_")
 
     fun getObjectAsByteArray(obj: MalformedRecord): ByteArray? {
         val bos = ByteArrayOutputStream()

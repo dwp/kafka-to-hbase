@@ -2,6 +2,7 @@
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.nhaarman.mockitokotlin2.*
+import io.kotest.assertions.json.shouldMatchJson
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.apache.hadoop.hbase.util.Bytes
@@ -24,17 +25,17 @@ class ArchiveAwsS3ServiceTest : StringSpec() {
             verifyNoMoreInteractions(amazonS3)
             val request = requestCaptor.firstValue
             request.bucketName shouldBe "ucarchive"
-            request.key shouldBe "ucdata_main/${today()}/database/collection/db.database.collection_10_1-100.jsonl.gz"
-            val lineReader = LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream)))
-
-            lineReader.forEachLine {
-                it shouldBe messageBody(lineReader.lineNumber).replace('\n', ' ')
+            request.key shouldBe "ucdata_main/${today()}/database/collection/db.database.collection_10_0-99.jsonl.gz"
+            LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream))).use { lineReader ->
+                lineReader.forEachLine {
+                    it shouldMatchJson messageBody(lineReader.lineNumber - 1)
+                }
             }
         }
     }
 
     private fun hbasePayloads(): List<HbasePayload>
-            = (1..100).map { index ->
+            = List(100) { index ->
                 val consumerRecord = mock<ConsumerRecord<ByteArray, ByteArray>> {
                     on { key() } doReturn index.toString().toByteArray()
                     on { topic() } doReturn "db.database.collection"
@@ -52,7 +53,7 @@ class ArchiveAwsS3ServiceTest : StringSpec() {
             },
             "position": $index 
         }
-        """.trimIndent()
+        """
 
     private fun today() = dateFormat().format(Date())
     private fun payloadTime(index: Int) = payloadTimestamp(index).time
