@@ -1,34 +1,59 @@
 
+import MetricsMocks.counter
+import MetricsMocks.summary
+import MetricsMocks.summaryChild
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.nhaarman.mockitokotlin2.*
 import io.kotest.assertions.json.shouldMatchJson
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.prometheus.client.Counter
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.InputStreamReader
 import java.io.LineNumberReader
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Callable
 import java.util.zip.GZIPInputStream
+import kotlin.time.ExperimentalTime
 
-class ArchiveAwsS3ServiceTest : StringSpec() {
+@ExperimentalTime
+class CorporateStorageServiceTest : StringSpec() {
     init {
         "Batch puts set request parameters correctly" {
             val amazonS3 = mock<AmazonS3>()
-            val archiveAwsS3Service = ArchiveAwsS3Service(amazonS3)
+
+            val successChild = summaryChild()
+            val successTimer = summary(successChild)
+            val retryChild = mock<Counter.Child>()
+            val retriesCounter = counter(retryChild)
+            val failureChild = mock<Counter.Child>()
+            val failureCounter = counter(failureChild)
+            val service = CorporateStorageService(amazonS3, successTimer, retriesCounter, failureCounter)
             val payloads = hbasePayloads()
-            archiveAwsS3Service.putBatch("database:collection", payloads)
-            val requestCaptor = argumentCaptor<PutObjectRequest>()
-            verify(amazonS3, times(1)).putObject(requestCaptor.capture())
-            verifyNoMoreInteractions(amazonS3)
-            val request = requestCaptor.firstValue
-            request.bucketName shouldBe "ucarchive"
-            request.key shouldBe "ucdata_main/${today()}/database/collection/db.database.collection_10_0-99.jsonl.gz"
-            LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream))).use { lineReader ->
-                lineReader.forEachLine {
-                    it shouldMatchJson messageBody(lineReader.lineNumber - 1)
+
+            service.putBatch("database:collection", payloads)
+
+            verify(successTimer, times(1)).labels(any())
+            verify(successChild, times(1)).time(any<Callable<*>>())
+            verifyNoMoreInteractions(successTimer)
+            verifyZeroInteractions(retriesCounter)
+            verifyZeroInteractions(retryChild)
+            verifyZeroInteractions(failureCounter)
+            verifyZeroInteractions(failureChild)
+
+            argumentCaptor<PutObjectRequest> {
+                verify(amazonS3, times(1)).putObject(capture())
+                verifyNoMoreInteractions(amazonS3)
+                val request = firstValue
+                request.bucketName shouldBe "ucarchive"
+                request.key shouldBe "ucdata_main/${today()}/database/collection/db.database.collection_10_0-99.jsonl.gz"
+                LineNumberReader(InputStreamReader(GZIPInputStream(request.inputStream))).use { lineReader ->
+                    lineReader.forEachLine {
+                        it shouldMatchJson messageBody(lineReader.lineNumber - 1)
+                    }
                 }
             }
         }

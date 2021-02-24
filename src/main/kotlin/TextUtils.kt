@@ -1,5 +1,7 @@
 import uk.gov.dwp.dataworks.logging.DataworksLogger
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 class TextUtils {
 
     private val qualifiedTablePattern = Regex(Config.Hbase.qualifiedTablePattern)

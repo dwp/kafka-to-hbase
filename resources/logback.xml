@@ -15,4 +15,9 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="METRICS"/>
     </root>
+
+    <logger name="org.apache" level="WARN" additivity="true">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
 </configuration>

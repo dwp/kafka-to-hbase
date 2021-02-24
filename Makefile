@@ -53,7 +53,10 @@ rdbms: ## Bring up and provision mysql
 prometheus:
 	docker-compose up -d prometheus
 
-services: hbase-up rdbms prometheus ## Bring up supporting services in docker
+pushgateway:
+	docker-compose up -d pushgateway
+
+services: hbase-up rdbms prometheus pushgateway ## Bring up supporting services in docker
 	docker-compose -f docker-compose.yaml up --build -d kafka aws-s3
 	@{ \
 		while ! docker logs aws-s3 2> /dev/null | grep -q $(S3_READY_REGEX); do \
@@ -88,3 +91,16 @@ build-base: ## Build the base images which certain images extend.
 		rm -rf settings.gradle.kts gradle.properties ; \
 		popd; \
 	}
+
+delete-topics: ## Delete a topic
+	docker exec -it kafka /opt/kafka/bin/kafka-topics.sh --zookeeper zookeeper:2181 --delete --topic '^(db.+|test-dlq-topic)'
+	make list-topics
+
+list-topics: ## List the topics
+	docker exec -it kafka /opt/kafka/bin/kafka-topics.sh --zookeeper zookeeper:2181 --list
+
+restart-prometheus:
+	docker stop prometheus pushgateway
+	docker rm prometheus pushgateway
+	docker-compose build prometheus
+	docker-compose up -d prometheus pushgateway
