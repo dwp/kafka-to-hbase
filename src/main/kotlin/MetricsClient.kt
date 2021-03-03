@@ -29,8 +29,8 @@ object MetricsClient {
         }
     }
 
-    val k2hbGauge: Gauge by lazy {
-        gauge("k2hb_gauge", "How many instances are running")
+    val k2hbRunningApplications: Gauge by lazy {
+        gauge("k2hb_running_applications", "How many instances are running")
     }
 
     val recordSuccesses: Counter by lazy {

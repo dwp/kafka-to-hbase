@@ -8,7 +8,7 @@ fun main() {
     runBlocking {
         MetadataStoreClient.connect().use { metadataStore ->
             KafkaConsumer<ByteArray, ByteArray>(Config.Kafka.consumerProps).use { kafka ->
-                Shovel(kafka, MetricsClient.k2hbGauge, MetricsClient.maximumLagGauge).shovel(metadataStore,
+                Shovel(kafka, MetricsClient.k2hbRunningApplications, MetricsClient.maximumLagGauge).shovel(metadataStore,
                     CorporateStorageService.connect(),
                     ManifestService.connect(),
                     Config.Kafka.pollTimeout)

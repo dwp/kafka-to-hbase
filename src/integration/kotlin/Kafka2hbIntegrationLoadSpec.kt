@@ -244,7 +244,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
 
     private suspend fun verifyMetrics() {
         verifyMetricNames()
-        validateMetric("""k2hb_gauge{job="k2hb", instance="k2hb-integration-test-container"}""", "1")
+        validateMetric("""k2hb_running_applications{job="k2hb", instance="k2hb-integration-test-container"}""", "1")
         validateMetric("""sum(k2hb_record_successes_total{topic=~"db.load-test.+"})""", "10000")
     }
 
@@ -267,7 +267,7 @@ class Kafka2hbIntegrationLoadSpec : StringSpec() {
             "k2hb_batch_timer_created",
             "k2hb_dlq_summary",
             "k2hb_dlq_summary_created",
-            "k2hb_gauge",
+            "k2hb_running_applications",
             "k2hb_hbase_successes",
             "k2hb_hbase_successes_created",
             "k2hb_manifest_successes",

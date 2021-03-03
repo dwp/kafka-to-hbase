@@ -10,7 +10,7 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 class Shovel(private val consumer: KafkaConsumer<ByteArray, ByteArray>,
-             private val k2hbGauge: Gauge,
+             private val k2hbRunningApplications: Gauge,
              private val maximumLagGauge: Gauge) {
 
     @ExperimentalTime
@@ -18,7 +18,7 @@ class Shovel(private val consumer: KafkaConsumer<ByteArray, ByteArray>,
                        corporateStorageService: CorporateStorageService,
                        manifestService: ManifestService,
                        pollTimeout: Duration) {
-        k2hbGauge.inc()
+        k2hbRunningApplications.inc()
         listOf("INT", "TERM").forEach(::handleSignal)
         val parser = MessageParser()
         val validator = Validator()
@@ -63,7 +63,7 @@ class Shovel(private val consumer: KafkaConsumer<ByteArray, ByteArray>,
         logger.info("Setting up $signalName handler.")
         Signal.handle(Signal(signalName)) {
             logger.info("Signal received, cancelling job.", "signal" to "$it")
-            k2hbGauge.dec()
+            k2hbRunningApplications.dec()
             closed.set(true)
             consumer.wakeup()
             MetricsClient.pushFinalMetrics()
