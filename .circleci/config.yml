@@ -78,7 +78,7 @@ jobs:
             docker build --tag dwp-kotlin-slim-gradle-k2hb:latest --file ./docker/gradle/Dockerfile .
             VERSION=$(grep '^version' gradle.properties | cut -f2 -d'=')
             docker-compose -f docker-compose.yaml build --build-arg VERSION=$VERSION zookeeper kafka hbase aws-s3 metadatastore kafka2s3 s3-provision integration-test
-            docker-compose -f docker-compose.yaml up -d zookeeper kafka hbase aws-s3 metadatastore
+            docker-compose -f docker-compose.yaml up -d zookeeper kafka hbase aws-s3 metadatastore prometheus pushgateway
             S3_READY_REGEX=^Ready\.$
             while ! docker logs aws-s3 2> /dev/null | grep -q $S3_READY_REGEX; do
                 echo Waiting for aws-s3.
