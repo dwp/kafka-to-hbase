@@ -17,7 +17,7 @@ class AWSSecretHelper: SecretHelperInterface {
         logger.info("Getting value from aws secret manager", "secret_name" to secretName)
 
         try {
-            val region: String = Config.SecretManager.properties.getProperty("region")
+            val region = Config.SecretManager.properties["region"].toString()
             val client = AWSSecretsManagerClientBuilder.standard().withRegion(region).build()
             val getSecretValueRequest = GetSecretValueRequest().withSecretId(secretName)
 
