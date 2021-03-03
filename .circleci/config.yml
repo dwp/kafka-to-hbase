@@ -17,11 +17,12 @@ commands:
       - run:
           name: "Fetch current version, set next version"
           command: |
-            CURRENT_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            [ -z "$CURRENT_VERSION" ] && CURRENT_VERSION="0.0.0"
-            NEXT_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            echo NEXT_VERSION: \'$NEXT_VERSION\'
-            sed -i s/version=.*/version=$NEXT_VERSION/ gradle.properties
+            sed -i s/version=.*/version=0.0.1/ gradle.properties
+#            CURRENT_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+#            [ -z "$CURRENT_VERSION" ] && CURRENT_VERSION="0.0.0"
+#            NEXT_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+#            echo NEXT_VERSION: \'$NEXT_VERSION\'
+#            sed -i s/version=.*/version=$NEXT_VERSION/ gradle.properties
 
 jobs:
   build:
@@ -167,18 +168,18 @@ jobs:
 #         project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}-docker'
 
 
-  publish-github-release:
-    docker:
-      - image: cibuilds/github:0.10
-    steps:
-      - attach_workspace:
-          at: ./artifacts
-      - run:
-          name: "Publish Release on GitHub"
-          command: |
-            CURRENT_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-            NEXT_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${NEXT_VERSION} ./artifacts/
+#  publish-github-release:
+#    docker:
+#      - image: cibuilds/github:0.10
+#    steps:
+#      - attach_workspace:
+#          at: ./artifacts
+#      - run:
+#          name: "Publish Release on GitHub"
+#          command: |
+#            CURRENT_VERSION=$(curl --silent "https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+#            NEXT_VERSION=$(echo $CURRENT_VERSION | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+#            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${NEXT_VERSION} ./artifacts/
 
 #  docker-build:
 #    executor: docker-publisher
@@ -227,10 +228,11 @@ workflows:
   version: 2
   "build & test":
     jobs:
-      - build
-      - test:
-          requires:
-            - build
+      - test
+#      - build
+#      - test:
+#          requires:
+#            - build
 #      - snyk-pr:
 #          requires:
 #            - build
@@ -243,12 +245,12 @@ workflows:
 #          filters:
 #            branches:
 #              only: master
-      - publish-github-release:
-          requires:
-            - test
-          filters:
-            branches:
-              only: master
+#      - publish-github-release:
+#          requires:
+#            - test
+#          filters:
+#            branches:
+#              only: master
 #      - docker-build:
 #          requires:
 #            - test
