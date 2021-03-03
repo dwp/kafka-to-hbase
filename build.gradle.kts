@@ -37,6 +37,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:2.7.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.30")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.1")
     implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("com.fasterxml.jackson.core:jackson-databind:2.12.1")
