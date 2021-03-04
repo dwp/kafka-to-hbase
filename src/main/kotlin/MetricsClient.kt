@@ -147,7 +147,7 @@ object MetricsClient {
         groupingKey().entries.map { (k, v) -> Pair(k, v) }.toTypedArray()
 
     private val pushGateway: PushGateway by lazy {
-        PushGateway(Config.Metrics.pushgateway)
+        PushGateway("${Config.Metrics.pushgateway}:${Config.Metrics.pushgatewayPort}")
     }
 
     private fun pushMetrics() {
