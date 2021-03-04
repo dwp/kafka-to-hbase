@@ -151,6 +151,7 @@ object MetricsClient {
     }
 
     private fun pushMetrics() {
+        logger.info("Pushing metrics", *metricsGroupingKeyPairs())
         pushGateway.push(CollectorRegistry.defaultRegistry, "k2hb", groupingKey())
         logger.info("Pushed metrics", *metricsGroupingKeyPairs())
     }
