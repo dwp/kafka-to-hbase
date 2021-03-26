@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -eu
 
 # If a proxy is requested, set it up
 
@@ -65,5 +65,13 @@ then
 else
     echo "Skipping cert generation for host ${HOSTNAME}"
 fi
+
+export METADATASTORE_TRUSTSTORE=./truststore.jks
+export METADATASTORE_TRUSTSTORE_PASSWORD="$(uuidgen)"
+
+keytool -noprompt -import \
+  -file "$METADATA_TRUSTSTORE_CERTIFICATE" \
+  -keystore ./truststore.jks \
+  -storepass "$METADATASTORE_TRUSTSTORE_PASSWORD"
 
 exec "${@}"
