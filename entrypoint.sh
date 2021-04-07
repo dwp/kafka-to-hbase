@@ -1,10 +1,10 @@
 #!/bin/sh
 
-set -eu
+set -e
 
 # If a proxy is requested, set it up
 
-if [ "${INTERNET_PROXY}" ]; then
+if [ -n "${INTERNET_PROXY}" ]; then
     export http_proxy="http://${INTERNET_PROXY}:3128"
     export HTTP_PROXY="http://${INTERNET_PROXY}:3128"
     export https_proxy="http://${INTERNET_PROXY}:3128"
