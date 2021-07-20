@@ -19,7 +19,7 @@ open class MetadataStoreClient(private val newConnection: () -> Connection,
 
     private var connection: Connection = newConnection()
         get()  {
-            if (field.isValid(0)) {
+            if (!field.isValid(0)) {
                 if (!field.isClosed) {
                     logger.info("Closing metadatastore connection")
                     field.close()
