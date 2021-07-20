@@ -30,6 +30,8 @@ class MetadataStoreClientTest: StringSpec() {
 
             val connection = mock<Connection> {
                 on { prepareStatement(sql) } doReturn statement
+                on { isValid(0) } doReturn false doReturn true
+                on { isClosed } doReturn false
             }
 
             val client = MetadataStoreClient({ connection }, mock(), mock(), mock())
@@ -48,6 +50,8 @@ class MetadataStoreClientTest: StringSpec() {
             client.recordProcessingAttempt(id, record, lastUpdated)
             verify(connection, times(1)).prepareStatement(sql)
             verify(connection, times(1)).isValid(0)
+            verify(connection, times(1)).isClosed
+            verify(connection, times(1)).close()
             verifyNoMoreInteractions(connection)
             verify(statement, times(1)).setString(1, id)
             verify(statement, times(1)).setLong(2, lastUpdated)
@@ -67,6 +71,7 @@ class MetadataStoreClientTest: StringSpec() {
         val connection = mock<Connection> {
             on { prepareStatement(sql) } doReturn statement
             on { getAutoCommit() } doReturn autoCommit
+            on { isValid(0) } doReturn false doReturn true
         }
 
         val successChild = summaryChild()
@@ -99,6 +104,9 @@ class MetadataStoreClientTest: StringSpec() {
             verify(connection, times(1)).commit()
         }
         verify(connection, times(if (autoCommit) 2 else 3)).isValid(0)
+        verify(connection, times(1)).isClosed
+        verify(connection, times(1)).close()
+
         verifyNoMoreInteractions(connection)
 
         val textUtils = TextUtils()
