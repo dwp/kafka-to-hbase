@@ -79,8 +79,8 @@ open class HbaseClient(val connection: Connection, private val columnFamily: Byt
             "data_table_name" to dataTableName.nameAsString,
             "table_name" to tableName,
             "namespace" to namespace,
-            "namespaces" to namespaces,
-            "tables" to tables
+            "namespaces" to namespaces.keys,
+            "tables" to tables.keys
         )
 
         if (!namespaces.contains(namespace)) {
