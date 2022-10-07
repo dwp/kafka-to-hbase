@@ -178,7 +178,7 @@ class ListProcessorTest : StringSpec() {
         }
 
         successPartitionCaptor.allValues.forEachIndexed { index, partition ->
-            partition shouldBe if (hBaseFailCount > 0) "${10 - ((index + 1) * 2)}" else "${10 - ((index + 1))}"
+            partition shouldBe if (hBaseFailCount > 0) "${10 - ((index + 1) * 2)}" else "${10 - (index + 1)}"
         }
 
         verifyNoMoreInteractions(recordSuccesses)
