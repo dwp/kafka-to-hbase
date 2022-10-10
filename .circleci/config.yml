@@ -73,7 +73,7 @@ jobs:
       - run:
           name: "Run the integration test"
           command: |
-            pip3 install docker-compose
+            sudo pip3 install docker-compose
             docker-compose -f docker-compose.yaml down
             docker build --tag dwp-java:latest --file ./docker/java/Dockerfile .
             docker build --tag dwp-python-preinstall:latest --file ./docker/python/Dockerfile .
