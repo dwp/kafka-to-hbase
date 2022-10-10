@@ -64,7 +64,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/python:3.7.3
+      - image: python:3.7.10-stretch
     steps:
       - checkout
       - setup_remote_docker:
