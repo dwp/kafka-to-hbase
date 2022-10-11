@@ -125,7 +125,7 @@ class ListProcessorTest : StringSpec() {
     private fun verifyBatchSummaryInteractions(summary: Summary,
                                                summaryChild: Summary.Child,
                                                summaryTimer: Summary.Timer,
-                                                hBaseFailCount: Int) {
+                                               hBaseFailCount: Int) {
         val summaryTopicCaptor = argumentCaptor<String>()
         val summaryPartitionCaptor = argumentCaptor<String>()
         verify(summary, times(FULL_BATCH_SIZE)).labels(summaryTopicCaptor.capture(), summaryPartitionCaptor.capture())
@@ -166,7 +166,7 @@ class ListProcessorTest : StringSpec() {
 
     private fun verifyRecordsSuccessesInteractions(recordSuccesses: Counter,
                                                    recordSuccessesChild: Counter.Child,
-                                                    hBaseFailCount: Int) {
+                                                   hBaseFailCount: Int) {
 
         val successTopicCaptor = argumentCaptor<String>()
         val successPartitionCaptor = argumentCaptor<String>()
@@ -194,7 +194,7 @@ class ListProcessorTest : StringSpec() {
 
     private fun verifyRecordsFailuresInteractions(recordFailures: Counter,
                                                   recordFailuresChild: Counter.Child,
-                                                    hBaseFailCount: Int) {
+                                                  hBaseFailCount: Int) {
 
         val failureTopicCaptor = argumentCaptor<String>()
         val failurePartitionCaptor = argumentCaptor<String>()
