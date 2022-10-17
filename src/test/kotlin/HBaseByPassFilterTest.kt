@@ -82,7 +82,5 @@ class HBaseByPassFilterTest: StringSpec() {
             assert(!filter.tableShouldWriteToHBase("324234324"))
             assert(!filter.tableShouldWriteToHBase("12/12/12"))
         }
-
     }
-
 }

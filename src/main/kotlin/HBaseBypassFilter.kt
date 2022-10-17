@@ -5,5 +5,4 @@ open class HBaseBypassFilter (private val bypassTopics: String?) {
     open fun tableShouldWriteToHBase(table: String): Boolean {
         return !(bypassTopicRegex?.containsMatchIn(table) ?: false)
     }
-
 }
