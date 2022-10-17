@@ -57,8 +57,12 @@ class ListProcessorTest : StringSpec() {
                 on { labels(any()) } doReturn recordFailuresChild
             }
 
+            val HBaseBypassFilter = mock<HBaseBypassFilter> {
+                on { tableShouldWriteToHBase(any()) } doReturn true
+            }
+
             val processor = ListProcessor(mock(), Converter(), mock(), mock(), mock(),
-                batchSummary, batchFailures, recordSuccesses, recordFailures, false)
+                batchSummary, batchFailures, recordSuccesses, recordFailures, HBaseBypassFilter)
 
             val hbaseClient = hbaseClient()
             val metadataStoreClient = metadataStoreClient()
@@ -102,8 +106,12 @@ class ListProcessorTest : StringSpec() {
                 on { labels(any()) } doReturn recordFailuresChild
             }
 
+            val HBaseBypassFilter = mock<HBaseBypassFilter> {
+                on { tableShouldWriteToHBase(any()) } doReturn false
+            }
+
             val processor = ListProcessor(mock(), Converter(), mock(), mock(), mock(),
-                batchSummary, batchFailures, recordSuccesses, recordFailures, true)
+                batchSummary, batchFailures, recordSuccesses, recordFailures, HBaseBypassFilter)
 
             val hbaseClient = hbaseClient()
             val metadataStoreClient = metadataStoreClient()
