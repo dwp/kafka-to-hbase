@@ -65,7 +65,6 @@ jobs:
   test:
     docker:
       - image: circleci/python:3.9
-    resource_class: large
     steps:
       - checkout
       - setup_remote_docker:
