@@ -9,3 +9,4 @@ RUN id -a ${SERVICE_USER}
 RUN pip install awscli
 
 RUN chown -R ${SERVICE_USER}.${SERVICE_USER} ${SERVICE_USER_HOME}
+
