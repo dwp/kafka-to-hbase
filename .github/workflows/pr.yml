@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      JAVA_OPTS: "-Xmx4096m"
+      JAVA_OPTS: "-Xmx3200m"
 
     steps:
       - name: Checkout
