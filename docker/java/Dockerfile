@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:11.6-slim
 RUN apt update && apt upgrade -y
 RUN apt install -y \
       openjdk-11-jdk \
