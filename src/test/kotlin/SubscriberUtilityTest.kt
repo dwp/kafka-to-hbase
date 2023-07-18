@@ -50,6 +50,20 @@ class SubscriberUtilityTest : StringSpec() {
             verifyNoMoreInteractions(consumer)
         }
 
+        "Includes topics when exclude regex blank" {
+            val subscription = setOf(includedTopic1, includedTopic2)
+            val topics = listOf(includedTopic1, includedTopic2, includedTopic3)
+            val consumer = kafkaConsumer<ByteArray, ByteArray>(subscription, topics)
+            val includesRegex = Regex(inclusionRegex)
+            val excludesRegex = Regex("""""")
+            SubscriberUtility.subscribe(consumer, includesRegex, excludesRegex)
+            verify(consumer, times(1)).subscription()
+            verify(consumer, times(1)).listTopics()
+            verify(consumer, times(1))
+                .subscribe(listOf(includedTopic1, includedTopic2, includedTopic3))
+            verifyNoMoreInteractions(consumer)
+        }
+
         "Retries until subscribed" {
             val subscription = setOf<String>()
             val topics = arrayOf(listOf(), listOf(), listOf(),
